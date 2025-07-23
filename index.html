@@ -1,0 +1,1157 @@
+import React, { useState, useRef } from 'react';
+import { Upload, MessageCircle, Bell, Package, Truck, CheckCircle2, Clock, AlertTriangle, Eye, Play, Send, Paperclip, Plus, Edit, Users, Building2, BarChart3, FileText, Filter, Search, Download, X, Calendar, MapPin, ChevronDown, ChevronRight } from 'lucide-react';
+
+const BaubleBarDemo = () => {
+  const [currentView, setCurrentView] = useState('brand');
+  const [selectedPO, setSelectedPO] = useState(null);
+  const [selectedMTO, setSelectedMTO] = useState(null);
+  const [showChat, setShowChat] = useState(false);
+  const [chatTarget, setChatTarget] = useState({ type: '', id: '' });
+  const [newMessage, setNewMessage] = useState('');
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [expandedPOs, setExpandedPOs] = useState(new Set());
+  const fileInputRef = useRef(null);
+
+  const [notifications] = useState([
+    { id: 1, type: 'status', message: 'PO123 Line 6 moved to QC stage', time: '2h ago', read: false, po: 'PO123' },
+    { id: 2, type: 'delay', message: 'Material shortage: Patch 129559 for PO124', time: '4h ago', read: false, po: 'PO124' },
+    { id: 3, type: 'message', message: 'New QC photos from GZ Totes for PO123', time: '6h ago', read: false, po: 'PO123' },
+    { id: 4, type: 'shipping', message: 'PO125 Line 8 shipped - Tracking: 1Z123456', time: '1d ago', read: true, po: 'PO125' }
+  ]);
+
+  const [chatMessages, setChatMessages] = useState([
+    { id: 1, sender: 'Factory', message: 'QC photos uploaded for Line 6', time: '10:30 AM', po: 'PO123', mto: '6', files: ['qc_photo_line6.jpg'] },
+    { id: 2, sender: 'Brand', message: 'Approved! Please proceed with shipping', time: '11:15 AM', po: 'PO123', mto: '6', files: [] },
+    { id: 3, sender: 'Factory', message: 'Shipping scheduled for July 24th. Will provide tracking.', time: '2:45 PM', po: 'PO123', mto: '6', files: [] },
+    { id: 4, sender: 'Brand', message: 'Can you prioritize PO124 Line 12? Customer requested rush.', time: '3:20 PM', po: 'PO124', mto: '12', files: ['priority_request.pdf'] }
+  ]);
+
+  // Enhanced data with all required features
+  const brandPOs = [
+    { 
+      po: 'PO123', 
+      totalUnits: 500, 
+      completed: 280, 
+      percent: 56, 
+      eta: 'July 11, 2025', 
+      status: 'In Production',
+      uploadDate: 'June 15, 2025',
+      mtos: [
+        { lineId: 6, qty: 1, customization: 'Spot 1-6', status: 'QC', eta: 'July 5, 2025', progress: 75, style: '14oz Natural Tote - Medium' },
+        { lineId: 7, qty: 2, customization: 'Spot 1-4', status: 'In Production', eta: 'July 8, 2025', progress: 50, style: '14oz Natural Tote - Large' },
+        { lineId: 8, qty: 1, customization: 'Spot 1-3', status: 'Shipped', eta: 'June 28, 2025', progress: 100, style: '14oz Canvas Tote - Medium' },
+        { lineId: 9, qty: 3, customization: 'Spot 1-5', status: 'Not Started', eta: 'July 12, 2025', progress: 0, style: '14oz Natural Tote - Small' }
+      ]
+    },
+    { 
+      po: 'PO124', 
+      totalUnits: 300, 
+      completed: 85, 
+      percent: 28, 
+      eta: 'July 18, 2025', 
+      status: 'In Production',
+      urgent: true,
+      uploadDate: 'June 20, 2025',
+      mtos: [
+        { lineId: 12, qty: 2, customization: 'Spot 1-4', status: 'In Production', eta: 'July 15, 2025', progress: 60, style: '14oz Canvas Tote - Large' },
+        { lineId: 13, qty: 1, customization: 'Spot 1-2', status: 'QC', eta: 'July 16, 2025', progress: 80, style: '14oz Natural Tote - Medium' }
+      ]
+    },
+    { 
+      po: 'PO125', 
+      totalUnits: 750, 
+      completed: 750, 
+      percent: 100, 
+      eta: 'June 30, 2025', 
+      status: 'Shipped',
+      uploadDate: 'June 1, 2025',
+      mtos: [
+        { lineId: 14, qty: 5, customization: 'Spot 1-6', status: 'Shipped', eta: 'June 30, 2025', progress: 100, style: '14oz Natural Tote - Medium' }
+      ]
+    }
+  ];
+
+  const factoryMTOs = [
+    { 
+      po: 'PO123', 
+      lineId: 6, 
+      qty: 1, 
+      style: '14oz Natural Tote – Medium', 
+      eta: 'July 24', 
+      status: 'QC', 
+      priority: 'high',
+      customization: {
+        spot1: '129559',
+        spot2: '137234', 
+        spot3: '128687',
+        spot4: '128698',
+        spot5: '128954',
+        spot6: '—'
+      },
+      progress: 3, // 0=Receive PO, 1=In Production, 2=QC, 3=Shipping, 4=Shipped
+      actualStartDate: 'July 1',
+      estimatedShipDate: 'July 5',
+      trackingNumber: '',
+      qcPhotos: ['qc_photo_line6.jpg']
+    },
+    { 
+      po: 'PO124', 
+      lineId: 12, 
+      qty: 2, 
+      style: '14oz Canvas Tote – Large', 
+      eta: 'July 26', 
+      status: 'In Production', 
+      priority: 'high',
+      customization: {
+        spot1: '129560',
+        spot2: '137235', 
+        spot3: '128688',
+        spot4: '—',
+        spot5: '—',
+        spot6: '—'
+      },
+      progress: 1,
+      actualStartDate: 'July 2',
+      estimatedShipDate: 'July 8'
+    },
+    { 
+      po: 'PO125', 
+      lineId: 18, 
+      qty: 1, 
+      style: '14oz Natural Tote – Small', 
+      eta: 'July 28', 
+      status: 'Receive PO', 
+      priority: 'normal',
+      customization: {
+        spot1: '129561',
+        spot2: '—', 
+        spot3: '—',
+        spot4: '—',
+        spot5: '—',
+        spot6: '—'
+      },
+      progress: 0
+    }
+  ];
+
+  const inventoryData = [
+    { material: '14oz Tote Base', needed: 200, inStock: 140, allocated: 200, status: 'short', usedBy: ['PO123-6', 'PO124-12', 'PO125-18'] },
+    { material: 'Patch 129559', needed: 30, inStock: 10, allocated: 30, status: 'short', usedBy: ['PO123-6'] },
+    { material: 'Patch 137234', needed: 25, inStock: 30, allocated: 25, status: 'ok', usedBy: ['PO123-6'] },
+    { material: 'Patch 128687', needed: 15, inStock: 20, allocated: 15, status: 'ok', usedBy: ['PO123-6'] },
+    { material: 'Thread - Black', needed: 50, inStock: 100, allocated: 50, status: 'ok', usedBy: ['PO123-6', 'PO124-12'] }
+  ];
+
+  const shippingData = [
+    { po: 'PO123', lineId: 6, shipDate: 'July 24', trackingNumber: '1Z1234567890', carrier: 'UPS', files: ['packing_slip_line6.pdf'] },
+    { po: 'PO125', lineId: 14, shipDate: 'June 30', trackingNumber: '1Z0987654321', carrier: 'FedEx', files: ['packing_slip_line14.pdf', 'invoice.pdf'] }
+  ];
+
+  const getStatusColor = (status) => {
+    const colors = {
+      'Not Started': 'bg-gray-100 text-gray-700',
+      'In Production': 'bg-blue-100 text-blue-700', 
+      'QC': 'bg-yellow-100 text-yellow-700',
+      'Shipping': 'bg-purple-100 text-purple-700',
+      'Shipped': 'bg-green-100 text-green-700',
+      'Receive PO': 'bg-gray-100 text-gray-700'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-700';
+  };
+
+  const getProgressSteps = (currentStep) => {
+    const steps = ['Receive PO', 'In Production', 'QC', 'Shipping', 'Shipped'];
+    return steps.map((step, index) => ({
+      name: step,
+      completed: index < currentStep,
+      current: index === currentStep,
+      future: index > currentStep
+    }));
+  };
+
+  const togglePOExpansion = (po) => {
+    const newExpanded = new Set(expandedPOs);
+    if (newExpanded.has(po)) {
+      newExpanded.delete(po);
+    } else {
+      newExpanded.add(po);
+    }
+    setExpandedPOs(newExpanded);
+  };
+
+  const sendMessage = () => {
+    if (newMessage.trim()) {
+      setChatMessages([...chatMessages, {
+        id: Date.now(),
+        sender: currentView === 'brand' ? 'Brand' : 'Factory',
+        message: newMessage,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        po: chatTarget.po || '',
+        mto: chatTarget.mto || '',
+        files: []
+      }]);
+      setNewMessage('');
+    }
+  };
+
+  const advanceStatus = (mto) => {
+    // In real app, this would update the MTO status
+    console.log(`Advancing status for ${mto.po} Line ${mto.lineId}`);
+  };
+
+  // BRAND VIEW - Complete with all features
+  const BrandView = () => (
+    <div className="max-w-7xl mx-auto space-y-6">
+      {/* Upload Section */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Purchase Orders Dashboard</h1>
+            <p className="text-gray-600 mt-1">Upload and track PO fulfillment progress</p>
+          </div>
+          <div className="flex gap-3">
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              <Upload className="h-4 w-4" />
+              Upload PO + MTO File
+            </button>
+            <button 
+              onClick={() => {
+                setChatTarget({ type: 'general', po: '', mto: '' });
+                setShowChat(true);
+              }}
+              className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Messages
+            </button>
+          </div>
+        </div>
+        <div className="bg-blue-50 border border-blue-200 rounded p-3">
+          <p className="text-sm text-blue-800">
+            <strong>File Format:</strong> CSV/Excel with columns: PO#, Line ID, Quantity, Requested Delivery Date, Spot1-6 customization details
+          </p>
+        </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="hidden"
+          accept=".csv,.xlsx,.xls"
+          onChange={(e) => console.log('File selected:', e.target.files[0])}
+        />
+      </div>
+
+      {/* PO Dashboard */}
+      <div className="space-y-4">
+        {brandPOs.map((po) => (
+          <div key={po.po} className={`bg-white rounded-lg shadow-sm border-l-4 transition-all ${
+            po.urgent ? 'border-red-500' : po.status === 'Shipped' ? 'border-green-500' : 'border-blue-500'
+          }`}>
+            {/* PO Header */}
+            <div 
+              className="p-6 cursor-pointer hover:bg-gray-50"
+              onClick={() => togglePOExpansion(po.po)}
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    {expandedPOs.has(po.po) ? 
+                      <ChevronDown className="h-5 w-5 text-gray-400" /> : 
+                      <ChevronRight className="h-5 w-5 text-gray-400" />
+                    }
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">{po.po}</h3>
+                      <p className="text-gray-600">{po.totalUnits} units • Uploaded {po.uploadDate}</p>
+                    </div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">{po.completed}</div>
+                    <div className="text-sm text-gray-600">completed ({po.percent}%)</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(po.status)}`}>
+                      {po.status}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">ETA: {po.eta}</div>
+                    {po.urgent && <div className="text-red-600 text-xs font-medium mt-1">🔥 URGENT</div>}
+                  </div>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setChatTarget({ type: 'po', po: po.po, mto: '' });
+                      setShowChat(true);
+                    }}
+                    className="p-2 text-gray-400 hover:text-blue-600"
+                  >
+                    <MessageCircle className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              
+              {/* Progress bar */}
+              <div className="mt-4">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className={`h-2 rounded-full transition-all duration-300 ${
+                      po.status === 'Shipped' ? 'bg-green-600' : 'bg-blue-600'
+                    }`}
+                    style={{ width: `${po.percent}%` }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+
+            {/* MTO Details (Expanded) */}
+            {expandedPOs.has(po.po) && (
+              <div className="border-t bg-gray-50">
+                <div className="p-6">
+                  <h4 className="font-semibold mb-4">MTO (Line Item) Details</h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-white">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Line ID</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Style</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customization</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ETA</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progress</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {po.mtos.map((mto) => (
+                          <tr key={mto.lineId} className="hover:bg-gray-50">
+                            <td className="px-4 py-4 font-medium">{mto.lineId}</td>
+                            <td className="px-4 py-4">{mto.qty}</td>
+                            <td className="px-4 py-4 text-sm">{mto.style}</td>
+                            <td className="px-4 py-4 text-sm">{mto.customization}</td>
+                            <td className="px-4 py-4">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mto.status)}`}>
+                                {mto.status}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4">{mto.eta}</td>
+                            <td className="px-4 py-4">
+                              <div className="flex items-center gap-2">
+                                <div className="w-20 bg-gray-200 rounded-full h-2">
+                                  <div 
+                                    className="bg-blue-600 h-2 rounded-full transition-all"
+                                    style={{ width: `${mto.progress}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-xs text-gray-600">{mto.progress}%</span>
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <button 
+                                onClick={() => {
+                                  setChatTarget({ type: 'mto', po: po.po, mto: mto.lineId.toString() });
+                                  setShowChat(true);
+                                }}
+                                className="text-blue-600 hover:text-blue-800 mr-3"
+                              >
+                                <MessageCircle className="h-4 w-4" />
+                              </button>
+                              <button className="text-gray-600 hover:text-gray-800">
+                                <Eye className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // FACTORY VIEW - Organized with tabs
+  const FactoryView = () => {
+    const [activeTab, setActiveTab] = useState('po-overview');
+
+    // PO Overview Tab Content
+    const renderPOOverview = () => {
+      const poGroups = factoryMTOs.reduce((acc, mto) => {
+        if (!acc[mto.po]) {
+          acc[mto.po] = { po: mto.po, mtos: [], totalQty: 0, completedQty: 0 };
+        }
+        acc[mto.po].mtos.push(mto);
+        acc[mto.po].totalQty += mto.qty;
+        if (mto.progress === 4) acc[mto.po].completedQty += mto.qty;
+        return acc;
+      }, {});
+
+      return (
+        <div className="space-y-6">
+          {Object.values(poGroups).map((poData) => (
+            <div key={poData.po} className="bg-white rounded-lg shadow-sm border">
+              <div className="p-6 border-b">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="text-xl font-semibold">{poData.po}</h3>
+                    <p className="text-gray-600">{poData.mtos.length} line items • {poData.totalQty} total units</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-gray-900">{poData.completedQty}/{poData.totalQty}</div>
+                    <div className="text-sm text-gray-600">units completed</div>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all"
+                      style={{ width: `${(poData.completedQty / poData.totalQty) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-6">
+                <h4 className="font-medium mb-4">Line Items (MTOs):</h4>
+                <div className="space-y-3">
+                  {poData.mtos.map((mto) => (
+                    <div 
+                      key={mto.lineId} 
+                      className={`border rounded-lg p-4 ${
+                        mto.priority === 'high' ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h5 className="font-medium">Line {mto.lineId}</h5>
+                            {mto.priority === 'high' && (
+                              <span className="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded">🔥 URGENT</span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600">{mto.qty}x {mto.style}</p>
+                          <p className="text-xs text-gray-500">Due: {mto.eta}</p>
+                        </div>
+                        <div className="text-right">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mto.status)}`}>
+                            {mto.status}
+                          </span>
+                          <div className="flex gap-2 mt-2">
+                            <button 
+                              onClick={() => setActiveTab('mto-production')}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              View Details
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setChatTarget({ type: 'mto', po: mto.po, mto: mto.lineId.toString() });
+                                setShowChat(true);
+                              }}
+                              className="text-gray-600 hover:text-gray-800"
+                            >
+                              💬
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    };
+
+    // MTO Production Tab Content
+    const renderMTOProduction = () => (
+      <div className="space-y-6">
+        {inventoryData.filter(m => m.status === 'short').length > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <h3 className="font-semibold text-red-800">Material Shortages - Production Blocked</h3>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {inventoryData.filter(m => m.status === 'short').map((material) => (
+                <div key={material.material} className="bg-white rounded p-3 border border-red-200">
+                  <div className="font-medium text-red-800">{material.material}</div>
+                  <div className="text-sm text-red-600">Need: {material.needed} | Have: {material.inStock} | Short: {material.needed - material.inStock}</div>
+                  <div className="text-xs text-gray-600 mt-1">Blocks MTOs: {material.usedBy.join(', ')}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-semibold">Individual MTO Production</h2>
+            <div className="text-sm text-gray-600">
+              {factoryMTOs.filter(m => m.progress < 4).length} active MTOs
+            </div>
+          </div>
+          
+          {factoryMTOs.map((mto) => (
+            <div 
+              key={`${mto.po}-${mto.lineId}`} 
+              className={`bg-white rounded-lg shadow-sm border-l-4 p-6 ${
+                mto.priority === 'high' ? 'border-red-500' : 
+                mto.progress === 4 ? 'border-green-500' : 'border-blue-500'
+              }`}
+            >
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-lg font-semibold">
+                      MTO: {mto.po} - Line {mto.lineId}
+                    </h3>
+                    {mto.priority === 'high' && (
+                      <span className="bg-red-100 text-red-800 text-xs font-bold px-2 py-1 rounded">🔥 HIGH PRIORITY</span>
+                    )}
+                    {mto.progress === 4 && (
+                      <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded">✅ COMPLETED</span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Product:</span>
+                      <span className="ml-2 font-medium">{mto.qty}x {mto.style}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Due Date:</span>
+                      <span className="ml-2 font-medium">{mto.eta}</span>
+                    </div>
+                    {mto.actualStartDate && (
+                      <>
+                        <div>
+                          <span className="text-gray-600">Started:</span>
+                          <span className="ml-2 font-medium">{mto.actualStartDate}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-600">Est. Ship:</span>
+                          <span className="ml-2 font-medium">{mto.estimatedShipDate || 'TBD'}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(mto.status)}`}>
+                    {mto.status}
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    {mto.progress < 4 && (
+                      <button 
+                        onClick={() => advanceStatus(mto)}
+                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                      >
+                        {mto.progress === 0 ? 'Start Production' : 
+                         mto.progress === 1 ? 'Move to QC' :
+                         mto.progress === 2 ? 'Ready to Ship' :
+                         'Mark Shipped'}
+                      </button>
+                    )}
+                    <button 
+                      onClick={() => {
+                        setChatTarget({ type: 'mto', po: mto.po, mto: mto.lineId.toString() });
+                        setShowChat(true);
+                      }}
+                      className="border border-gray-300 px-3 py-1 rounded text-sm hover:bg-gray-50"
+                    >
+                      💬 Chat
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4 p-4 bg-gray-50 rounded-lg">
+                <h4 className="font-medium mb-3">Production Workflow:</h4>
+                <div className="flex items-center justify-between">
+                  {getProgressSteps(mto.progress).map((step, index) => (
+                    <div key={index} className="flex items-center flex-1">
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 text-xs font-bold ${
+                        step.completed ? 'bg-green-600 border-green-600 text-white' :
+                        step.current ? 'bg-blue-600 border-blue-600 text-white' :
+                        'bg-white border-gray-300 text-gray-400'
+                      }`}>
+                        {step.completed ? '✓' : index + 1}
+                      </div>
+                      <div className="ml-2 text-xs font-medium flex-1">{step.name}</div>
+                      {index < 4 && (
+                        <div className={`flex-1 h-1 mx-2 ${
+                          step.completed ? 'bg-green-600' : 'bg-gray-300'
+                        }`}></div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-blue-50 rounded p-4 mb-4">
+                <h4 className="font-semibold mb-3 text-blue-800">🎨 Customization Instructions for Line {mto.lineId}:</h4>
+                <div className="grid grid-cols-6 gap-3">
+                  {Object.entries(mto.customization).map(([spot, value]) => (
+                    <div key={spot} className="text-center">
+                      <div className="text-xs font-bold text-blue-600 mb-1">
+                        {spot.replace('spot', 'SPOT ').toUpperCase()}
+                      </div>
+                      <div className={`rounded p-2 text-sm font-mono border-2 ${
+                        value === '—' ? 'bg-gray-100 border-gray-300 text-gray-400' : 'bg-white border-blue-300 text-gray-900'
+                      }`}>
+                        {value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 text-xs text-blue-700">
+                  ⚠️ Each spot represents a specific patch/embroidery location on the tote
+                </div>
+              </div>
+
+              <div className="bg-gray-50 rounded p-4">
+                <h4 className="font-medium mb-3">Material Requirements for this MTO:</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">Base Material:</span>
+                    <span className="ml-2 font-medium">14oz Tote Base ({mto.qty} units)</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Patches Needed:</span>
+                    <div className="ml-2">
+                      {Object.entries(mto.customization)
+                        .filter(([_, value]) => value !== '—')
+                        .map(([spot, value]) => (
+                          <div key={spot} className="text-xs">Patch {value} ({mto.qty}x)</div>
+                        ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+
+    const InventoryTab = () => (
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="p-6 border-b">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-semibold">Inventory Management</h2>
+              <p className="text-gray-600 mt-1">Auto-calculated material needs and allocation</p>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-sm text-gray-600">
+                {inventoryData.filter(i => i.status === 'short').length} shortages detected
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Material</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Needed</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">In Stock</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Allocated</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Used By MTOs</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {inventoryData.map((item) => (
+                <tr key={item.material} className={`hover:bg-gray-50 ${item.status === 'short' ? 'bg-red-50' : ''}`}>
+                  <td className="px-6 py-4 font-medium">{item.material}</td>
+                  <td className="px-6 py-4">{item.needed}</td>
+                  <td className="px-6 py-4">{item.inStock}</td>
+                  <td className="px-6 py-4">{item.allocated}</td>
+                  <td className="px-6 py-4">
+                    <span className={item.inStock - item.allocated < 0 ? 'text-red-600 font-medium' : 'text-gray-900'}>
+                      {item.inStock - item.allocated}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      item.status === 'short' ? 'text-red-700 bg-red-100' : 'text-green-700 bg-green-100'
+                    }`}>
+                      {item.status === 'short' ? (
+                        <>
+                          <AlertTriangle className="h-3 w-3 inline mr-1" />
+                          Short
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-3 w-3 inline mr-1" />
+                          OK
+                        </>
+                      )}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {item.usedBy.join(', ')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Inventory Actions */}
+        <div className="p-6 border-t bg-gray-50">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-600">
+              Inventory auto-deducted when MTOs marked "Shipped"
+            </div>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+              Update Stock Levels
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+
+    const ShippingTab = () => (
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow-sm">
+          <div className="p-6 border-b">
+            <h2 className="text-xl font-semibold">Shipping & Tracking</h2>
+            <p className="text-gray-600 mt-1">Manage shipments and tracking information</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">PO / Line ID</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ship Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Carrier</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tracking Number</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Files</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {shippingData.map((shipment, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 font-medium">{shipment.po} - Line {shipment.lineId}</td>
+                    <td className="px-6 py-4">{shipment.shipDate}</td>
+                    <td className="px-6 py-4">{shipment.carrier}</td>
+                    <td className="px-6 py-4">
+                      <span className="font-mono text-sm">{shipment.trackingNumber}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {shipment.files.map((file, fileIndex) => (
+                        <div key={fileIndex} className="text-sm text-blue-600 cursor-pointer hover:underline">
+                          📎 {file}
+                        </div>
+                      ))}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button className="text-blue-600 hover:text-blue-800 mr-3">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button className="text-gray-600 hover:text-gray-800">
+                        <Download className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                
+                {/* Ready to ship MTOs */}
+                {factoryMTOs.filter(mto => mto.progress === 3).map((mto) => (
+                  <tr key={`ready-${mto.po}-${mto.lineId}`} className="bg-blue-50 hover:bg-blue-100">
+                    <td className="px-6 py-4 font-medium">{mto.po} - Line {mto.lineId}</td>
+                    <td className="px-6 py-4">
+                      <input type="date" className="border rounded px-2 py-1 text-sm" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <select className="border rounded px-2 py-1 text-sm">
+                        <option>UPS</option>
+                        <option>FedEx</option>
+                        <option>DHL</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4">
+                      <input type="text" placeholder="Enter tracking #" className="border rounded px-2 py-1 text-sm font-mono" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <button className="text-blue-600 hover:text-blue-800 text-sm">
+                        <Paperclip className="h-4 w-4 inline mr-1" />
+                        Upload
+                      </button>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                        Ship
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Factory Dashboard</h1>
+              <p className="text-gray-600 mt-1">Manage production, inventory, and shipping</p>
+            </div>
+            <button 
+              onClick={() => {
+                setChatTarget({ type: 'general', po: '', mto: '' });
+                setShowChat(true);
+              }}
+              className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Messages
+            </button>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="flex gap-1 bg-gray-100 rounded-lg p-1 mt-6">
+            <button
+              onClick={() => setActiveTab('po-overview')}
+              className={`px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'po-overview' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <FileText className="h-4 w-4" />
+              PO Overview
+            </button>
+            <button
+              onClick={() => setActiveTab('mto-production')}
+              className={`px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'mto-production' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Package className="h-4 w-4" />
+              MTO Production
+              {factoryMTOs.filter(m => m.progress < 4).length > 0 && (
+                <span className="bg-blue-100 text-blue-600 rounded-full text-xs px-2 py-1">
+                  {factoryMTOs.filter(m => m.progress < 4).length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('inventory')}
+              className={`px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'inventory' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Building2 className="h-4 w-4" />
+              Inventory
+              {inventoryData.filter(i => i.status === 'short').length > 0 && (
+                <span className="bg-red-100 text-red-600 rounded-full text-xs px-2 py-1">
+                  {inventoryData.filter(i => i.status === 'short').length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setActiveTab('shipping')}
+              className={`px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'shipping' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Truck className="h-4 w-4" />
+              Shipping
+              {factoryMTOs.filter(m => m.progress === 3).length > 0 && (
+                <span className="bg-green-100 text-green-600 rounded-full text-xs px-2 py-1">
+                  {factoryMTOs.filter(m => m.progress === 3).length}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'production' && <ProductionTab />}
+        {activeTab === 'inventory' && <InventoryTab />}
+        {activeTab === 'shipping' && <ShippingTab />}
+      </div>
+    );
+  };
+
+  // ADMIN VIEW - Complete management features
+  const AdminView = () => (
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Admin Dashboard</h1>
+        
+        {/* System Stats */}
+        <div className="grid grid-cols-4 gap-6 mb-8">
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <div className="text-3xl font-bold text-blue-600">{brandPOs.length}</div>
+            <div className="text-gray-600">Active POs</div>
+          </div>
+          <div className="text-center p-4 bg-green-50 rounded-lg">
+            <div className="text-3xl font-bold text-green-600">8</div>
+            <div className="text-gray-600">Active Users</div>
+          </div>
+          <div className="text-center p-4 bg-yellow-50 rounded-lg">
+            <div className="text-3xl font-bold text-yellow-600">
+              {inventoryData.filter(m => m.status === 'short').length}
+            </div>
+            <div className="text-gray-600">Material Alerts</div>
+          </div>
+          <div className="text-center p-4 bg-purple-50 rounded-lg">
+            <div className="text-3xl font-bold text-purple-600">2</div>
+            <div className="text-gray-600">Connected Factories</div>
+          </div>
+        </div>
+
+        {/* PO/MTO Oversight */}
+        <div className="border-t pt-6">
+          <h3 className="font-semibold mb-4">PO / MTO Oversight</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">PO #</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Brand</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Factory</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progress</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {brandPOs.map((po) => (
+                  <tr key={po.po} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 font-medium">{po.po}</td>
+                    <td className="px-6 py-4">BaubleBar</td>
+                    <td className="px-6 py-4">GZ Totes</td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <span>{po.percent}%</span>
+                        <div className="w-20 bg-gray-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-600 h-2 rounded-full"
+                            style={{ width: `${po.percent}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(po.status)}`}>
+                        {po.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <button className="text-blue-600 hover:text-blue-800 mr-3">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button className="text-gray-600 hover:text-gray-800">
+                        <Download className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Enhanced Chat Component
+  const ChatOverlay = () => {
+    const filteredMessages = chatMessages.filter(msg => {
+      if (chatTarget.type === 'general') return true;
+      if (chatTarget.type === 'po') return msg.po === chatTarget.po;
+      if (chatTarget.type === 'mto') return msg.po === chatTarget.po && msg.mto === chatTarget.mto;
+      return true;
+    });
+
+    const getTitle = () => {
+      if (chatTarget.type === 'po') return `Messages - ${chatTarget.po}`;
+      if (chatTarget.type === 'mto') return `Messages - ${chatTarget.po} Line ${chatTarget.mto}`;
+      return 'Messages';
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-96 h-96 flex flex-col">
+          <div className="p-4 border-b flex justify-between items-center">
+            <h3 className="font-semibold">{getTitle()}</h3>
+            <button onClick={() => setShowChat(false)} className="text-gray-500 hover:text-gray-700">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {filteredMessages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.sender === (currentView === 'brand' ? 'Brand' : 'Factory') ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-xs px-3 py-2 rounded-lg ${
+                  msg.sender === (currentView === 'brand' ? 'Brand' : 'Factory') 
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-gray-200'
+                }`}>
+                  <div className="text-sm">{msg.message}</div>
+                  {msg.files && msg.files.length > 0 && (
+                    <div className="mt-2">
+                      {msg.files.map((file, index) => (
+                        <div key={index} className="flex items-center text-xs opacity-75 cursor-pointer hover:opacity-100">
+                          <Paperclip className="h-3 w-3 mr-1" />
+                          {file}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <div className="text-xs opacity-75 mt-1">{msg.time}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="p-4 border-t">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                placeholder="Type message..."
+                className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="p-2 border rounded-lg hover:bg-gray-50"
+              >
+                <Paperclip className="h-4 w-4" />
+              </button>
+              <button onClick={sendMessage} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-6">
+              <h1 className="text-xl font-bold">BaubleBar Fulfillment System</h1>
+              <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setCurrentView('brand')}
+                  className={`px-4 py-2 rounded text-sm font-medium ${
+                    currentView === 'brand' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Brand Dashboard
+                </button>
+                <button
+                  onClick={() => setCurrentView('factory')}
+                  className={`px-4 py-2 rounded text-sm font-medium ${
+                    currentView === 'factory' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Factory Dashboard
+                </button>
+                <button
+                  onClick={() => setCurrentView('admin')}
+                  className={`px-4 py-2 rounded text-sm font-medium ${
+                    currentView === 'admin' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Admin Panel
+                </button>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 text-gray-600 hover:text-gray-800"
+                >
+                  <Bell className="h-5 w-5" />
+                  {notifications.filter(n => !n.read).length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
+                      {notifications.filter(n => !n.read).length}
+                    </span>
+                  )}
+                </button>
+                
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
+                    <div className="p-4 border-b">
+                      <h3 className="font-semibold">Notifications</h3>
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {notifications.map((notification) => (
+                        <div key={notification.id} className={`p-4 border-b hover:bg-gray-50 ${!notification.read ? 'bg-blue-50' : ''}`}>
+                          <div className="flex items-start gap-3">
+                            <div className={`p-1 rounded-full ${
+                              notification.type === 'status' ? 'bg-blue-100' :
+                              notification.type === 'delay' ? 'bg-red-100' : 
+                              notification.type === 'message' ? 'bg-green-100' : 'bg-purple-100'
+                            }`}>
+                              {notification.type === 'status' && <Package className="h-4 w-4 text-blue-600" />}
+                              {notification.type === 'delay' && <AlertTriangle className="h-4 w-4 text-red-600" />}
+                              {notification.type === 'message' && <MessageCircle className="h-4 w-4 text-green-600" />}
+                              {notification.type === 'shipping' && <Truck className="h-4 w-4 text-purple-600" />}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-900">{notification.message}</p>
+                              <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                            </div>
+                            {!notification.read && (
+                              <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="text-sm text-gray-600">
+                {currentView === 'brand' ? 'Alice Chen (BaubleBar)' : 
+                 currentView === 'factory' ? 'John Kim (GZ Totes)' : 'System Admin'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="py-8 px-6">
+        {currentView === 'brand' && <BrandView />}
+        {currentView === 'factory' && <FactoryView />}
+        {currentView === 'admin' && <AdminView />}
+      </div>
+
+      {/* Chat Overlay */}
+      {showChat && <ChatOverlay />}
+    </div>
+  );
+};
+
+export default BaubleBarDemo;
