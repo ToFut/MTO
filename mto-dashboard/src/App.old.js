@@ -3,10 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import { Upload, MessageCircle, Bell, Package, Truck, CheckCircle2, AlertTriangle, Eye, Paperclip, Edit, Building2, FileText, Download, X, ChevronDown, ChevronRight, BarChart3, Clock, Play, Filter, Calendar, TrendingUp, MapPin, Layers, Star, ShoppingBag, Palette, Box, Search, Users, Zap, AlertCircle, Award, Target, Globe, Warehouse, Scan, PieChart, Activity, Maximize2, Minimize2, Camera, Music, Coffee, Plane, Flower, Heart, Sparkles, Baby, Cat, Dog, Home, Car, Utensils, Palette as PaletteIcon, Trophy, Gift, Sun, Moon, CloudRain, Zap as Lightning, Anchor, Mountain, Leaf, Diamond, Crown, Flame, Snowflake, Feather, Circle, Bug, Fish, Bird, TreePine, Apple, Cherry, Grape, Pizza, IceCream, Cake, Cookie } from 'lucide-react';
 import CustomizationRouter from './components/CustomizationRouter';
 import ProductCatalog from './components/ProductCatalog';
-import InventoryCartonSplit from './components/InventoryCartonSplit';
-import InventorySupervision from './components/InventorySupervision';
-import FactoryMTOManager from './components/FactoryMTOManager';
-import FactoryOverview from './components/FactoryOverview';
 
 // Comprehensive Icon Library for Customization Patches
 const CUSTOMIZATION_ICONS = {
@@ -207,11 +203,9 @@ const BaubleBarDemo = () => {
   // Add state for new features
   const [showLocationMap, setShowLocationMap] = useState(false);
   const [selectedTimeframe, setSelectedTimeframe] = useState('month');
-  const [showLocationView, setShowLocationView] = useState(false);
   const [showAuditLogs, setShowAuditLogs] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedProductType, setSelectedProductType] = useState(null);
-  const [selectedCustomizationProduct, setSelectedCustomizationProduct] = useState(null);
   const [expandedCarton, setExpandedCarton] = useState(null);
   
   // Add state for customization preview gallery
@@ -400,6 +394,39 @@ const BaubleBarDemo = () => {
     }
   ];
 
+  // Sales Analytics Data by Countries and Cities
+  const salesData = {
+    countries: [
+      {
+        id: 1,
+        name: 'United States',
+        flag: '🇺🇸',
+        totalSales: 2847500,
+        growth: 12.5,
+        topCities: [
+          {
+            name: 'New York',
+            sales: 485000,
+            growth: 15.2,
+            bestProducts: [
+              { name: 'Initial Tote', sales: 125000, units: 2500, icon: '👜' },
+              { name: 'Icon Tote', sales: 98000, units: 1960, icon: '🎒' },
+              { name: 'Blanket', sales: 67000, units: 1340, icon: '🛏️' }
+            ],
+            topStores: ["Bloomingdale's", "Macy's", 'Nordstrom']
+          }
+        ]
+      }
+    ],
+    globalStats: {
+      totalRevenue: 6507500,
+      totalGrowth: 10.2,
+      totalOrders: 125000,
+      averageOrderValue: 52.06,
+      topPerformingCountry: 'United States',
+      fastestGrowingCountry: 'Australia'
+    }
+  };
   const inventoryData = [
     // Raw materials with realistic quantities and usage
     { 
@@ -615,324 +642,7 @@ const BaubleBarDemo = () => {
       color: '#FECACA'
     }
   ];
-
-  // Sales Analytics Data by Countries and Cities
-  const salesData = {
-    countries: [
-      {
-        id: 1,
-        name: 'United States',
-        flag: '🇺🇸',
-        totalSales: 2847500,
-        growth: 12.5,
-        topCities: [
-          {
-            name: 'New York',
-            sales: 485000,
-            growth: 15.2,
-            bestProducts: [
-              { name: 'Initial Tote', sales: 125000, units: 2500, icon: '👜' },
-              { name: 'Icon Tote', sales: 98000, units: 1960, icon: '🎒' },
-              { name: 'Blanket', sales: 67000, units: 1340, icon: '🛏️' }
-            ],
-            topStores: ['Bloomingdale\'s', 'Macy\'s', 'Nordstrom']
-          },
-          {
-            name: 'Los Angeles',
-            sales: 320000,
-            growth: 8.7,
-            bestProducts: [
-              { name: 'Icon Tote', sales: 89000, units: 1780, icon: '🎒' },
-              { name: 'Initial Tote', sales: 76000, units: 1520, icon: '👜' },
-              { name: 'Tote Bag', sales: 54000, units: 1080, icon: '🛍️' }
-            ],
-            topStores: ['Nordstrom', 'Neiman Marcus', 'Saks Fifth Avenue']
-          },
-          {
-            name: 'Chicago',
-            sales: 285000,
-            growth: 11.3,
-            bestProducts: [
-              { name: 'Initial Tote', sales: 78000, units: 1560, icon: '👜' },
-              { name: 'Tote Bag', sales: 62000, units: 1240, icon: '🛍️' },
-              { name: 'Icon Tote', sales: 58000, units: 1160, icon: '🎒' }
-            ],
-            topStores: ['Nordstrom', 'Macy\'s', 'Bloomingdale\'s']
-          }
-        ]
-      },
-      {
-        id: 2,
-        name: 'Canada',
-        flag: '🇨🇦',
-        totalSales: 1250000,
-        growth: 9.8,
-        topCities: [
-          {
-            name: 'Toronto',
-            sales: 420000,
-            growth: 7.5,
-            bestProducts: [
-              { name: 'Icon Tote', sales: 115000, units: 2300, icon: '🎒' },
-              { name: 'Initial Tote', sales: 98000, units: 1960, icon: '👜' },
-              { name: 'Blanket', sales: 45000, units: 900, icon: '🛏️' }
-            ],
-            topStores: ['Hudson\'s Bay', 'Holt Renfrew', 'Nordstrom']
-          },
-          {
-            name: 'Vancouver',
-            sales: 280000,
-            growth: 12.1,
-            bestProducts: [
-              { name: 'Tote Bag', sales: 85000, units: 1700, icon: '🛍️' },
-              { name: 'Icon Tote', sales: 72000, units: 1440, icon: '🎒' },
-              { name: 'Initial Tote', sales: 68000, units: 1360, icon: '👜' }
-            ],
-            topStores: ['Holt Renfrew', 'Nordstrom', 'Hudson\'s Bay']
-          }
-        ]
-      },
-      {
-        id: 3,
-        name: 'United Kingdom',
-        flag: '🇬🇧',
-        totalSales: 980000,
-        growth: 6.2,
-        topCities: [
-          {
-            name: 'London',
-            sales: 520000,
-            growth: 5.8,
-            bestProducts: [
-              { name: 'Initial Tote', sales: 145000, units: 2900, icon: '👜' },
-              { name: 'Icon Tote', sales: 112000, units: 2240, icon: '🎒' },
-              { name: 'Tote Bag', sales: 78000, units: 1560, icon: '🛍️' }
-            ],
-            topStores: ['Selfridges', 'Harrods', 'Liberty London']
-          },
-          {
-            name: 'Manchester',
-            sales: 180000,
-            growth: 8.9,
-            bestProducts: [
-              { name: 'Icon Tote', sales: 52000, units: 1040, icon: '🎒' },
-              { name: 'Initial Tote', sales: 48000, units: 960, icon: '👜' },
-              { name: 'Blanket', sales: 32000, units: 640, icon: '🛏️' }
-            ],
-            topStores: ['Selfridges', 'Harvey Nichols', 'John Lewis']
-          }
-        ]
-      },
-      {
-        id: 4,
-        name: 'Germany',
-        flag: '🇩🇪',
-        totalSales: 750000,
-        growth: 4.5,
-        topCities: [
-          {
-            name: 'Berlin',
-            sales: 220000,
-            growth: 6.2,
-            bestProducts: [
-              { name: 'Icon Tote', sales: 68000, units: 1360, icon: '🎒' },
-              { name: 'Tote Bag', sales: 58000, units: 1160, icon: '🛍️' },
-              { name: 'Initial Tote', sales: 52000, units: 1040, icon: '👜' }
-            ],
-            topStores: ['KaDeWe', 'Galeries Lafayette', 'Breuninger']
-          },
-          {
-            name: 'Munich',
-            sales: 180000,
-            growth: 3.8,
-            bestProducts: [
-              { name: 'Initial Tote', sales: 52000, units: 1040, icon: '👜' },
-              { name: 'Icon Tote', sales: 48000, units: 960, icon: '🎒' },
-              { name: 'Blanket', sales: 38000, units: 760, icon: '🛏️' }
-            ],
-            topStores: ['Ludwig Beck', 'Breuninger', 'Oberpollinger']
-          }
-        ]
-      },
-      {
-        id: 5,
-        name: 'Australia',
-        flag: '🇦🇺',
-        totalSales: 680000,
-        growth: 15.7,
-        topCities: [
-          {
-            name: 'Sydney',
-            sales: 320000,
-            growth: 18.2,
-            bestProducts: [
-              { name: 'Icon Tote', sales: 95000, units: 1900, icon: '🎒' },
-              { name: 'Tote Bag', sales: 78000, units: 1560, icon: '🛍️' },
-              { name: 'Initial Tote', sales: 72000, units: 1440, icon: '👜' }
-            ],
-            topStores: ['David Jones', 'Myer', 'Westfield']
-          },
-          {
-            name: 'Melbourne',
-            sales: 280000,
-            growth: 12.8,
-            bestProducts: [
-              { name: 'Tote Bag', sales: 82000, units: 1640, icon: '🛍️' },
-              { name: 'Icon Tote', sales: 76000, units: 1520, icon: '🎒' },
-              { name: 'Initial Tote', sales: 68000, units: 1360, icon: '👜' }
-            ],
-            topStores: ['David Jones', 'Myer', 'Chadstone']
-          }
-        ]
-      }
-    ],
-    globalStats: {
-      totalRevenue: 6507500,
-      totalGrowth: 10.2,
-      totalOrders: 125000,
-      averageOrderValue: 52.06,
-      topPerformingCountry: 'United States',
-      fastestGrowingCountry: 'Australia'
-    }
-  };
-
   // Factory & Brand Location Data (keeping for reference)
-  // Brand Sales by Location Data (based on shipping zip codes)
-  const brandSalesLocationData = [
-    {
-      id: 1,
-      region: 'New York Metro',
-      city: 'New York',
-      state: 'NY',
-      zipCodes: ['10001-10299', '11201-11256'],
-      coordinates: { lat: 40.7128, lng: -74.0060 },
-      type: 'sales_region',
-      totalSales: 45892,
-      totalOrders: 1823,
-      avgOrderValue: 251.85,
-      topProducts: [
-        { name: 'Custom Initial Bracelet', sales: 12450, orders: 532, revenue: 23424 },
-        { name: 'Icon Tote Bag', sales: 8932, orders: 287, revenue: 18657 },
-        { name: 'Premium Monogram Tote', sales: 6789, orders: 198, revenue: 14851 },
-        { name: 'Luxury Throw Blanket', sales: 4523, orders: 124, revenue: 14968 },
-        { name: 'Initial Signet Ring', sales: 3456, orders: 89, revenue: 6945 }
-      ],
-      demographics: { age: '25-35', income: 'High', interests: ['Fashion', 'Luxury'] },
-      growthRate: 15.2,
-      monthlyTrend: [3200, 3450, 3890, 4123, 4567, 4892]
-    },
-    {
-      id: 2,
-      region: 'Los Angeles Metro',
-      city: 'Los Angeles',
-      state: 'CA',
-      zipCodes: ['90001-90899', '91001-91999'],
-      coordinates: { lat: 34.0522, lng: -118.2437 },
-      type: 'sales_region',
-      totalSales: 38567,
-      totalOrders: 1456,
-      avgOrderValue: 264.89,
-      topProducts: [
-        { name: 'Beaded Charm Bracelet', sales: 9876, orders: 423, revenue: 28748 },
-        { name: 'Custom Cozy Blanket', sales: 7654, orders: 234, revenue: 22234 },
-        { name: 'Personalized Hair Clips', sales: 5432, orders: 567, revenue: 15209 },
-        { name: 'Custom Leather Keychain', sales: 4321, orders: 189, revenue: 15124 },
-        { name: 'Monogram Makeup Bag', sales: 3289, orders: 298, revenue: 12497 }
-      ],
-      demographics: { age: '22-32', income: 'Medium-High', interests: ['Beach', 'Wellness', 'Style'] },
-      growthRate: 12.8,
-      monthlyTrend: [2800, 3100, 3200, 3456, 3789, 3567]
-    },
-    {
-      id: 3,
-      region: 'Chicago Metro',
-      city: 'Chicago',
-      state: 'IL',
-      zipCodes: ['60601-60827'],
-      coordinates: { lat: 41.8781, lng: -87.6298 },
-      type: 'sales_region',
-      totalSales: 29834,
-      totalOrders: 1134,
-      avgOrderValue: 263.15,
-      topProducts: [
-        { name: 'Stackable Ring Set', sales: 7890, orders: 298, revenue: 19345 },
-        { name: 'Custom Anklet', sales: 5678, orders: 234, revenue: 23865 },
-        { name: 'Charm Choker Necklace', sales: 4567, orders: 189, revenue: 31082 },
-        { name: 'Custom Picture Frame', sales: 3456, orders: 167, revenue: 8019 },
-        { name: 'Personalized Water Bottle', sales: 2890, orders: 123, revenue: 15034 }
-      ],
-      demographics: { age: '28-38', income: 'Medium', interests: ['Family', 'Home', 'Urban'] },
-      growthRate: 8.4,
-      monthlyTrend: [2200, 2400, 2650, 2890, 3100, 2834]
-    },
-    {
-      id: 4,
-      region: 'Miami Metro',
-      city: 'Miami',
-      state: 'FL',
-      zipCodes: ['33101-33299'],
-      coordinates: { lat: 25.7617, lng: -80.1918 },
-      type: 'sales_region',
-      totalSales: 32145,
-      totalOrders: 1289,
-      avgOrderValue: 249.46,
-      topProducts: [
-        { name: 'Custom Pet Collar', sales: 8765, orders: 456, revenue: 14608 },
-        { name: 'Personalized Water Bottle', sales: 6543, orders: 289, revenue: 34024 },
-        { name: 'Custom Initial Bracelet', sales: 5432, orders: 234, revenue: 11251 },
-        { name: 'Beaded Charm Bracelet', sales: 4321, orders: 198, revenue: 13464 },
-        { name: 'Personalized Mouse Pad', sales: 2109, orders: 167, revenue: 5273 }
-      ],
-      demographics: { age: '24-34', income: 'Medium-High', interests: ['Pets', 'Beach', 'Travel'] },
-      growthRate: 18.7,
-      monthlyTrend: [2100, 2345, 2678, 2890, 3098, 3145]
-    },
-    {
-      id: 5,
-      region: 'Seattle Metro',
-      city: 'Seattle',
-      state: 'WA',
-      zipCodes: ['98101-98199'],
-      coordinates: { lat: 47.6062, lng: -122.3321 },
-      type: 'sales_region',
-      totalSales: 26789,
-      totalOrders: 998,
-      avgOrderValue: 268.42,
-      topProducts: [
-        { name: 'Luxury Throw Blanket', sales: 7890, orders: 234, revenue: 28080 },
-        { name: 'Custom Cozy Blanket', sales: 5432, orders: 189, revenue: 17955 },
-        { name: 'Personalized Mouse Pad', sales: 4321, orders: 298, revenue: 10803 },
-        { name: 'Custom Leather Keychain', sales: 3210, orders: 156, revenue: 11235 },
-        { name: 'Icon Tote Bag', sales: 2987, orders: 121, revenue: 19419 }
-      ],
-      demographics: { age: '26-36', income: 'High', interests: ['Tech', 'Outdoors', 'Coffee'] },
-      growthRate: 21.3,
-      monthlyTrend: [1800, 2100, 2300, 2456, 2598, 2789]
-    },
-    {
-      id: 6,
-      region: 'Austin Metro',
-      city: 'Austin',
-      state: 'TX',
-      zipCodes: ['78701-78799'],
-      coordinates: { lat: 30.2672, lng: -97.7431 },
-      type: 'sales_region',
-      totalSales: 24567,
-      totalOrders: 923,
-      avgOrderValue: 266.25,
-      topProducts: [
-        { name: 'Premium Monogram Tote', sales: 6789, orders: 189, revenue: 14175 },
-        { name: 'Custom Initial Bracelet', sales: 5432, orders: 234, revenue: 11237 },
-        { name: 'Initial Signet Ring', sales: 4321, orders: 167, revenue: 33703 },
-        { name: 'Personalized Hair Clips', sales: 3210, orders: 234, revenue: 8988 },
-        { name: 'Monogram Makeup Bag', sales: 2890, orders: 198, revenue: 10980 }
-      ],
-      demographics: { age: '23-33', income: 'Medium-High', interests: ['Music', 'Food', 'Art'] },
-      growthRate: 14.6,
-      monthlyTrend: [1900, 2050, 2200, 2345, 2456, 2567]
-    }
-  ];
-
   const locationData = [
     { 
       id: 1, 
@@ -1180,7 +890,6 @@ const BaubleBarDemo = () => {
       future: index > currentStep
     }));
   };
-
   const togglePOExpansion = (po) => {
     console.log('togglePOExpansion called with:', po, 'Current tab:', brandActiveTab);
     const newExpanded = new Set(expandedPOs);
@@ -1234,110 +943,14 @@ const BaubleBarDemo = () => {
       setViewMtoDetail({ mto: mtoData, po: brandPOs.find(po => po.po === shipment.po) });
     }
   };
-
-  // Shared InventoryTab component
-  const InventoryTab = () => (
-    <div className="bg-white rounded-lg shadow-sm">
-      <div className="p-6 border-b">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-semibold">Inventory Management</h2>
-            <p className="text-gray-600 mt-1">Auto-calculated material needs and allocation</p>
-          </div>
-          <div className="flex gap-2">
-            <span className="text-sm text-gray-600">
-              {inventoryData.filter(i => i.status === 'short').length} shortages detected
-            </span>
-          </div>
-        </div>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Material</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Needed</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">In Stock</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Allocated</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Used By MTOs</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {inventoryData.map((item) => (
-              <tr key={item.material} className={`hover:bg-gray-50 ${item.status === 'short' ? 'bg-red-50' : ''}`}>
-                <td className="px-6 py-4 font-medium">{item.material}</td>
-                <td className="px-6 py-4">{item.needed}</td>
-                <td className="px-6 py-4">{item.inStock}</td>
-                <td className="px-6 py-4">{item.allocated}</td>
-                <td className="px-6 py-4">
-                  <span className={item.inStock - item.allocated < 0 ? 'text-red-600 font-medium' : 'text-gray-900'}>
-                    {item.inStock - item.allocated}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    item.status === 'short' ? 'text-red-700 bg-red-100' : 'text-green-700 bg-green-100'
-                  }`}>
-                    {item.status === 'short' ? (
-                      <>
-                        <AlertTriangle className="h-3 w-3 inline mr-1" />
-                        Short
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircle2 className="h-3 w-3 inline mr-1" />
-                        OK
-                      </>
-                    )}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">{item.usedBy.join(', ')}</span>
-                    {item.status === 'short' && (
-                      <button 
-                        onClick={() => {
-                          setShowChat(true);
-                          // Auto-create chat for material inquiry
-                        }}
-                        className="text-blue-600 hover:text-blue-800 text-xs bg-blue-50 px-2 py-1 rounded flex items-center gap-1"
-                        title="AutoChat with factory about material availability"
-                      >
-                        <MessageCircle className="h-3 w-3" />
-                        Inquiry
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      
-      {/* Inventory Actions */}
-      <div className="p-6 border-t bg-gray-50">
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-600">
-            Inventory auto-deducted when MTOs marked "Shipped"
-          </div>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
-            Update Stock Levels
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
+  // BRAND VIEW - Complete with all features
   const BrandView = () => (
-    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
       {/* Tab Navigation */}
       <div className="bg-white rounded-lg shadow-sm">
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-6" aria-label="Tabs">
-            <button
+            <button 
               onClick={() => setBrandActiveTab('overview')}
               className={`py-4 px-1 border-b-2 font-medium text-sm ${
                 brandActiveTab === 'overview'
@@ -1346,8 +959,8 @@ const BaubleBarDemo = () => {
               }`}
             >
               <div className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                Overview
+              <BarChart3 className="h-4 w-4" />
+              Overview
               </div>
             </button>
             <button
@@ -1359,8 +972,8 @@ const BaubleBarDemo = () => {
               }`}
             >
               <div className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                MTO Management
+              <Package className="h-4 w-4" />
+              MTO Management
               </div>
             </button>
             <button
@@ -1403,14 +1016,14 @@ const BaubleBarDemo = () => {
               </div>
             </button>
           </nav>
+          </div>
         </div>
-      </div>
 
-      {/* Tab Content */}
+        {/* Tab Content */}
       {brandActiveTab === 'overview' && (
-        <div className="space-y-6">
-          {/* Best Products Overview */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="space-y-6">
+      {/* Best Products Overview */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
@@ -1418,6 +1031,15 @@ const BaubleBarDemo = () => {
               Best Products Overview
             </h2>
             <p className="text-gray-600 mt-1">Top performing SKUs by volume, delays, and ratings</p>
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setShowLocationMap(true)}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              <MapPin className="h-4 w-4" />
+              Location Map
+            </button>
           </div>
         </div>
         
@@ -1481,36 +1103,23 @@ const BaubleBarDemo = () => {
             </h2>
             <p className="text-gray-600 mt-1">Track MTO volume by product type over time</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setShowLocationView(!showLocationView)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm transition-colors ${
-                showLocationView 
-                  ? 'bg-blue-700 text-white' 
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
+          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setSelectedTimeframe('day')}
+              className={`px-3 py-1 rounded text-sm font-medium ${
+                selectedTimeframe === 'day' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <MapPin className="h-4 w-4" />
-              {showLocationView ? 'Hide Location View' : 'Sales by Location'}
+              Per Day
             </button>
-            <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-              <button
-                onClick={() => setSelectedTimeframe('day')}
-                className={`px-3 py-1 rounded text-sm font-medium ${
-                  selectedTimeframe === 'day' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Per Day
-              </button>
-              <button
-                onClick={() => setSelectedTimeframe('month')}
-                className={`px-3 py-1 rounded text-sm font-medium ${
-                  selectedTimeframe === 'month' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Per Month
-              </button>
-            </div>
+            <button
+              onClick={() => setSelectedTimeframe('month')}
+              className={`px-3 py-1 rounded text-sm font-medium ${
+                selectedTimeframe === 'month' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Per Month
+            </button>
           </div>
         </div>
         
@@ -1583,118 +1192,11 @@ const BaubleBarDemo = () => {
             </div>
           </div>
         </div>
-        
-        {/* Inline Location View */}
-        {showLocationView && (
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <Globe className="h-5 w-5 text-blue-500" />
-                Sales by Location
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">Revenue distribution by shipping regions and zip codes</p>
-            </div>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Map Placeholder */}
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6 h-80 flex items-center justify-center">
-                <div className="text-center text-gray-700">
-                  <Globe className="h-16 w-16 mx-auto mb-4 text-blue-500" />
-                  <p className="text-lg font-medium mb-2">Interactive Sales Map</p>
-                  <p className="text-sm text-gray-600 mb-2">Visual distribution of sales data:</p>
-                  <div className="text-xs text-gray-500 space-y-1">
-                    <p>• Regional performance by zip codes</p>
-                    <p>• Top products per location</p>
-                    <p>• Growth trends and demographics</p>
-                  </div>
-                </div>
-              </div>
-              
-              {/* Sales Regions Data */}
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-gray-900">Regional Overview</h4>
-                  <div className="text-sm text-gray-500">
-                    Total: ${brandSalesLocationData.reduce((sum, region) => sum + region.totalSales, 0).toLocaleString()}
-                  </div>
-                </div>
-                
-                <div className="max-h-64 overflow-y-auto space-y-3">
-                  {brandSalesLocationData.slice(0, 4).map((region) => (
-                    <div key={region.id} className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h5 className="font-medium text-gray-900">{region.region}</h5>
-                          <p className="text-sm text-gray-600">{region.city}, {region.state}</p>
-                          <p className="text-xs text-gray-500">Zip: {region.zipCodes.slice(0, 2).join(', ')}</p>
-                        </div>
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                          {region.growth > 0 ? `+${region.growth}%` : `${region.growth}%`}
-                        </span>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-3 text-sm mb-3">
-                        <div className="text-center">
-                          <div className="font-bold text-blue-600">${(region.totalSales / 1000).toFixed(0)}k</div>
-                          <div className="text-xs text-gray-600">Sales</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="font-bold text-green-600">{region.totalOrders}</div>
-                          <div className="text-xs text-gray-600">Orders</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="font-bold text-purple-600">${Math.round(region.totalSales / region.totalOrders)}</div>
-                          <div className="text-xs text-gray-600">Avg</div>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-3">
-                        <p className="text-xs text-gray-600 mb-1 font-medium">Top Products:</p>
-                        <div className="space-y-1">
-                          {region.topProducts.slice(0, 2).map((product, idx) => (
-                            <div key={idx} className="flex justify-between items-center text-xs">
-                              <span className="text-gray-700 truncate">{product.name}</span>
-                              <span className="text-gray-500 ml-2">${(product.revenue / 1000).toFixed(0)}k</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                
-                <div className="pt-3 border-t border-gray-200">
-                  <div className="grid grid-cols-3 gap-4 text-center text-sm">
-                    <div>
-                      <div className="font-bold text-blue-600">
-                        {brandSalesLocationData.reduce((sum, region) => sum + region.totalOrders, 0).toLocaleString()}
-                      </div>
-                      <div className="text-gray-600">Total Orders</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-green-600">
-                        {Math.round(brandSalesLocationData.reduce((sum, region) => sum + region.growth, 0) / brandSalesLocationData.length)}%
-                      </div>
-                      <div className="text-gray-600">Avg Growth</div>
-                    </div>
-                    <div>
-                      <div className="font-bold text-purple-600">
-                        {brandSalesLocationData.length}
-                      </div>
-                      <div className="text-gray-600">Regions</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
 
-        </div>
+          </div>
       )}
-
       {/* MTO Management Tab */}
       {brandActiveTab === 'mto-management' && (
         <div className="space-y-6">
@@ -1706,30 +1208,30 @@ const BaubleBarDemo = () => {
                 <span className="text-xs text-gray-500">Upload and track PO/MTO fulfillment</span>
               </div>
               <div className="flex gap-1">
-                <button 
-                  onClick={() => setShowAdvancedSearch(true)}
+            <button 
+              onClick={() => setShowAdvancedSearch(true)}
                   className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-700"
-                >
+            >
                   <Search className="h-3 w-3" />
                   Search
-                </button>
-                <button 
+            </button>
+            <button 
                   onClick={() => setShowChat(true)}
                   className="flex items-center gap-1 border border-gray-300 px-3 py-1.5 rounded text-xs hover:bg-gray-50"
-                >
+            >
                   <MessageCircle className="h-3 w-3" />
                   Chat
-                </button>
-                <button 
+            </button>
+            <button 
                   onClick={() => navigate('/products')}
                   className="flex items-center gap-1 border border-gray-300 px-3 py-1.5 rounded text-xs hover:bg-gray-50"
                 >
                   <Box className="h-3 w-3" />
                   3D
-                </button>
-              </div>
-            </div>
-
+            </button>
+          </div>
+        </div>
+        
             {/* Upload PO + MTO File Section */}
             <div className="bg-gray-50 rounded-lg p-3 mb-4">
               <div className="flex items-center justify-between">
@@ -1764,7 +1266,7 @@ const BaubleBarDemo = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <h3 className="text-xs font-medium text-gray-900">Date Range:</h3>
-                  <input 
+        <input
                     type="date" 
                     className="border border-gray-300 rounded px-2 py-1 text-xs w-28"
                     placeholder="From"
@@ -1774,8 +1276,8 @@ const BaubleBarDemo = () => {
                     type="date" 
                     className="border border-gray-300 rounded px-2 py-1 text-xs w-28"
                     placeholder="To"
-                  />
-                </div>
+        />
+      </div>
                 <div className="flex items-center gap-1">
                   <button className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
                     Apply
@@ -1783,7 +1285,7 @@ const BaubleBarDemo = () => {
                   <button className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50">
                     Clear
                   </button>
-                </div>
+        </div>
               </div>
             </div>
           </div>
@@ -1794,7 +1296,7 @@ const BaubleBarDemo = () => {
               <div className="flex items-center gap-3">
                 <h3 className="text-base font-semibold text-gray-900">MTO Management by Product Category</h3>
                 <span className="text-xs text-gray-500">Track by product type and status</span>
-              </div>
+                </div>
               <div className="flex gap-1 bg-gray-100 rounded p-1">
                 <button
                   onClick={() => setViewMode('po')}
@@ -1803,7 +1305,7 @@ const BaubleBarDemo = () => {
                   }`}
                 >
                   PO View
-                </button>
+                  </button>
                 <button
                   onClick={() => setViewMode('mto')}
                   className={`px-2 py-1 rounded text-xs font-medium ${
@@ -1811,9 +1313,9 @@ const BaubleBarDemo = () => {
                   }`}
                 >
                   MTO View
-                </button>
+                  </button>
+                </div>
               </div>
-            </div>
 
                          {/* Product Type Tabs */}
              <div className="flex gap-1 bg-gray-100 rounded p-1 mb-3">
@@ -1834,7 +1336,7 @@ const BaubleBarDemo = () => {
             <div className="space-y-4">
                           {/* Date Navigation */}
             <div className="bg-white rounded-lg shadow-sm p-3 mb-3">
-              <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <h3 className="text-sm font-medium text-gray-900">Date Navigation</h3>
                   <div className="flex items-center gap-1">
@@ -1847,8 +1349,8 @@ const BaubleBarDemo = () => {
                     <button className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50">
                       Next
                     </button>
+                    </div>
                   </div>
-                </div>
                 <div className="flex items-center gap-1">
                   <input 
                     type="month" 
@@ -1859,9 +1361,9 @@ const BaubleBarDemo = () => {
                     Go
                   </button>
                 </div>
-              </div>
-            </div>
-              
+                  </div>
+                </div>
+
               {mtoVolumeData.month.map((monthData) => {
                 const monthlyMTOs = brandPOs.flatMap(po => 
                   po.mtos.filter(mto => {
@@ -1891,7 +1393,7 @@ const BaubleBarDemo = () => {
                               <ChevronDown className="h-6 w-6 text-blue-600" /> : 
                               <ChevronRight className="h-6 w-6 text-blue-600" />
                             }
-                            <div>
+                    <div>
                               <h3 className="text-xl font-bold text-gray-900">📅 {monthData.period}</h3>
                               <p className="text-sm text-gray-700">
                                 {selectedProductType ? 
@@ -1902,8 +1404,8 @@ const BaubleBarDemo = () => {
                               <p className="text-xs text-gray-500 mt-1">
                                 {getMonthDateRange(monthData).startFormatted} - {getMonthDateRange(monthData).endFormatted}
                               </p>
-                            </div>
-                          </div>
+                    </div>
+                  </div>
                         </div>
                         
                         {/* Monthly Summary */}
@@ -1927,9 +1429,9 @@ const BaubleBarDemo = () => {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                    
+                  </div>
+                </div>
+
                     {/* Daily MTO View - Nested within Month */}
                     {expandedPOs.has(monthData.period) && (
                       <div className="bg-gray-50 p-4">
@@ -1960,7 +1462,7 @@ const BaubleBarDemo = () => {
                                         <ChevronDown className="h-4 w-4 text-gray-600" /> : 
                                         <ChevronRight className="h-4 w-4 text-gray-600" />
                                       }
-                                      <div>
+                    <div>
                                         <h5 className="text-sm font-semibold flex items-center gap-1">
                                           <span className="text-blue-600">{dayData.dayOfWeek}</span>
                                           <span className="text-gray-900">{dayData.day}</span>
@@ -1969,8 +1471,8 @@ const BaubleBarDemo = () => {
                                         <p className="text-xs text-gray-600">
                                           {dayData.totalMTOs} MTOs • {dayData.dayName}
                                         </p>
-                                      </div>
-                                    </div>
+                    </div>
+                  </div>
                                   </div>
                                   
                                   {/* Daily Product Counts */}
@@ -1980,9 +1482,9 @@ const BaubleBarDemo = () => {
                                     <span className="text-gray-600">BL: <strong>{dayData.blanket}</strong></span>
                                     <span className="text-gray-600">TB: <strong>{dayData.toteBag}</strong></span>
                                   </div>
-                                </div>
-                              </div>
-                              
+                  </div>
+                </div>
+
                               {/* Individual MTOs with Unique IDs */}
                               {expandedPOs.has(`${monthData.period}-${dayData.isoDate}`) && (
                                 <div className="p-3 bg-gray-50">
@@ -1992,26 +1494,26 @@ const BaubleBarDemo = () => {
                                       <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                                         <span className="text-white text-xs font-bold">{monthlyMTOs.slice(0, dayData.initialTote + dayData.iconTote + dayData.blanket + dayData.toteBag).length}</span>
                                       </div>
-                                      <div>
+                    <div>
                                         <h5 className="text-sm font-semibold text-gray-900">{dayData.period} Production</h5>
                                         <div className="flex items-center gap-3 text-xs text-gray-600">
                                           <span>🟢 {monthlyMTOs.filter(m => m.status === 'cutting' || m.status === 'QC').length} Active</span>
                                           <span>🟡 {monthlyMTOs.filter(m => m.status === 'pending').length} Pending</span>
-                                        </div>
-                                      </div>
-                                    </div>
+                    </div>
+                  </div>
+                  </div>
                                     <div className="flex items-center gap-1">
                                       <input type="text" placeholder="Search ID..." className="text-xs border border-gray-300 rounded px-2 py-1 w-24" />
                                       <button className="px-2 py-1 text-xs bg-blue-600 text-white rounded">Filter</button>
-                                    </div>
-                                  </div>
-                                  
+                </div>
+              </div>
+
                                   {/* Ultra-Dense Table for 100+ Items */}
                                   <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                                     <div className="overflow-x-auto max-h-96">
                                       <table className="w-full text-xs">
                                         <thead className="bg-gray-50 sticky top-0 z-10">
-                                          <tr className="border-b border-gray-200">
+                      <tr className="border-b border-gray-200">
                                             <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-32">MTO ID & Internal</th>
                                             <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-48">Product Details</th>
                                             <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-32">Order Info</th>
@@ -2033,8 +1535,8 @@ const BaubleBarDemo = () => {
                                             </th>
                                             <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-28">Production Info</th>
                                             <th className="px-2 py-1.5 text-center font-medium text-gray-700 w-12"></th>
-                                          </tr>
-                                        </thead>
+                      </tr>
+                    </thead>
                                         <tbody className="divide-y divide-gray-100">
                                           {monthlyMTOs.slice(0, dayData.totalMTOs).map((mto, idx) => {
                                             const uniqueMtoId = `MTO-${monthData.period.replace(' ', '')}-${dayData.isoDate}-${mto.internalId || mto.lineId}-${idx}`;
@@ -2076,7 +1578,7 @@ const BaubleBarDemo = () => {
                                                       </div>
                                                     </div>
                                                   </div>
-                                                </td>
+                          </td>
                                                 
                                                 {/* Product Details */}
                                                 <td className="px-2 py-1.5">
@@ -2091,7 +1593,7 @@ const BaubleBarDemo = () => {
                                                       Bag Base PID: {mto.bagBasePid || mto.bagBasePID || '133938'}
                                                     </div>
                                                   </div>
-                                                </td>
+                          </td>
                                                 
                                                 {/* Order Information */}
                                                 <td className="px-2 py-1.5">
@@ -2106,14 +1608,14 @@ const BaubleBarDemo = () => {
                                                       SO Date: {mto.soDate || '16/07/2025'}
                                                     </div>
                                                   </div>
-                                                </td>
+                          </td>
                                                 
                                                 {/* Quantity */}
                                                 <td className="px-2 py-1.5 text-center">
                                                   <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg text-sm font-bold">
                                                     {mto.qty || mto.quantity || 1}
-                                                  </span>
-                                                </td>
+                            </span>
+                          </td>
                                                 
                                                 {/* Status Details */}
                                                 <td className="px-2 py-1.5 text-center">
@@ -2127,8 +1629,8 @@ const BaubleBarDemo = () => {
                                                     <span className="text-xs text-gray-500">
                                                       {mto.priority === 'high' ? '🔥 HIGH' : 'Normal'}
                                                     </span>
-                                                  </div>
-                                                </td>
+                            </div>
+                          </td>
                                                 
                                                 {/* Key Dates */}
                                                 <td className="px-2 py-1.5">
@@ -2283,9 +1785,9 @@ const BaubleBarDemo = () => {
                                                         }, {})).slice(0, 3).map((count, idx) => (
                                                           <div key={idx} className="w-1 h-1 bg-blue-400 rounded-full"></div>
                                                         ))}
-                                                      </div>
-                                                    </div>
-                                                    
+                </div>
+              </div>
+
                                                     <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                                       <div 
                                                         className={`h-full transition-all ${
@@ -2304,19 +1806,19 @@ const BaubleBarDemo = () => {
                                                 
                                                 {/* Production Information */}
                                                 <td className="px-2 py-1.5">
-                                                  <div>
+                        <div>
                                                     <div className="text-xs font-medium text-gray-900">
                                                       {mto.progress ? `Step ${mto.progress}/4` : 'Not Started'}
-                                                    </div>
+                        </div>
                                                     <div className="text-xs text-gray-600">
                                                       XF Date: {mto.xfDate || 'TBD'}
-                                                    </div>
+                      </div>
                                                     <div className="text-xs text-gray-500">
                                                       Factory: {mto.factory || 'Main'}
-                                                    </div>
+                        </div>
                                                     <div className="text-xs text-gray-500">
                                                       Started: {mto.actualStartDate || 'Pending'}
-                                                    </div>
+                      </div>
                                                   </div>
                                                 </td>
                                                 
@@ -2343,7 +1845,6 @@ const BaubleBarDemo = () => {
                                       </div>
                                     </div>
                                   </div>
-                                  
                                   {/* Bottom Quick Stats - Minimal */}
                                   <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
                                     <div className="flex items-center gap-4">
@@ -2357,33 +1858,25 @@ const BaubleBarDemo = () => {
                                   </div>
                                 </div>
                               )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
                     )}
                   </div>
                 );
               })}
             </div>
+            </div>
           </div>
-        </div>
-      )}
-
+        )}
       {/* Shipping Tab */}
       {brandActiveTab === 'shipping' && (
-        <div className="space-y-6">
-          <InventoryCartonSplit mtoData={brandPOs.flatMap(po => po.mtos || [])} isShippingView={true} />
-        </div>
-      )}
-
-      {/* Original Shipping Tab Content - Hidden for now */}
-      {brandActiveTab === 'shipping-old' && (
-        <div className="space-y-6">
+          <div className="space-y-6">
           {/* Shipping Overview Header */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex justify-between items-center mb-6">
-                              <div>
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
                   <h2 className="text-xl font-bold text-gray-900">Shipping Management</h2>
                   <p className="text-gray-600 mt-1">Track shipments, manage carriers, and monitor delivery performance</p>
                 </div>
@@ -2401,55 +1894,55 @@ const BaubleBarDemo = () => {
                     Carrier Management
                   </button>
                 </div>
-            </div>
+              </div>
 
             {/* Shipping Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
                     <p className="text-sm font-medium text-blue-600">In Transit</p>
                     <p className="text-2xl font-bold text-blue-700">{shippingData.filter(s => s.status === 'In Transit').length}</p>
-                  </div>
+                    </div>
                   <div className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
                     <Truck className="h-4 w-4 text-blue-600" />
                   </div>
+                  </div>
                 </div>
-              </div>
-              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
                     <p className="text-sm font-medium text-green-600">Delivered</p>
                     <p className="text-2xl font-bold text-green-700">{shippingData.filter(s => s.status === 'Delivered').length}</p>
-                  </div>
+                    </div>
                   <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
                     <Award className="h-4 w-4 text-green-600" />
                   </div>
+                  </div>
                 </div>
-              </div>
-              <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
                     <p className="text-sm font-medium text-yellow-600">Pending</p>
                     <p className="text-2xl font-bold text-yellow-700">{shippingData.filter(s => s.status === 'Pending').length}</p>
-                  </div>
+                    </div>
                   <div className="w-8 h-8 bg-yellow-200 rounded-full flex items-center justify-center">
                     <Clock className="h-4 w-4 text-yellow-600" />
                   </div>
+                  </div>
                 </div>
-              </div>
-              <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
                     <p className="text-sm font-medium text-purple-600">Total Shipments</p>
                     <p className="text-2xl font-bold text-purple-700">{shippingData.length}</p>
-                  </div>
+                    </div>
                   <div className="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
                     <Package className="h-4 w-4 text-purple-600" />
                   </div>
+                  </div>
                 </div>
               </div>
-            </div>
 
                          {/* Carrier Performance */}
               <div className="bg-gray-50 rounded-lg p-4 mb-6">
@@ -2459,35 +1952,35 @@ const BaubleBarDemo = () => {
                    <div className="flex items-center justify-between mb-2">
                      <span className="text-sm font-medium text-gray-900">UPS</span>
                      <span className="text-sm text-green-600">96%</span>
-                   </div>
+                          </div>
                    <div className="w-full bg-gray-200 rounded-full h-2">
                      <div className="bg-green-600 h-2 rounded-full" style={{ width: '96%' }}></div>
-                   </div>
+                          </div>
                    <p className="text-xs text-gray-500 mt-1">On-time delivery rate</p>
-                 </div>
+                        </div>
                  <div className="bg-white rounded-lg p-3">
                    <div className="flex items-center justify-between mb-2">
                      <span className="text-sm font-medium text-gray-900">FedEx</span>
                      <span className="text-sm text-blue-600">94%</span>
-                   </div>
+                          </div>
                    <div className="w-full bg-gray-200 rounded-full h-2">
                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '94%' }}></div>
-                   </div>
+                        </div>
                    <p className="text-xs text-gray-500 mt-1">On-time delivery rate</p>
-                 </div>
+                      </div>
                  <div className="bg-white rounded-lg p-3">
                    <div className="flex items-center justify-between mb-2">
                      <span className="text-sm font-medium text-gray-900">DHL</span>
                      <span className="text-sm text-yellow-600">89%</span>
-                   </div>
-                   <div className="w-full bg-gray-200 rounded-full h-2">
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
                      <div className="bg-yellow-600 h-2 rounded-full" style={{ width: '89%' }}></div>
                    </div>
                    <p className="text-xs text-gray-500 mt-1">On-time delivery rate</p>
                  </div>
                </div>
-             </div>
-          </div>
+                        </div>
+                      </div>
 
                      {/* Active Shipments */}
             <div className="bg-white rounded-lg shadow-sm p-6">
@@ -2506,8 +1999,8 @@ const BaubleBarDemo = () => {
                     <option>Pending</option>
                   </select>
                 </div>
-              </div>
-
+                              </div>
+                              
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50">
@@ -2540,28 +2033,28 @@ const BaubleBarDemo = () => {
                             >
                               <span>Ref: {shipment.referenceNumber}</span>
                               <Eye className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </div>
+                                </div>
                             <div className="text-sm text-gray-600">PO: {shipment.po} Line {shipment.lineId}</div>
                             <div className="text-xs text-gray-500">Master Carton: {shipment.masterCarton}</div>
-                          </div>
+                                </div>
                         </td>
                         <td className="px-4 py-3">
                           <div>
                             <div className="font-medium text-blue-600">{shipment.trackingNumber}</div>
                             <div className="text-sm text-gray-600">AWB: {shipment.awb}</div>
                             <div className="text-xs text-gray-500">Ship Date: {shipment.shipDate}</div>
-                          </div>
+                                </div>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                               <Truck className="h-4 w-4 text-gray-600" />
-                            </div>
+                              </div>
                             <div>
                               <div className="font-medium text-gray-900">{shipment.carrier}</div>
                               <div className="text-xs text-gray-500">Express</div>
                             </div>
-                          </div>
+                        </div>
                         </td>
                         <td className="px-4 py-3">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusColor}`}>
@@ -2574,31 +2067,31 @@ const BaubleBarDemo = () => {
                             <div className="text-xs text-gray-500">
                               {shipment.status === 'In Transit' ? '2 days remaining' : 
                                shipment.status === 'Delivered' ? 'Delivered on time' : 'Processing'}
-                            </div>
-                          </div>
+                      </div>
+                        </div>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex gap-2">
-                            <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        <div className="flex gap-2">
+                          <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
                               Track
-                            </button>
+                          </button>
                             <button className="text-gray-600 hover:text-gray-800 text-sm font-medium">
                               Details
-                            </button>
+                          </button>
                             {shipment.files.length > 0 && (
                               <button className="text-green-600 hover:text-green-800 text-sm font-medium">
                                 Files ({shipment.files.length})
                               </button>
                             )}
-                          </div>
+                        </div>
                         </td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
-            </div>
-          </div>
+                      </div>
+                    </div>
 
           {/* Shipping Analytics */}
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -2610,11 +2103,11 @@ const BaubleBarDemo = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">On-time Delivery</span>
                     <span className="text-sm font-medium text-green-600">94.2%</span>
-                  </div>
+                </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Average Transit Time</span>
                     <span className="text-sm font-medium text-blue-600">3.2 days</span>
-                  </div>
+              </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Damaged Shipments</span>
                     <span className="text-sm font-medium text-red-600">0.3%</span>
@@ -2664,41 +2157,387 @@ const BaubleBarDemo = () => {
                 </div>
               </div>
             </div>
+            </div>
           </div>
-        </div>
-      )}
-
+        )}
       {/* Inventory Tab */}
       {brandActiveTab === 'inventory' && (
-        <InventoryTab />
-      )}
+          <div className="space-y-6">
+          {/* Inventory Overview Header */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                <h2 className="text-xl font-bold text-gray-900">Inventory Management</h2>
+                <p className="text-gray-600 mt-1">Real-time material tracking and supply chain optimization</p>
+                </div>
+              <div className="flex gap-2">
+                <button className="flex items-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
+                  <AlertTriangle className="h-4 w-4" />
+                  Reorder All Critical
+                </button>
+                <button className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                  <Upload className="h-4 w-4" />
+                  Import Inventory
+                </button>
+                <button className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50">
+                  <Download className="h-4 w-4" />
+                  Export Report
+                </button>
+              </div>
+              </div>
 
+            {/* Inventory Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-gradient-to-r from-red-50 to-red-100 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-sm font-medium text-red-600">Critical Shortages</p>
+                    <p className="text-2xl font-bold text-red-700">{inventoryData.filter(i => i.status === 'short').length}</p>
+                    <p className="text-xs text-red-600">Need immediate action</p>
+                </div>
+                  <div className="w-8 h-8 bg-red-200 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="h-4 w-4 text-red-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-sm font-medium text-yellow-600">Low Stock Items</p>
+                    <p className="text-2xl font-bold text-yellow-700">{inventoryData.filter(i => i.status === 'low').length}</p>
+                    <p className="text-xs text-yellow-600">Reorder soon</p>
+                </div>
+                  <div className="w-8 h-8 bg-yellow-200 rounded-full flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-yellow-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-sm font-medium text-green-600">In Stock</p>
+                    <p className="text-2xl font-bold text-green-700">{inventoryData.filter(i => i.status === 'ok').length}</p>
+                    <p className="text-xs text-green-600">Adequate levels</p>
+                </div>
+                  <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
+                    <Box className="h-4 w-4 text-green-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                <div>
+                    <p className="text-sm font-medium text-blue-600">Total Value</p>
+                    <p className="text-2xl font-bold text-blue-700">${inventoryData.reduce((sum, item) => sum + (item.inStock * item.cost), 0).toLocaleString()}</p>
+                    <p className="text-xs text-blue-600">Current inventory</p>
+                  </div>
+                  <div className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
+                    <PieChart className="h-4 w-4 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+                </div>
+                
+            {/* Critical Shortages Alert */}
+            {inventoryData.filter(i => i.status === 'short').length > 0 && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-red-600" />
+                    <h3 className="font-semibold text-red-800">Critical Material Shortages - Action Required</h3>
+                  </div>
+                  <button className="text-red-600 hover:text-red-800 text-sm font-medium">
+                    Reorder All Critical Items
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {inventoryData.filter(m => m.status === 'short').map((material, index) => {
+                    const shortage = material.needed - material.inStock;
+                    const reorderQty = Math.max(material.minOrder, shortage + material.reorderPoint);
+                    const reorderCost = reorderQty * material.cost;
+                    
+                    return (
+                      <div key={index} className="bg-white rounded-lg p-3 border border-red-200">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900 text-sm">{material.material}</p>
+                            <p className="text-xs text-gray-500">{material.sku}</p>
+                          </div>
+                          <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Critical</span>
+                        </div>
+                        <div className="space-y-1 mb-3">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600">Need:</span>
+                            <span className="font-medium">{material.needed}</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600">Stock:</span>
+                            <span className="font-medium text-red-600">{material.inStock}</span>
+                          </div>
+                          <div className="flex justify-between text-xs">
+                            <span className="text-gray-600">Shortage:</span>
+                            <span className="font-medium text-red-600">{shortage}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <div className="text-xs text-gray-500">
+                            Reorder: {reorderQty} × ${material.cost} = ${reorderCost.toFixed(2)}
+                          </div>
+                          <button className="text-blue-600 hover:text-blue-800 text-xs font-medium">
+                            Order Now
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
 
-      {/* Messages Tab */}
-      {brandActiveTab === 'messages' && (
-        <div className="space-y-6">
-          {/* Messages Overview Header */}
+          {/* Inventory Management Tools */}
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
-              <div>
+              <h3 className="text-lg font-semibold text-gray-900">Material Inventory Management</h3>
+              <div className="flex gap-2">
+                <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                  <option>All Categories</option>
+                  <option>Base Materials</option>
+                  <option>Patches</option>
+                  <option>Threads</option>
+                  <option>Fabrics</option>
+                  <option>Hardware</option>
+                </select>
+                <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
+                  <option>All Status</option>
+                  <option>Critical</option>
+                  <option>Low Stock</option>
+                  <option>In Stock</option>
+                </select>
+                  <input 
+                    type="text" 
+                  placeholder="Search materials..." 
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-48"
+                  />
+                </div>
+              </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-medium text-gray-900">
+                      <input type="checkbox" className="rounded border-gray-300" />
+                    </th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-900">Material</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-900">Stock Levels</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-900">Status</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-900">Supplier</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-900">Cost & Lead Time</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-900">Used By</th>
+                    <th className="px-4 py-3 text-left font-medium text-gray-900">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {inventoryData.map((item, index) => {
+                    const available = item.inStock - item.allocated;
+                    const shortage = item.needed - available;
+                    const statusColor = item.status === 'short' ? 'bg-red-100 text-red-800' : 
+                                      item.status === 'low' ? 'bg-yellow-100 text-yellow-800' : 
+                                      'bg-green-100 text-green-800';
+                    const reorderQty = Math.max(item.minOrder, shortage + item.reorderPoint);
+                    const reorderCost = reorderQty * item.cost;
+                    
+                    return (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-4 py-3">
+                          <input type="checkbox" className="rounded border-gray-300" />
+                        </td>
+                        <td className="px-4 py-3">
+                          <div>
+                            <div className="font-medium text-gray-900">{item.material}</div>
+                            <div className="text-xs text-gray-500">SKU: {item.sku}</div>
+                            <div className="text-xs text-gray-400">{item.category}</div>
+                  </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-600">In Stock:</span>
+                              <span className="font-medium">{item.inStock}</span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-600">Allocated:</span>
+                              <span className="font-medium">{item.allocated}</span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-600">Available:</span>
+                              <span className={`font-medium ${available < 0 ? 'text-red-600' : 'text-gray-900'}`}>
+                                {available}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-xs">
+                              <span className="text-gray-600">Needed:</span>
+                              <span className="font-medium">{item.needed}</span>
+                            </div>
+                            {shortage > 0 && (
+                              <div className="flex justify-between text-xs">
+                                <span className="text-red-600">Shortage:</span>
+                                <span className="font-medium text-red-600">{shortage}</span>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusColor}`}>
+                            {item.status === 'short' ? 'Critical' : 
+                             item.status === 'low' ? 'Low Stock' : 'In Stock'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div>
+                            <div className="font-medium text-gray-900">{item.supplier}</div>
+                            <div className="text-xs text-gray-500">Lead: {item.leadTime} days</div>
+                            <div className="text-xs text-gray-500">Min: {item.minOrder}</div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div>
+                            <div className="font-medium text-gray-900">${item.cost}</div>
+                            <div className="text-xs text-gray-500">Reorder: {reorderQty}</div>
+                            <div className="text-xs text-gray-500">Cost: ${reorderCost.toFixed(2)}</div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="space-y-1">
+                            {item.usedBy.slice(0, 3).map((po, idx) => (
+                              <div key={idx} className="text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded">
+                                {po}
+                              </div>
+                            ))}
+                            {item.usedBy.length > 3 && (
+                              <div className="text-xs text-gray-500">
+                                +{item.usedBy.length - 3} more
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                  <div className="flex gap-2">
+                            <button className="text-blue-600 hover:text-blue-800 text-xs font-medium">
+                              Reorder
+                    </button>
+                            <button className="text-gray-600 hover:text-gray-800 text-xs font-medium">
+                              Details
+                            </button>
+                            <button className="text-green-600 hover:text-green-800 text-xs font-medium">
+                              Update
+                    </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+                  </div>
+                </div>
+
+          {/* Supply Chain Analytics */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Supply Chain Analytics</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">Reorder Alerts</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Critical Items</span>
+                    <span className="text-sm font-medium text-red-600">{inventoryData.filter(i => i.status === 'short').length}</span>
+                            </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Low Stock Items</span>
+                    <span className="text-sm font-medium text-yellow-600">{inventoryData.filter(i => i.status === 'low').length}</span>
+                            </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Total Reorder Value</span>
+                    <span className="text-sm font-medium text-blue-600">
+                      ${inventoryData.filter(i => i.status === 'short' || i.status === 'low')
+                        .reduce((sum, item) => {
+                          const shortage = item.needed - (item.inStock - item.allocated);
+                          const reorderQty = Math.max(item.minOrder, shortage + item.reorderPoint);
+                          return sum + (reorderQty * item.cost);
+                        }, 0).toFixed(2)}
+                    </span>
+                          </div>
+                            </div>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">Supplier Performance</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Active Suppliers</span>
+                    <span className="text-sm font-medium text-blue-600">
+                      {new Set(inventoryData.map(i => i.supplier)).size}
+                            </span>
+                          </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Avg Lead Time</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {(inventoryData.reduce((sum, item) => sum + item.leadTime, 0) / inventoryData.length).toFixed(1)} days
+                    </span>
+                        </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">On-time Delivery</span>
+                    <span className="text-sm font-medium text-green-600">94%</span>
+                      </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">Inventory Optimization</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Turnover Rate</span>
+                    <span className="text-sm font-medium text-green-600">2.4x</span>
+            </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Stock Accuracy</span>
+                    <span className="text-sm font-medium text-blue-600">98.5%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Cost Savings</span>
+                    <span className="text-sm font-medium text-green-600">$2,340</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        )}
+      {/* Messages Tab */}
+      {brandActiveTab === 'messages' && (
+          <div className="space-y-6">
+          {/* Messages Overview Header */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex justify-between items-center mb-6">
+                <div>
                 <h2 className="text-xl font-bold text-gray-900">Communication Center</h2>
                 <p className="text-gray-600 mt-1">Manage all communications with factories, track issues, and monitor project status</p>
-              </div>
+                </div>
               <div className="flex gap-2">
-                <button 
+                  <button 
                   onClick={() => setShowChat(true)}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
+                    className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  >
                   <MessageCircle className="h-4 w-4" />
                   New Message
                 </button>
                 <button className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50">
                   <Download className="h-4 w-4" />
                   Export Chat History
-                </button>
+                  </button>
+                </div>
               </div>
-            </div>
-
+              
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
@@ -2706,34 +2545,34 @@ const BaubleBarDemo = () => {
                   <div>
                     <p className="text-sm font-medium text-blue-600">Total Messages</p>
                     <p className="text-2xl font-bold text-blue-700">{chatMessages.length}</p>
-                  </div>
+            </div>
                   <div className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
                     <MessageCircle className="h-4 w-4 text-blue-600" />
-                  </div>
                 </div>
+              </div>
               </div>
               <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
                 <div className="flex items-center justify-between">
-                  <div>
+                              <div>
                     <p className="text-sm font-medium text-green-600">Active Conversations</p>
                     <p className="text-2xl font-bold text-green-700">{chatTabs.length}</p>
-                  </div>
+                              </div>
                   <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
                     <Users className="h-4 w-4 text-green-600" />
-                  </div>
-                </div>
-              </div>
+                            </div>
+                          </div>
+                              </div>
               <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-yellow-600">Pending Responses</p>
                     <p className="text-2xl font-bold text-yellow-700">{chatMessages.filter(m => m.sender === 'Factory' && !m.read).length}</p>
-                  </div>
+                              </div>
                   <div className="w-8 h-8 bg-yellow-200 rounded-full flex items-center justify-center">
                     <Clock className="h-4 w-4 text-yellow-600" />
-                  </div>
-                </div>
-              </div>
+                              </div>
+                              </div>
+                            </div>
               <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <div>
@@ -2744,10 +2583,10 @@ const BaubleBarDemo = () => {
                     <Paperclip className="h-4 w-4 text-purple-600" />
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
+                          </div>
+                        </div>
+                      </div>
+                      
           {/* Conversation Categories */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Recent Conversations */}
@@ -2756,7 +2595,7 @@ const BaubleBarDemo = () => {
                 <h3 className="text-lg font-semibold text-gray-900">Recent Conversations</h3>
                 <button className="text-blue-600 hover:text-blue-800 text-sm">View All</button>
               </div>
-              <div className="space-y-3">
+                          <div className="space-y-3">
                 {chatTabs.slice(0, 5).map((tab) => (
                   <div 
                     key={tab.id} 
@@ -2767,23 +2606,23 @@ const BaubleBarDemo = () => {
                     }}
                   >
                     <div className="flex justify-between items-start">
-                      <div>
+                                        <div>
                         <div className="font-medium text-gray-900">{tab.title}</div>
                         <div className="text-sm text-gray-600">{tab.type === 'general' ? 'General Discussion' : `PO: ${tab.po} Line: ${tab.mto}`}</div>
-                      </div>
+                                        </div>
                       <div className="text-xs text-gray-500">2m ago</div>
                     </div>
                   </div>
                 ))}
-              </div>
-            </div>
-
+                                      </div>
+                                    </div>
+                                    
             {/* Priority Issues */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Priority Issues</h3>
                 <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">3 Active</span>
-              </div>
+                                    </div>
               <div className="space-y-3">
                 <div className="border-l-4 border-red-500 pl-3 py-2">
                   <div className="font-medium text-gray-900">Material Shortage - PO124</div>
@@ -2800,9 +2639,9 @@ const BaubleBarDemo = () => {
                   <div className="text-sm text-gray-600">Carrier pickup delayed</div>
                   <div className="text-xs text-gray-500 mt-1">6 hours ago</div>
                 </div>
-              </div>
-            </div>
-
+                                  </div>
+                                </div>
+                                
             {/* Quick Actions */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
@@ -2810,11 +2649,11 @@ const BaubleBarDemo = () => {
                 <button className="w-full flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                     <MessageCircle className="h-4 w-4 text-blue-600" />
-                  </div>
+                                    </div>
                   <div className="text-left">
                     <div className="font-medium text-gray-900">Send Status Update</div>
                     <div className="text-sm text-gray-600">Notify all factories</div>
-                  </div>
+                                  </div>
                 </button>
                 <button className="w-full flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
                   <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
@@ -2888,9 +2727,9 @@ const BaubleBarDemo = () => {
                           )}
                           {message.mto && (
                             <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded">Line: {message.mto}</span>
-                          )}
-                        </div>
-                      </div>
+                                )}
+                              </div>
+                          </div>
                       <p className="text-gray-700 mb-2">{message.message}</p>
                       {message.files.length > 0 && (
                         <div className="flex items-center gap-2">
@@ -2906,15 +2745,14 @@ const BaubleBarDemo = () => {
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
+        )}
+        
       {viewMtoDetail && <MtoDetailModal mto={viewMtoDetail.mto} po={viewMtoDetail.po} onClose={() => setViewMtoDetail(null)} />}
-    </div>
-  );
-
+      </div>
+    );
   // FACTORY VIEW - Organized with tabs
   const FactoryView = () => {
     const [factoryActiveTab, setFactoryActiveTab] = useState('overview');
@@ -2988,7 +2826,7 @@ const BaubleBarDemo = () => {
                           </span>
                           <div className="flex gap-2 mt-2">
                             <button 
-                              onClick={() => setFactoryActiveTab('mto-management')}
+                              onClick={() => setActiveTab('mto-production')}
                               className="text-blue-600 hover:text-blue-800 text-sm"
                             >
                               View Details
@@ -3207,84 +3045,381 @@ const BaubleBarDemo = () => {
       </div>
     );
 
+    const InventoryTab = () => (
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="p-6 border-b">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-semibold">Inventory Management</h2>
+              <p className="text-gray-600 mt-1">Auto-calculated material needs and allocation</p>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-sm text-gray-600">
+                {inventoryData.filter(i => i.status === 'short').length} shortages detected
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Material</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Needed</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">In Stock</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Allocated</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Used By MTOs</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {inventoryData.map((item) => (
+                <tr key={item.material} className={`hover:bg-gray-50 ${item.status === 'short' ? 'bg-red-50' : ''}`}>
+                  <td className="px-6 py-4 font-medium">{item.material}</td>
+                  <td className="px-6 py-4">{item.needed}</td>
+                  <td className="px-6 py-4">{item.inStock}</td>
+                  <td className="px-6 py-4">{item.allocated}</td>
+                  <td className="px-6 py-4">
+                    <span className={item.inStock - item.allocated < 0 ? 'text-red-600 font-medium' : 'text-gray-900'}>
+                      {item.inStock - item.allocated}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      item.status === 'short' ? 'text-red-700 bg-red-100' : 'text-green-700 bg-green-100'
+                    }`}>
+                      {item.status === 'short' ? (
+                        <>
+                          <AlertTriangle className="h-3 w-3 inline mr-1" />
+                          Short
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-3 w-3 inline mr-1" />
+                          OK
+                        </>
+                      )}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">{item.usedBy.join(', ')}</span>
+                      {item.status === 'short' && (
+                        <button 
+                          onClick={() => {
+                            setShowChat(true);
+                            // Auto-create chat for material inquiry
+                          }}
+                          className="text-blue-600 hover:text-blue-800 text-xs bg-blue-50 px-2 py-1 rounded flex items-center gap-1"
+                          title="AutoChat with factory about material availability"
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                          Inquiry
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Inventory Actions */}
+        <div className="p-6 border-t bg-gray-50">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-600">
+              Inventory auto-deducted when MTOs marked "Shipped"
+            </div>
+            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
+              Update Stock Levels
+            </button>
+          </div>
+        </div>
+      </div>
+    );
     const ShippingTab = () => (
       <div className="space-y-6">
+        {/* Master Carton Management Header */}
         <div className="bg-white rounded-lg shadow-sm">
           <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold">Shipping & Tracking</h2>
-            <p className="text-gray-600 mt-1">Manage shipments and tracking information</p>
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Package className="h-5 w-5 text-blue-500" />
+                  Master Carton Management
+                </h2>
+                <p className="text-gray-600 mt-1">Manage shipments by Master Carton with MTO tracking</p>
           </div>
+              <div className="flex gap-2">
+                <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                  <Plus className="h-4 w-4" />
+                  New Master Carton
+                </button>
+                <button className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50">
+                  <Download className="h-4 w-4" />
+                  Export
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Master Carton Overview Stats */}
+          <div className="p-6 border-b bg-gray-50">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="bg-white rounded-lg p-4 border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Total Master Cartons</p>
+                    <p className="text-2xl font-bold text-blue-600">{shippingData.length}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Package className="h-5 w-5 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-4 border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">In Transit</p>
+                    <p className="text-2xl font-bold text-blue-600">{shippingData.filter(s => s.status === 'In Transit').length}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Truck className="h-5 w-5 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-4 border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Delivered</p>
+                    <p className="text-2xl font-bold text-green-600">{shippingData.filter(s => s.status === 'Delivered').length}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-lg p-4 border">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Pending</p>
+                    <p className="text-2xl font-bold text-yellow-600">{shippingData.filter(s => s.status === 'Pending').length}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <Clock className="h-5 w-5 text-yellow-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Master Carton Table */}
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">PO / Line ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ship Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Carrier</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tracking Number</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Files</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Master Carton</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">AWB</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ETA</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">MTOs</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {shippingData.map((shipment, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium">{shipment.po} - Line {shipment.lineId}</td>
-                    <td className="px-6 py-4">{shipment.shipDate}</td>
-                    <td className="px-6 py-4">{shipment.carrier}</td>
                     <td className="px-6 py-4">
-                      <span className="font-mono text-sm">{shipment.trackingNumber}</span>
+                      <div className="font-semibold text-gray-900">{shipment.masterCarton}</div>
+                      <div className="text-sm text-gray-500">{shipment.carrier} • {shipment.trackingNumber}</div>
                     </td>
                     <td className="px-6 py-4">
-                      {shipment.files.map((file, fileIndex) => (
-                        <div key={fileIndex} className="text-sm text-blue-600 cursor-pointer hover:underline">
-                          📎 {file}
+                      <div className="font-medium text-gray-900">MC-TT-{String(shipment.masterCarton).slice(-3)}</div>
+                      <div className="text-sm text-gray-500">{shipment.contents.join(', ')}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-2">
+                        <input 
+                          type="text" 
+                          placeholder="Paste AWB" 
+                          defaultValue={shipment.awb}
+                          className="border rounded px-2 py-1 text-sm font-mono w-28 bg-white"
+                        />
+                        <div className="text-xs text-gray-500">Click to paste AWB</div>
                         </div>
-                      ))}
                     </td>
                     <td className="px-6 py-4">
-                      <button className="text-blue-600 hover:text-blue-800 mr-3">
-                        <Edit className="h-4 w-4" />
+                      <div className="space-y-2">
+                        <input 
+                          type="date" 
+                          defaultValue={shipment.eta ? new Date(shipment.eta).toISOString().split('T')[0] : ''}
+                          className="border rounded px-2 py-1 text-sm"
+                        />
+                        <div className="text-xs text-gray-500">Update ETA</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-2">
+                        <select 
+                          defaultValue={shipment.status}
+                          className="border rounded px-2 py-1 text-sm bg-white"
+                        >
+                          <option value="Pending">Pending</option>
+                          <option value="In Transit">In Transit</option>
+                          <option value="Delivered">Delivered</option>
+                          <option value="Delayed">Delayed</option>
+                        </select>
+                        <div className="text-xs text-gray-500">Update Status</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-1">
+                        <div 
+                          className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-1 group"
+                          onClick={() => handleReferenceNumberClick(shipment)}
+                          title="Click to view MTO details"
+                        >
+                          <span>MTO: {shipment.mtoId}</span>
+                          <Eye className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {shipment.po} - Line {shipment.lineId}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Qty: {shipment.qty} • ${shipment.value}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-2">
+                        <button className="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1" title="Save Changes">
+                          <Save className="h-4 w-4" />
+                          Save
                       </button>
-                      <button className="text-gray-600 hover:text-gray-800">
+                        <button className="text-green-600 hover:text-green-800 text-sm flex items-center gap-1" title="Track Shipment">
+                          <MapPin className="h-4 w-4" />
+                          Track
+                        </button>
+                        <button className="text-gray-600 hover:text-gray-800 text-sm flex items-center gap-1" title="Download Documents">
                         <Download className="h-4 w-4" />
+                          Docs
                       </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
                 
-                {/* Ready to ship MTOs */}
+                {/* Ready to ship MTOs - Create New Master Carton */}
                 {factoryMTOs.filter(mto => mto.progress === 3).map((mto) => (
                   <tr key={`ready-${mto.po}-${mto.lineId}`} className="bg-blue-50 hover:bg-blue-100">
-                    <td className="px-6 py-4 font-medium">{mto.po} - Line {mto.lineId}</td>
+                    <td className="px-6 py-4">
+                      <div className="font-semibold text-gray-900">MC{String(mto.po).slice(-3)}</div>
+                      <div className="text-sm text-gray-500">New Master Carton</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-gray-900">MC-TT-{String(mto.po).slice(-3)}</div>
+                      <div className="text-sm text-gray-500">{mto.product}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <input type="text" placeholder="Enter AWB" className="border rounded px-2 py-1 text-sm font-mono w-24" />
+                    </td>
                     <td className="px-6 py-4">
                       <input type="date" className="border rounded px-2 py-1 text-sm" />
                     </td>
                     <td className="px-6 py-4">
-                      <select className="border rounded px-2 py-1 text-sm">
-                        <option>UPS</option>
-                        <option>FedEx</option>
-                        <option>DHL</option>
-                      </select>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                        Pending
+                      </span>
                     </td>
                     <td className="px-6 py-4">
-                      <input type="text" placeholder="Enter tracking #" className="border rounded px-2 py-1 text-sm font-mono" />
-                    </td>
-                    <td className="px-6 py-4">
-                      <button className="text-blue-600 hover:text-blue-800 text-sm">
-                        <Paperclip className="h-4 w-4 inline mr-1" />
-                        Upload
-                      </button>
+                      <div className="text-sm text-gray-900">MTO: {mto.po}-{mto.lineId}</div>
+                      <div className="text-xs text-gray-500">{mto.po} - Line {mto.lineId}</div>
                     </td>
                     <td className="px-6 py-4">
                       <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
-                        Ship
+                        Create MC
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* Master Carton Details Section */}
+        <div className="bg-white rounded-lg shadow-sm">
+          <div className="p-6 border-b">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Package className="h-5 w-5 text-blue-500" />
+              Master Carton Details
+            </h3>
+            <p className="text-gray-600 mt-1">Detailed view of selected Master Carton contents and MTOs</p>
+          </div>
+          <div className="p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Master Carton Summary */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-gray-900">Master Carton Summary</h4>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Total Master Cartons:</span>
+                      <span className="ml-2 font-medium">{shippingData.length}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Total MTOs:</span>
+                      <span className="ml-2 font-medium">{shippingData.length}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Total Value:</span>
+                      <span className="ml-2 font-medium">${shippingData.reduce((sum, s) => sum + s.value, 0).toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Total Weight:</span>
+                      <span className="ml-2 font-medium">{shippingData.reduce((sum, s) => sum + parseFloat(s.weight), 0).toFixed(1)}kg</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-gray-900">Quick Actions</h4>
+                <div className="space-y-2">
+                  <button className="w-full flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <Package className="h-4 w-4 text-blue-600" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium text-gray-900">Create New Master Carton</div>
+                      <div className="text-sm text-gray-600">From ready MTOs</div>
+                    </div>
+                  </button>
+                  <button className="w-full flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <Truck className="h-4 w-4 text-green-600" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium text-gray-900">Track All Shipments</div>
+                      <div className="text-sm text-gray-600">Real-time updates</div>
+                    </div>
+                  </button>
+                  <button className="w-full flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <FileText className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium text-gray-900">Generate Reports</div>
+                      <div className="text-sm text-gray-600">Shipping analytics</div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -3440,7 +3575,6 @@ const BaubleBarDemo = () => {
         </div>
       </div>
     );
-
     return (
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
@@ -3465,7 +3599,7 @@ const BaubleBarDemo = () => {
           <div className="bg-white rounded-lg shadow-sm">
             <div className="border-b border-gray-200">
               <nav className="flex space-x-8 px-6" aria-label="Tabs">
-                <button
+            <button
                   onClick={() => setFactoryActiveTab('overview')}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
                     factoryActiveTab === 'overview'
@@ -3477,8 +3611,8 @@ const BaubleBarDemo = () => {
                     <BarChart3 className="h-4 w-4" />
                     Overview
                   </div>
-                </button>
-                <button
+            </button>
+            <button
                   onClick={() => setFactoryActiveTab('mto-management')}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
                     factoryActiveTab === 'mto-management'
@@ -3487,16 +3621,16 @@ const BaubleBarDemo = () => {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Package className="h-4 w-4" />
+              <Package className="h-4 w-4" />
                     MTO Management
-                    {factoryMTOs.filter(m => m.progress < 4).length > 0 && (
-                      <span className="bg-blue-100 text-blue-600 rounded-full text-xs px-2 py-1">
-                        {factoryMTOs.filter(m => m.progress < 4).length}
-                      </span>
-                    )}
+              {factoryMTOs.filter(m => m.progress < 4).length > 0 && (
+                <span className="bg-blue-100 text-blue-600 rounded-full text-xs px-2 py-1">
+                  {factoryMTOs.filter(m => m.progress < 4).length}
+                </span>
+              )}
                   </div>
-                </button>
-                <button
+            </button>
+            <button
                   onClick={() => setFactoryActiveTab('shipping')}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
                     factoryActiveTab === 'shipping'
@@ -3505,16 +3639,16 @@ const BaubleBarDemo = () => {
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Truck className="h-4 w-4" />
-                    Shipping
-                    {factoryMTOs.filter(m => m.progress === 3).length > 0 && (
-                      <span className="bg-green-100 text-green-600 rounded-full text-xs px-2 py-1">
-                        {factoryMTOs.filter(m => m.progress === 3).length}
-                      </span>
-                    )}
+              <Truck className="h-4 w-4" />
+              Shipping
+              {factoryMTOs.filter(m => m.progress === 3).length > 0 && (
+                <span className="bg-green-100 text-green-600 rounded-full text-xs px-2 py-1">
+                  {factoryMTOs.filter(m => m.progress === 3).length}
+                </span>
+              )}
                   </div>
-                </button>
-                <button
+            </button>
+            <button
                   onClick={() => setFactoryActiveTab('inventory')}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
                     factoryActiveTab === 'inventory'
@@ -3526,12 +3660,12 @@ const BaubleBarDemo = () => {
                     <Building2 className="h-4 w-4" />
                     Inventory
                     {inventoryData.filter(i => i.status === 'short').length > 0 && (
-                      <span className="bg-red-100 text-red-600 rounded-full text-xs px-2 py-1">
+                <span className="bg-red-100 text-red-600 rounded-full text-xs px-2 py-1">
                         {inventoryData.filter(i => i.status === 'short').length}
-                      </span>
-                    )}
+                </span>
+              )}
                   </div>
-                </button>
+            </button>
                 <button
                   onClick={() => setFactoryActiveTab('messages')}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
@@ -3550,14 +3684,94 @@ const BaubleBarDemo = () => {
           </div>
         </div>
 
-      {/* Tab Content */}
+        {/* Tab Content */}
       {factoryActiveTab === 'overview' && (
-        <FactoryOverview mtoData={brandPOs.flatMap(po => po.mtos || [])} />
+        <div className="space-y-6">
+          {/* Factory Overview Content */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Factory Overview</h2>
+                <p className="text-gray-600 mt-1">Production status, key metrics, and recent activities</p>
+              </div>
+            </div>
+            
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-blue-600">Active MTOs</p>
+                    <p className="text-2xl font-bold text-blue-700">{factoryMTOs.filter(m => m.progress < 4).length}</p>
+                  </div>
+                  <div className="w-8 h-8 bg-blue-200 rounded-full flex items-center justify-center">
+                    <Package className="h-4 w-4 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-green-600">Completed Today</p>
+                    <p className="text-2xl font-bold text-green-700">{factoryMTOs.filter(m => m.progress === 4).length}</p>
+                  </div>
+                  <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-yellow-50 to-yellow-100 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-yellow-600">Material Alerts</p>
+                    <p className="text-2xl font-bold text-yellow-700">{inventoryData.filter(i => i.status === 'short').length}</p>
+                  </div>
+                  <div className="w-8 h-8 bg-yellow-200 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-purple-600">Ready to Ship</p>
+                    <p className="text-2xl font-bold text-purple-700">{factoryMTOs.filter(m => m.progress === 3).length}</p>
+                  </div>
+                  <div className="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
+                    <Truck className="h-4 w-4 text-purple-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Activities */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Recent Activities</h3>
+              <div className="space-y-2">
+                {auditLogs.slice(0, 5).map((log, index) => (
+                  <div key={index} className="flex items-center gap-3 text-sm">
+                    <div className={`w-2 h-2 rounded-full ${
+                      log.status === 'shortage' ? 'bg-red-500' : 
+                      log.status === 'completed' ? 'bg-green-500' : 'bg-blue-500'
+                    }`}></div>
+                    <span className="text-gray-600">{log.message}</span>
+                    <span className="text-gray-400 text-xs">{log.timestamp}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* MTO Management Tab */}
       {factoryActiveTab === 'mto-management' && (
-        <FactoryMTOManager mtoData={brandPOs.flatMap(po => po.mtos || [])} />
+        <div className="space-y-6">
+          {/* Add filter UI above MTO Management */}
+            <FilterBar filters={factoryFilters} setFilters={setFactoryFilters} showAdvanced={showFactoryAdvanced} setShowAdvanced={setShowFactoryAdvanced} />
+            <AdvancedFilterModal filters={factoryFilters} setFilters={setFactoryFilters} show={showFactoryAdvanced} setShow={setShowFactoryAdvanced} />
+            {renderMTOProduction()}
+        </div>
       )}
 
       {/* Shipping Tab */}
@@ -3738,7 +3952,7 @@ const BaubleBarDemo = () => {
                         <span>{po.percent}%</span>
                         <div className="w-20 bg-gray-200 rounded-full h-2">
                           <div 
-                            className="bg-blue-600 h-2 rounded-full transition-all"
+                            className="bg-blue-600 h-2 rounded-full"
                             style={{ width: `${po.percent}%` }}
                           ></div>
                         </div>
@@ -4000,7 +4214,6 @@ const BaubleBarDemo = () => {
       </div>
     );
   }
-
   // Advanced filter modal
   function AdvancedFilterModal({ filters, setFilters, show, setShow, factoryList }) {
     if (!show) return null;
@@ -4175,13 +4388,13 @@ const BaubleBarDemo = () => {
                       <div className="font-mono text-sm mb-1">{spotValue || '—'}</div>
                       <div className="text-xs text-gray-600">{spotRef || '—'}</div>
                       {spotValue && (
-                        <button
-                          onClick={() => setQrSpot({ mto, spot: `spot${spot}`, value: spotValue })}
+                          <button
+                            onClick={() => setQrSpot({ mto, spot: `spot${spot}`, value: spotValue })}
                           className="mt-2 p-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
                           title="Generate QR"
-                        >
-                          <Scan className="h-4 w-4" />
-                        </button>
+                          >
+                            <Scan className="h-4 w-4" />
+                          </button>
                       )}
                     </div>
                   </div>
@@ -4301,131 +4514,254 @@ const BaubleBarDemo = () => {
   }
 
   // CUSTOMIZATION VIEW - Next-Gen Product Builder
-  const CustomizationView = () => {
-    const handleCustomizeProduct = (product) => {
-      setSelectedCustomizationProduct(product);
-    };
-
-    return (
-      <div className="max-w-7xl mx-auto">
-        <ProductCatalog onCustomize={handleCustomizeProduct} />
-      </div>
-    );
-  };
-
-  // Location Map Modal
-  const LocationMapModal = ({ onClose }) => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-6xl border border-blue-200 relative max-h-[80vh] overflow-y-auto">
-        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-blue-600">
-          <X className="h-5 w-5" />
-        </button>
-        <h2 className="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
-          <MapPin className="h-5 w-5" />
-          Brand Sales by Location
-        </h2>
-        <p className="text-sm text-gray-600 mb-6">Sales data recognized by shipping zip codes and product categories</p>
+  const CustomizationView = () => (
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Palette className="h-6 w-6 text-purple-500" />
+              Next-Gen Product Customization
+            </h1>
+            <p className="text-gray-600 mt-1">Design and customize products with real-time 3D preview</p>
+          </div>
+          <button 
+            onClick={() => navigate('/products')}
+            className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+          >
+            <Box className="h-4 w-4" />
+            Launch 3D Builder
+          </button>
+        </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-4 h-80 flex items-center justify-center">
-            <div className="text-center text-gray-700">
-              <Globe className="h-16 w-16 mx-auto mb-4 text-blue-500" />
-              <p className="text-lg font-medium mb-2">Sales Distribution Map</p>
-              <p className="text-sm text-gray-600 mb-2">Interactive visualization showing:</p>
-              <div className="text-xs text-gray-500 space-y-1">
-                <p>• Regional sales performance by zip codes</p>
-                <p>• Top-selling products per location</p>
-                <p>• Growth trends and demographics</p>
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-8">
+            <div className="text-center">
+              <Box className="h-24 w-24 mx-auto mb-4 text-purple-500" />
+              <h3 className="text-xl font-bold mb-2">Interactive 3D Product Builder</h3>
+              <p className="text-gray-600 mb-4">Design custom products with real-time visualization</p>
+              <button 
+                onClick={() => navigate('/products')}
+                className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
+              >
+                Start Customizing
+              </button>
             </div>
           </div>
           
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="font-semibold text-lg">Sales Regions Overview</h3>
-              <div className="text-sm text-gray-500">
-                Total: ${brandSalesLocationData.reduce((sum, region) => sum + region.totalSales, 0).toLocaleString()}
-              </div>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-semibold mb-3">Features</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Real-time 3D preview
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  6 customizable spots
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Direct factory submission
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Material cost calculator
+                </li>
+              </ul>
             </div>
             
-            <div className="max-h-64 overflow-y-auto space-y-3">
-              {brandSalesLocationData.map((region) => (
-                <div key={region.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <h4 className="font-medium text-lg">{region.region}</h4>
-                      <p className="text-sm text-gray-600">{region.city}, {region.state}</p>
-                      <p className="text-xs text-gray-500">Zip Codes: {region.zipCodes.join(', ')}</p>
-                    </div>
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                      {region.growth > 0 ? `+${region.growth}%` : `${region.growth}%`}
-                    </span>
-                  </div>
-                  
-                  <div className="grid grid-cols-3 gap-3 text-sm mb-3">
-                    <div className="text-center p-2 bg-blue-50 rounded">
-                      <div className="font-bold text-blue-600">${region.totalSales.toLocaleString()}</div>
-                      <div className="text-xs text-gray-600">Total Sales</div>
-                    </div>
-                    <div className="text-center p-2 bg-green-50 rounded">
-                      <div className="font-bold text-green-600">{region.totalOrders}</div>
-                      <div className="text-xs text-gray-600">Orders</div>
-                    </div>
-                    <div className="text-center p-2 bg-purple-50 rounded">
-                      <div className="font-bold text-purple-600">${Math.round(region.totalSales / region.totalOrders)}</div>
-                      <div className="text-xs text-gray-600">Avg Order</div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-3">
-                    <p className="text-xs text-gray-600 mb-2 font-medium">Top Products:</p>
-                    <div className="space-y-1">
-                      {region.topProducts.slice(0, 3).map((product, idx) => (
-                        <div key={idx} className="flex justify-between items-center text-xs">
-                          <span className="text-gray-700 truncate">{product.name}</span>
-                          <div className="flex gap-2 text-gray-500 ml-2">
-                            <span>${product.revenue.toLocaleString()}</span>
-                            <span>({product.orders} orders)</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div className="mt-3 pt-3 border-t border-gray-200">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="text-gray-600">Demographics:</span>
-                      <span className="text-gray-700">
-                        {region.demographics.age} • {region.demographics.income} • {region.demographics.interests.join(', ')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="h-4 w-4 text-yellow-600" />
+                <span className="font-semibold text-yellow-800">Coming Soon</span>
+              </div>
+              <p className="text-sm text-yellow-700">AI-powered design suggestions and automated quality checks</p>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+
+  // Sales Analytics by Location Modal
+  const LocationMapModal = ({ onClose }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-7xl border border-blue-200 relative max-h-[90vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-blue-600">
+          <X className="h-5 w-5" />
+        </button>
+        <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center gap-2">
+          <Globe className="h-6 w-6" />
+          Global Sales Analytics by Location
+        </h2>
         
-        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h4 className="font-medium mb-2">Sales Insights</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="text-center">
-              <div className="text-lg font-bold text-blue-600">
-                {brandSalesLocationData.reduce((sum, region) => sum + region.totalOrders, 0).toLocaleString()}
-              </div>
-              <div className="text-gray-600">Total Orders</div>
+        {/* Global Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-600">Total Revenue</p>
+                <p className="text-2xl font-bold text-blue-700">${(salesData.globalStats.totalRevenue / 1000000).toFixed(1)}M</p>
             </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-green-600">
-                {Math.round(brandSalesLocationData.reduce((sum, region) => sum + region.growth, 0) / brandSalesLocationData.length)}%
-              </div>
-              <div className="text-gray-600">Avg Growth</div>
+              <div className="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center">
+                <DollarSign className="h-5 w-5 text-blue-600" />
+          </div>
             </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-purple-600">
-                {brandSalesLocationData.length}
+          </div>
+          <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+                  <div>
+                <p className="text-sm font-medium text-green-600">Growth Rate</p>
+                <p className="text-2xl font-bold text-green-700">+{salesData.globalStats.totalGrowth}%</p>
+                  </div>
+              <div className="w-10 h-10 bg-green-200 rounded-full flex items-center justify-center">
+                <TrendingUp className="h-5 w-5 text-green-600" />
               </div>
-              <div className="text-gray-600">Active Regions</div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-600">Total Orders</p>
+                <p className="text-2xl font-bold text-purple-700">{salesData.globalStats.totalOrders.toLocaleString()}</p>
+              </div>
+              <div className="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center">
+                <ShoppingBag className="h-5 w-5 text-purple-600" />
+              </div>
+            </div>
+          </div>
+          <div className="bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-600">Avg Order Value</p>
+                <p className="text-2xl font-bold text-orange-700">${salesData.globalStats.averageOrderValue}</p>
+              </div>
+              <div className="w-10 h-10 bg-orange-200 rounded-full flex items-center justify-center">
+                <BarChart3 className="h-5 w-5 text-orange-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Countries Grid */}
+        <div className="space-y-6">
+          {salesData.countries.map((country) => (
+            <div key={country.id} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+              {/* Country Header */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <div className="text-3xl">{country.flag}</div>
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900">{country.name}</h3>
+                      <div className="flex items-center gap-4 mt-1">
+                        <span className="text-lg font-semibold text-blue-600">
+                          ${(country.totalSales / 1000).toFixed(0)}K
+                        </span>
+                        <span className={`flex items-center gap-1 text-sm font-medium ${
+                          country.growth >= 0 ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          <TrendingUp className="h-4 w-4" />
+                          {country.growth >= 0 ? '+' : ''}{country.growth}%
+                  </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm text-gray-600">Top Cities</p>
+                    <p className="text-lg font-semibold text-gray-900">{country.topCities.length}</p>
+                  </div>
+                </div>
+                </div>
+                
+              {/* Cities Grid */}
+              <div className="p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {country.topCities.map((city, cityIndex) => (
+                    <div key={cityIndex} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      {/* City Header */}
+                      <div className="flex justify-between items-start mb-4">
+                  <div>
+                          <h4 className="text-lg font-semibold text-gray-900">{city.name}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-lg font-bold text-blue-600">
+                              ${(city.sales / 1000).toFixed(0)}K
+                            </span>
+                            <span className={`flex items-center gap-1 text-sm font-medium ${
+                              city.growth >= 0 ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              <TrendingUp className="h-3 w-3" />
+                              {city.growth >= 0 ? '+' : ''}{city.growth}%
+                            </span>
+                  </div>
+                        </div>
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                          <MapPin className="h-4 w-4 text-blue-600" />
+                  </div>
+                </div>
+                
+                      {/* Best Products */}
+                      <div className="mb-4">
+                        <h5 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                          <Star className="h-4 w-4 text-yellow-500" />
+                          Best Products
+                        </h5>
+                        <div className="space-y-2">
+                          {city.bestProducts.map((product, productIndex) => (
+                            <div key={productIndex} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg">{product.icon}</span>
+                                <span className="text-sm font-medium text-gray-900">{product.name}</span>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm font-semibold text-blue-600">${(product.sales / 1000).toFixed(0)}K</div>
+                                <div className="text-xs text-gray-500">{product.units} units</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Top Stores */}
+                      <div>
+                        <h5 className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                          <Store className="h-4 w-4 text-green-500" />
+                          Top Stores
+                        </h5>
+                        <div className="flex flex-wrap gap-1">
+                          {city.topStores.map((store, storeIndex) => (
+                            <span key={storeIndex} className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                              {store}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Performance Highlights */}
+        <div className="mt-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-yellow-500" />
+            Performance Highlights
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg p-4 border border-blue-200">
+              <h4 className="font-semibold text-blue-700 mb-2">Top Performing Country</h4>
+              <p className="text-2xl font-bold text-blue-600">{salesData.globalStats.topPerformingCountry}</p>
+              <p className="text-sm text-gray-600">Highest total sales volume</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 border border-green-200">
+              <h4 className="font-semibold text-green-700 mb-2">Fastest Growing Market</h4>
+              <p className="text-2xl font-bold text-green-600">{salesData.globalStats.fastestGrowingCountry}</p>
+              <p className="text-sm text-gray-600">Highest growth rate</p>
             </div>
           </div>
         </div>
@@ -4492,7 +4828,6 @@ const BaubleBarDemo = () => {
       </div>
     </div>
   );
-
   // Audit Logs Modal
   const AuditLogsModal = ({ onClose }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
@@ -5023,20 +5358,11 @@ const BaubleBarDemo = () => {
       {qrMto && <QrModal mto={qrMto} onClose={() => setQrMto(null)} />}
       {qrSpot && <QrSpotModal mto={qrSpot.mto} spot={qrSpot.spot} value={qrSpot.value} onClose={() => setQrSpot(null)} />}
       {autoGenerateQr && <AutoGenerateQrModal mto={autoGenerateQr} onClose={() => setAutoGenerateQr(null)} />}
+      {showLocationMap && <LocationMapModal onClose={() => setShowLocationMap(false)} />}
       {selectedProduct && <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
       {showAuditLogs && <AuditLogsModal onClose={() => setShowAuditLogs(false)} />}
       {showAdvancedSearch && <AdvancedSearchModal onClose={() => setShowAdvancedSearch(false)} />}
       {showCustomizationGallery && <CustomizationGalleryModal onClose={() => setShowCustomizationGallery(false)} />}
-      {selectedCustomizationProduct && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-50">
-          <div className="h-full w-full">
-            <CustomizationRouter 
-              initialProduct={selectedCustomizationProduct} 
-              onClose={() => setSelectedCustomizationProduct(null)}
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

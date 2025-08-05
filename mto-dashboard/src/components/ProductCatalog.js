@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaFilter, FaTimes, FaPalette, FaStar, FaHeart, FaShoppingBag } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaPalette, FaStar, FaHeart, FaShoppingBag } from 'react-icons/fa';
 
-const ProductCatalog = () => {
+const ProductCatalog = ({ onCustomize = null }) => {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -26,7 +26,8 @@ const ProductCatalog = () => {
       colors: ['Gold', 'Silver', 'Rose Gold'],
       rating: 4.8,
       reviews: 2341,
-      description: 'Personalize with your initials'
+      description: 'Personalize with your initials',
+      type: 'bracelet'
     },
     {
       id: 2,
@@ -35,11 +36,40 @@ const ProductCatalog = () => {
       brand: 'BaubleBar',
       price: 68,
       customizable: true,
-      image: 'https://images.unsplash.com/photo-1611591437281-460bfbe1cedc?w=400',
+      image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=400&fit=crop',
       colors: ['Multi', 'Pastel', 'Ocean'],
       rating: 4.9,
       reviews: 1876,
-      description: 'Mix and match bead colors'
+      description: 'Mix and match bead colors',
+      type: 'bracelet'
+    },
+    {
+      id: 9,
+      name: 'Icon Tote Bag',
+      category: 'accessories',
+      brand: 'BaubleBar',
+      price: 65,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400',
+      colors: ['Natural', 'Black', 'Navy', 'Burgundy'],
+      rating: 4.9,
+      reviews: 3421,
+      description: 'Customize with 6 icon spots',
+      type: 'tote'
+    },
+    {
+      id: 10,
+      name: 'Personalized Canvas Tote',
+      category: 'accessories',
+      brand: 'BaubleBar',
+      price: 55,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1594736797933-d0501ba2fe65?w=400',
+      colors: ['Natural', 'Black'],
+      rating: 4.8,
+      reviews: 2156,
+      description: 'Add text and icons',
+      type: 'tote'
     },
     {
       id: 3,
@@ -144,6 +174,191 @@ const ProductCatalog = () => {
       rating: 4.6,
       reviews: 1432,
       description: 'Stack your initials'
+    },
+    {
+      id: 11,
+      name: 'Premium Monogram Tote',
+      category: 'accessories',
+      brand: 'BaubleBar',
+      price: 75,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400',
+      colors: ['Black', 'Navy', 'Gray', 'Cream'],
+      rating: 4.9,
+      reviews: 1893,
+      description: 'Large initials with monogram circle',
+      type: 'initialsTote'
+    },
+    {
+      id: 12,
+      name: 'Luxury Throw Blanket',
+      category: 'home',
+      brand: 'BaubleBar',
+      price: 120,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400',
+      colors: ['Cream', 'Gray', 'Navy', 'Burgundy'],
+      rating: 4.8,
+      reviews: 756,
+      description: 'Personalized with monogram or text',
+      type: 'blanket'
+    },
+    {
+      id: 13,
+      name: 'Custom Cozy Blanket',
+      category: 'home',
+      brand: 'BaubleBar',
+      price: 95,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400',
+      colors: ['Cream', 'Gray', 'Burgundy'],
+      rating: 4.7,
+      reviews: 432,
+      description: 'Add patterns and fringe',
+      type: 'blanket'
+    },
+    {
+      id: 14,
+      name: 'Stackable Ring Set',
+      category: 'rings',
+      brand: 'BaubleBar',
+      price: 65,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400',
+      colors: ['Gold', 'Silver', 'Mixed'],
+      rating: 4.8,
+      reviews: 2341,
+      description: 'Mix metals and add birthstones'
+    },
+    {
+      id: 15,
+      name: 'Initial Signet Ring',
+      category: 'rings',
+      brand: 'BaubleBar',
+      price: 78,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&h=400&fit=crop',
+      colors: ['Gold', 'Silver', 'Rose Gold'],
+      rating: 4.9,
+      reviews: 1654,
+      description: 'Classic signet with your initial'
+    },
+    {
+      id: 16,
+      name: 'Custom Anklet',
+      category: 'bracelets',
+      brand: 'BaubleBar',
+      price: 42,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400',
+      colors: ['Gold', 'Silver'],
+      rating: 4.6,
+      reviews: 987,
+      description: 'Add charms and beads'
+    },
+    {
+      id: 17,
+      name: 'Personalized Hair Clips',
+      category: 'accessories',
+      brand: 'BaubleBar',
+      price: 28,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop',
+      colors: ['Gold', 'Silver', 'Rose Gold'],
+      rating: 4.7,
+      reviews: 1234,
+      description: 'Add initials or small icons'
+    },
+    {
+      id: 18,
+      name: 'Custom Leather Keychain',
+      category: 'accessories',
+      brand: 'BaubleBar',
+      price: 35,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=400&fit=crop',
+      colors: ['Black', 'Brown', 'Tan'],
+      rating: 4.8,
+      reviews: 876,
+      description: 'Emboss with initials or short text'
+    },
+    {
+      id: 19,
+      name: 'Charm Choker Necklace',
+      category: 'necklaces',
+      brand: 'BaubleBar',
+      price: 68,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1602173574767-37ac01994b2a?w=400',
+      colors: ['Gold', 'Silver', 'Black'],
+      rating: 4.7,
+      reviews: 1543,
+      description: 'Add up to 5 charms'
+    },
+    {
+      id: 20,
+      name: 'Personalized Water Bottle',
+      category: 'accessories',
+      brand: 'BaubleBar',
+      price: 52,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=400',
+      colors: ['White', 'Black', 'Pink', 'Blue'],
+      rating: 4.6,
+      reviews: 654,
+      description: 'Add name and fun icons'
+    },
+    {
+      id: 21,
+      name: 'Custom Picture Frame',
+      category: 'home',
+      brand: 'BaubleBar',
+      price: 48,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400',
+      colors: ['Gold', 'Silver', 'White', 'Black'],
+      rating: 4.8,
+      reviews: 432,
+      description: 'Engrave with names and dates'
+    },
+    {
+      id: 22,
+      name: 'Monogram Makeup Bag',
+      category: 'accessories',
+      brand: 'BaubleBar',
+      price: 38,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1631214540827-c99da3c6e2e0?w=400&h=400&fit=crop',
+      colors: ['Pink', 'Black', 'Cream', 'Navy'],
+      rating: 4.7,
+      reviews: 876,
+      description: 'Add initials in elegant font'
+    },
+    {
+      id: 23,
+      name: 'Custom Pet Collar',
+      category: 'pets',
+      brand: 'BaubleBar',
+      price: 32,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400',
+      colors: ['Red', 'Blue', 'Pink', 'Black'],
+      rating: 4.9,
+      reviews: 1234,
+      description: 'Add your pet\'s name and phone number'
+    },
+    {
+      id: 24,
+      name: 'Personalized Mouse Pad',
+      category: 'accessories',
+      brand: 'BaubleBar',
+      price: 25,
+      customizable: true,
+      image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400',
+      colors: ['White', 'Black', 'Gray'],
+      rating: 4.5,
+      reviews: 543,
+      description: 'Add motivational text or design'
     }
   ];
 
@@ -154,7 +369,9 @@ const ProductCatalog = () => {
     { id: 'earrings', name: 'Earrings', count: products.filter(p => p.category === 'earrings').length },
     { id: 'rings', name: 'Rings', count: products.filter(p => p.category === 'rings').length },
     { id: 'accessories', name: 'Accessories', count: products.filter(p => p.category === 'accessories').length },
-    { id: 'bags', name: 'Bags', count: products.filter(p => p.category === 'bags').length }
+    { id: 'bags', name: 'Bags', count: products.filter(p => p.category === 'bags').length },
+    { id: 'home', name: 'Home & Living', count: products.filter(p => p.category === 'home').length },
+    { id: 'pets', name: 'Pet Accessories', count: products.filter(p => p.category === 'pets').length }
   ];
 
   const filteredProducts = products.filter(product => {
@@ -176,8 +393,13 @@ const ProductCatalog = () => {
   };
 
   const handleCustomize = (product) => {
-    // Pass product data to customization page
-    navigate('/customize', { state: { product } });
+    if (onCustomize) {
+      // Use custom handler if provided
+      onCustomize(product);
+    } else {
+      // Default behavior: navigate to separate customization page
+      navigate('/customize', { state: { product } });
+    }
   };
 
   return (
