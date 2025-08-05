@@ -1,7 +1,174 @@
 import React, { useState, useRef } from 'react';
-import { Upload, MessageCircle, Bell, Package, Truck, CheckCircle2, AlertTriangle, Eye, Paperclip, Edit, Building2, FileText, Download, X, ChevronDown, ChevronRight, BarChart3, Clock, Play, Filter, Calendar } from 'lucide-react';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { Upload, MessageCircle, Bell, Package, Truck, CheckCircle2, AlertTriangle, Eye, Paperclip, Edit, Building2, FileText, Download, X, ChevronDown, ChevronRight, BarChart3, Clock, Play, Filter, Calendar, TrendingUp, MapPin, Layers, Star, ShoppingBag, Palette, Box, Search, Users, Zap, AlertCircle, Award, Target, Globe, Warehouse, Scan, PieChart, Activity, Maximize2, Minimize2, Camera, Music, Coffee, Plane, Flower, Heart, Sparkles, Baby, Cat, Dog, Home, Car, Utensils, Palette as PaletteIcon, Trophy, Gift, Sun, Moon, CloudRain, Zap as Lightning, Anchor, Mountain, Leaf, Diamond, Crown, Flame, Snowflake, Feather, Circle, Bug, Fish, Bird, TreePine, Apple, Cherry, Grape, Pizza, IceCream, Cake, Cookie } from 'lucide-react';
+import CustomizationRouter from './components/CustomizationRouter';
+import ProductCatalog from './components/ProductCatalog';
+
+// Comprehensive Icon Library for Customization Patches
+const CUSTOMIZATION_ICONS = {
+  // Electronics & Tech
+  'Camera Icon': { icon: Camera, color: 'text-purple-600', bg: 'bg-purple-100', category: 'Tech' },
+  'Music Notes Icon': { icon: Music, color: 'text-pink-600', bg: 'bg-pink-100', category: 'Music' },
+  
+  // Food & Drinks
+  'Coffee Icon': { icon: Coffee, color: 'text-amber-700', bg: 'bg-amber-100', category: 'Food' },
+  'Hot Sauce Icon': { icon: Flame, color: 'text-red-600', bg: 'bg-red-100', category: 'Food' },
+  'Spicy Margarita Icon': { icon: Coffee, color: 'text-lime-600', bg: 'bg-lime-100', category: 'Drinks' },
+  'Pickles Icon': { icon: Apple, color: 'text-green-600', bg: 'bg-green-100', category: 'Food' },
+  'Pizza Icon': { icon: Pizza, color: 'text-orange-600', bg: 'bg-orange-100', category: 'Food' },
+  'Ice Cream Icon': { icon: IceCream, color: 'text-cyan-600', bg: 'bg-cyan-100', category: 'Food' },
+  'Cake Icon': { icon: Cake, color: 'text-pink-600', bg: 'bg-pink-100', category: 'Food' },
+  'Cookie Icon': { icon: Cookie, color: 'text-yellow-700', bg: 'bg-yellow-100', category: 'Food' },
+  
+  // Transportation
+  'Airplane Icon': { icon: Plane, color: 'text-blue-600', bg: 'bg-blue-100', category: 'Travel' },
+  'Car Icon': { icon: Car, color: 'text-gray-700', bg: 'bg-gray-100', category: 'Travel' },
+  
+  // Nature & Flowers
+  'Daisy Icon': { icon: Flower, color: 'text-yellow-500', bg: 'bg-yellow-100', category: 'Nature' },
+  'Leaf Icon': { icon: Leaf, color: 'text-green-500', bg: 'bg-green-100', category: 'Nature' },
+  'Tree Icon': { icon: TreePine, color: 'text-emerald-600', bg: 'bg-emerald-100', category: 'Nature' },
+  'Mountain Icon': { icon: Mountain, color: 'text-stone-600', bg: 'bg-stone-100', category: 'Nature' },
+  'Sun Icon': { icon: Sun, color: 'text-orange-500', bg: 'bg-orange-100', category: 'Weather' },
+  'Moon Icon': { icon: Moon, color: 'text-indigo-600', bg: 'bg-indigo-100', category: 'Weather' },
+  'Rain Icon': { icon: CloudRain, color: 'text-blue-500', bg: 'bg-blue-100', category: 'Weather' },
+  'Snow Icon': { icon: Snowflake, color: 'text-cyan-400', bg: 'bg-cyan-100', category: 'Weather' },
+  
+  // Animals
+  'Cat Icon': { icon: Cat, color: 'text-orange-600', bg: 'bg-orange-100', category: 'Pets' },
+  'Dog Icon': { icon: Dog, color: 'text-amber-700', bg: 'bg-amber-100', category: 'Pets' },
+  'Bird Icon': { icon: Bird, color: 'text-sky-600', bg: 'bg-sky-100', category: 'Animals' },
+  'Fish Icon': { icon: Fish, color: 'text-teal-600', bg: 'bg-teal-100', category: 'Animals' },
+  'Bug Icon': { icon: Bug, color: 'text-green-700', bg: 'bg-green-100', category: 'Animals' },
+  
+  // Special Symbols
+  'Heart Icon': { icon: Heart, color: 'text-red-500', bg: 'bg-red-100', category: 'Love' },
+  'Star Icon': { icon: Star, color: 'text-yellow-500', bg: 'bg-yellow-100', category: 'Special' },
+  'Crown Icon': { icon: Crown, color: 'text-yellow-600', bg: 'bg-yellow-100', category: 'Special' },
+  'Diamond Icon': { icon: Diamond, color: 'text-cyan-600', bg: 'bg-cyan-100', category: 'Luxury' },
+  'Trophy Icon': { icon: Trophy, color: 'text-amber-500', bg: 'bg-amber-100', category: 'Awards' },
+  'Gift Icon': { icon: Gift, color: 'text-emerald-600', bg: 'bg-emerald-100', category: 'Special' },
+  'Lightning Icon': { icon: Lightning, color: 'text-purple-600', bg: 'bg-purple-100', category: 'Energy' },
+  'Sparkles Icon': { icon: Sparkles, color: 'text-pink-500', bg: 'bg-pink-100', category: 'Magic' },
+  'Flame Icon': { icon: Flame, color: 'text-red-600', bg: 'bg-red-100', category: 'Fire' },
+  
+  // Lifestyle
+  'Home Icon': { icon: Home, color: 'text-slate-600', bg: 'bg-slate-100', category: 'Home' },
+  'Utensils Icon': { icon: Utensils, color: 'text-gray-700', bg: 'bg-gray-100', category: 'Kitchen' },
+  'Palette Icon': { icon: PaletteIcon, color: 'text-indigo-600', bg: 'bg-indigo-100', category: 'Art' },
+  'Baby Icon': { icon: Baby, color: 'text-pink-400', bg: 'bg-pink-100', category: 'Family' },
+  
+  // Ocean & Beach
+  'Anchor Icon': { icon: Anchor, color: 'text-navy-600', bg: 'bg-blue-100', category: 'Ocean' },
+  'Shell Icon': { icon: Circle, color: 'text-orange-400', bg: 'bg-orange-100', category: 'Beach' },
+  'Feather Icon': { icon: Feather, color: 'text-gray-500', bg: 'bg-gray-100', category: 'Nature' },
+  
+  // Letters (A-Z)
+  'A - Classic Letter': { icon: () => <span className="font-bold text-lg">A</span>, color: 'text-gray-800', bg: 'bg-gray-100', category: 'Letters' },
+  'B - Classic Letter': { icon: () => <span className="font-bold text-lg">B</span>, color: 'text-gray-800', bg: 'bg-gray-100', category: 'Letters' },
+  'C - Classic Letter': { icon: () => <span className="font-bold text-lg">C</span>, color: 'text-gray-800', bg: 'bg-gray-100', category: 'Letters' },
+  'H - Classic Letter': { icon: () => <span className="font-bold text-lg">H</span>, color: 'text-gray-800', bg: 'bg-gray-100', category: 'Letters' },
+  'M - Classic Letter': { icon: () => <span className="font-bold text-lg">M</span>, color: 'text-gray-800', bg: 'bg-gray-100', category: 'Letters' },
+  'S - Classic Letter': { icon: () => <span className="font-bold text-lg">S</span>, color: 'text-gray-800', bg: 'bg-gray-100', category: 'Letters' }
+};
+
+// Helper function to get icon details from patch reference
+const getIconFromPatchRef = (patchRef) => {
+  if (!patchRef) return null;
+  
+  // Extract the icon name from patch reference (e.g., "63 - Camera Icon" -> "Camera Icon")
+  const iconName = patchRef.split(' - ')[1] || patchRef;
+  return CUSTOMIZATION_ICONS[iconName] || null;
+};
+
+// Helper function to generate patch preview image based on patch reference
+const generatePatchPreview = (patchRef, sku) => {
+  if (!patchRef) return null;
+  
+  const iconName = patchRef.split(' - ')[1] || patchRef;
+  const iconData = CUSTOMIZATION_ICONS[iconName];
+  
+  if (!iconData) return null;
+  
+  // Create a visual representation of the patch
+  return {
+    iconName,
+    iconData,
+    sku,
+    patchRef,
+    // Generate example patch designs
+    patchStyle: {
+      shape: 'circle', // circle, square, oval, custom
+      size: 'medium', // small, medium, large
+      material: 'embroidered', // embroidered, printed, vinyl, leather
+      colors: [iconData.color.replace('text-', ''), 'white', 'black'],
+      texture: iconData.category === 'Letters' ? 'metallic' : 'fabric'
+    }
+  };
+};
+
+// Visual Patch Preview Component - Shows actual patch design
+const PatchPreview = ({ patchData, size = 'small' }) => {
+  if (!patchData) return null;
+  
+  const { iconData, patchStyle, iconName } = patchData;
+  const sizeClasses = {
+    small: 'w-8 h-8',
+    medium: 'w-12 h-12', 
+    large: 'w-16 h-16',
+    xlarge: 'w-20 h-20'
+  };
+  
+  const shapeClasses = {
+    circle: 'rounded-full',
+    square: 'rounded-lg',
+    oval: 'rounded-full transform scale-x-110',
+    custom: 'rounded-lg'
+  };
+  
+  return (
+    <div className={`${sizeClasses[size]} ${shapeClasses[patchStyle.shape]} relative overflow-hidden`}>
+      {/* Patch Background with Texture */}
+      <div className={`absolute inset-0 ${iconData.bg} border-2 border-gray-300`}>
+        {/* Fabric/Material Texture Overlay */}
+        <div 
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: patchStyle.texture === 'metallic' 
+              ? 'linear-gradient(45deg, rgba(255,255,255,0.3) 25%, transparent 25%), linear-gradient(-45deg, rgba(255,255,255,0.3) 25%, transparent 25%)'
+              : 'radial-gradient(circle at 2px 2px, rgba(0,0,0,0.15) 1px, transparent 0)',
+            backgroundSize: patchStyle.texture === 'metallic' ? '8px 8px' : '4px 4px'
+          }}
+        />
+        
+        {/* Embroidered Border Effect */}
+        {patchStyle.material === 'embroidered' && (
+          <div className="absolute inset-0 border-2 border-dashed border-gray-400 opacity-30 rounded-inherit"></div>
+        )}
+        
+        {/* Icon in Center */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          {React.createElement(iconData.icon, { 
+            size: size === 'small' ? 12 : size === 'medium' ? 16 : size === 'large' ? 20 : 24,
+            className: `${iconData.color} drop-shadow-sm`
+          })}
+        </div>
+        
+        {/* Material-specific effects */}
+        {patchStyle.material === 'vinyl' && (
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white to-transparent opacity-20"></div>
+        )}
+        
+        {patchStyle.material === 'leather' && (
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-transparent to-amber-200 opacity-30"></div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const BaubleBarDemo = () => {
+  const navigate = useNavigate();
   const [currentView, setCurrentView] = useState('brand');
   const [showChat, setShowChat] = useState(false);
   const [newMessage, setNewMessage] = useState('');
@@ -33,6 +200,26 @@ const BaubleBarDemo = () => {
   // Add state for auto-generating all QR codes
   const [autoGenerateQr, setAutoGenerateQr] = useState(null);
 
+  // Add state for new features
+  const [showLocationMap, setShowLocationMap] = useState(false);
+  const [selectedTimeframe, setSelectedTimeframe] = useState('month');
+  const [showAuditLogs, setShowAuditLogs] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [expandedCarton, setExpandedCarton] = useState(null);
+  
+  // Add state for customization preview gallery
+  const [showCustomizationGallery, setShowCustomizationGallery] = useState(false);
+  
+  // Add state for Brand view tabs
+  const [brandActiveTab, setBrandActiveTab] = useState('overview');
+  
+  // Advanced search state
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [searchFilters, setSearchFilters] = useState({
+    po: '', sku: '', brand: '', factory: '', xfDate: '', awb: '', status: '', productType: ''
+  });
+  const [viewMode, setViewMode] = useState('po'); // 'po' or 'mto'
+
   const [notifications] = useState([
     { id: 1, type: 'status', message: 'PO123 Line 6 moved to QC stage', time: '2h ago', read: false, po: 'PO123' },
     { id: 2, type: 'delay', message: 'Material shortage: Patch 129559 for PO124', time: '4h ago', read: false, po: 'PO124' },
@@ -60,7 +247,7 @@ const BaubleBarDemo = () => {
     { id: 10, sender: 'Brand', message: 'PO125 - Perfect! All items received in good condition.', time: '4:00 PM', po: 'PO125', mto: '', files: [] }
   ]);
 
-  // Enhanced data with all required features
+  // Enhanced data with all required features - Complete MTO field set from improvements spec
   const brandPOs = [
     { 
       po: 'PO123', 
@@ -70,11 +257,49 @@ const BaubleBarDemo = () => {
       eta: 'July 11, 2025', 
       status: 'In Production',
       uploadDate: 'June 15, 2025',
+      factory: 'GZ Totes',
       mtos: [
-        { lineId: 6, qty: 1, customization: 'Spot 1-6', status: 'QC', eta: 'July 5, 2025', progress: 75, style: '14oz Natural Tote - Medium' },
-        { lineId: 7, qty: 2, customization: 'Spot 1-4', status: 'In Production', eta: 'July 8, 2025', progress: 50, style: '14oz Natural Tote - Large' },
-        { lineId: 8, qty: 1, customization: 'Spot 1-3', status: 'Shipped', eta: 'June 28, 2025', progress: 100, style: '14oz Canvas Tote - Medium' },
-        { lineId: 9, qty: 3, customization: 'Spot 1-5', status: 'Not Started', eta: 'July 12, 2025', progress: 0, style: '14oz Natural Tote - Small' }
+        { 
+          lineId: 6, 
+          qty: 1, 
+          customization: 'Spot 1-6', 
+          status: 'QC', 
+          eta: 'July 5, 2025', 
+          progress: 75, 
+          style: '14oz Natural Tote - Medium',
+          // Complete MTO Details from improvements spec
+          internalId: '37483586',
+          poLineId: '6',
+          expectedShipDate: '24/07/2025',
+          actualShipDate: '',
+          poLineTrackingNumber: '',
+          awb: '',
+          masterCarton: '',
+          vendorPoStatus: 'process',
+          orderSubmitDate: '16/07/2025',
+          soDate: '16/07/2025',
+          shopifyOrderDateTime: '07/16/25 02:15 PM',
+          salesOrderNumber: 'SO2508459',
+          cpsd: '06/08/2025',
+          displayName: 'Custom Tote Bag - 14oz Natural Lined - Medium',
+          referenceNumber: 'md6a4z3j45we9',
+          quantity: 1,
+          spot1: '129559',
+          spot2: '137234',
+          spot3: '128687',
+          spot4: '128698',
+          spot5: '128954',
+          spot6: '',
+          bagBasePid: '133938',
+          spot1PatchRef: '63 - Camera Icon',
+          spot2PatchRef: '171 - Music Notes Icon',
+          spot3PatchRef: '17 - Spicy Margarita Icon',
+          spot4PatchRef: '30 - Airplane Icon',
+          spot5PatchRef: '38 - H - Classic Letter',
+          spot6PatchRef: '',
+          xfDate: '01/07/2025',
+          productType: 'Initial Tote'
+        }
       ]
     },
     { 
@@ -177,8 +402,201 @@ const BaubleBarDemo = () => {
   ];
 
   const shippingData = [
-    { po: 'PO123', lineId: 6, shipDate: 'July 24', trackingNumber: '1Z1234567890', carrier: 'UPS', files: ['packing_slip_line6.pdf'] },
-    { po: 'PO125', lineId: 14, shipDate: 'June 30', trackingNumber: '1Z0987654321', carrier: 'FedEx', files: ['packing_slip_line14.pdf', 'invoice.pdf'] }
+    { po: 'PO123', lineId: 6, shipDate: 'July 24', trackingNumber: '1Z1234567890', carrier: 'UPS', files: ['packing_slip_line6.pdf'], masterCarton: 'MC001', awb: 'AWB123456', eta: 'July 26', referenceNumber: 'REF001' },
+    { po: 'PO125', lineId: 14, shipDate: 'June 30', trackingNumber: '1Z0987654321', carrier: 'FedEx', files: ['packing_slip_line14.pdf', 'invoice.pdf'], masterCarton: 'MC002', awb: 'AWB789012', eta: 'July 2', referenceNumber: 'REF002' }
+  ];
+
+  // Best Products Overview Data
+  const bestProducts = [
+    { 
+      sku: 'TT-001', 
+      name: 'Initial Tote - Natural', 
+      type: 'Initial Tote', 
+      orderVolume: 1250, 
+      delayFreq: 5, 
+      rating: 4.8, 
+      trend: 'up',
+      icon: '🛍️',
+      color: '#F3F4F6'
+    },
+    { 
+      sku: 'TT-002', 
+      name: 'Icon Tote - Canvas', 
+      type: 'Icon Tote', 
+      orderVolume: 890, 
+      delayFreq: 12, 
+      rating: 4.6, 
+      trend: 'stable',
+      icon: '⭐',
+      color: '#EEF2FF'
+    },
+    { 
+      sku: 'BL-001', 
+      name: 'Comfort Blanket - Wool', 
+      type: 'Blanket', 
+      orderVolume: 456, 
+      delayFreq: 8, 
+      rating: 4.9, 
+      trend: 'up',
+      icon: '🧸',
+      color: '#FEF3C7' 
+    },
+    { 
+      sku: 'TB-001', 
+      name: 'Premium Tote Bag', 
+      type: 'Tote Bag', 
+      orderVolume: 678, 
+      delayFreq: 15, 
+      rating: 4.3, 
+      trend: 'down',
+      icon: '👜',
+      color: '#FECACA'
+    }
+  ];
+
+  // Factory & Brand Location Data
+  const locationData = [
+    { 
+      id: 1, 
+      name: 'GZ Totes Manufacturing', 
+      type: 'factory', 
+      location: 'Guangzhou, China', 
+      region: 'Asia Pacific', 
+      lat: 23.1291, 
+      lng: 113.2644, 
+      activePOs: 8, 
+      completionRate: 94,
+      specialties: ['Totes', 'Canvas Products']
+    },
+    { 
+      id: 2, 
+      name: 'EcoManufacturing Inc', 
+      type: 'factory', 
+      location: 'Mumbai, India', 
+      region: 'Asia Pacific', 
+      lat: 19.0760, 
+      lng: 72.8777, 
+      activePOs: 3, 
+      completionRate: 88,
+      specialties: ['Blankets', 'Sustainable Materials']
+    },
+    { 
+      id: 3, 
+      name: 'BaubleBar HQ', 
+      type: 'brand', 
+      location: 'New York, USA', 
+      region: 'North America', 
+      lat: 40.7128, 
+      lng: -74.0060, 
+      activePOs: 0, 
+      completionRate: 0,
+      specialties: ['Design', 'Quality Control']
+    }
+  ];
+
+  // MTO Volume Analytics Data
+  const mtoVolumeData = {
+    month: [
+      { period: 'Jan 2025', initialTote: 245, iconTote: 189, blanket: 67, toteBag: 123 },
+      { period: 'Feb 2025', initialTote: 298, iconTote: 156, blanket: 89, toteBag: 167 },
+      { period: 'Mar 2025', initialTote: 334, iconTote: 201, blanket: 98, toteBag: 145 },
+      { period: 'Apr 2025', initialTote: 287, iconTote: 234, blanket: 76, toteBag: 198 },
+      { period: 'May 2025', initialTote: 356, iconTote: 189, blanket: 112, toteBag: 176 },
+      { period: 'Jun 2025', initialTote: 298, iconTote: 267, blanket: 89, toteBag: 134 }
+    ],
+    day: [
+      { period: 'Mon', initialTote: 45, iconTote: 32, blanket: 12, toteBag: 28 },
+      { period: 'Tue', initialTote: 52, iconTote: 38, blanket: 15, toteBag: 31 },
+      { period: 'Wed', initialTote: 48, iconTote: 41, blanket: 18, toteBag: 35 },
+      { period: 'Thu', initialTote: 56, iconTote: 29, blanket: 11, toteBag: 42 },
+      { period: 'Fri', initialTote: 61, iconTote: 47, blanket: 16, toteBag: 38 },
+      { period: 'Sat', initialTote: 34, iconTote: 25, blanket: 8, toteBag: 22 },
+      { period: 'Sun', initialTote: 29, iconTote: 18, blanket: 6, toteBag: 19 }
+    ]
+  };
+
+  // Master Carton Data
+  const masterCartonData = [
+    {
+      id: 'MC001',
+      sku: 'MC-TT-001',
+      referenceNumber: 'REF001',
+      awb: 'AWB123456',
+      eta: 'July 26, 2025',
+      status: 'In Transit',
+      mtos: [
+        { po: 'PO123', lineId: 6, qty: 1, style: '14oz Natural Tote - Medium' },
+        { po: 'PO123', lineId: 7, qty: 2, style: '14oz Natural Tote - Large' }
+      ]
+    },
+    {
+      id: 'MC002', 
+      sku: 'MC-BL-001',
+      referenceNumber: 'REF002',
+      awb: 'AWB789012',
+      eta: 'July 2, 2025',
+      status: 'Delivered',
+      mtos: [
+        { po: 'PO125', lineId: 14, qty: 5, style: '14oz Natural Tote - Medium' }
+      ]
+    }
+  ];
+
+  // Audit Logs Data  
+  const auditLogs = [
+    {
+      id: 1,
+      timestamp: '2025-07-15 14:30:25',
+      type: 'carton_mapping',
+      sku: 'TT-001',
+      cartonId: 'MC001',
+      action: 'Packed',
+      expectedQty: 3,
+      actualQty: 3,
+      variance: 0,
+      status: 'ok'
+    },
+    {
+      id: 2,
+      timestamp: '2025-07-15 14:25:12',
+      type: 'missing_product',
+      sku: 'TT-002',
+      cartonId: 'MC003',
+      action: 'Quality Check',
+      expectedQty: 5,
+      actualQty: 4,
+      variance: -1,
+      status: 'shortage'
+    },
+    {
+      id: 3,
+      timestamp: '2025-07-15 13:45:33',
+      type: 'carton_mapping',
+      sku: 'BL-001',
+      cartonId: 'MC002',
+      action: 'Packed',
+      expectedQty: 2,
+      actualQty: 2,
+      variance: 0,
+      status: 'ok'
+    },
+    {
+      id: 4,
+      timestamp: '2025-07-15 12:15:44',
+      type: 'missing_product',
+      sku: 'TB-001',
+      cartonId: 'MC004',
+      action: 'Final Inspection',
+      expectedQty: 8,
+      actualQty: 7,
+      variance: -1,
+      status: 'shortage'
+    }
+  ];
+
+  // Enhanced status options with new statuses
+  const allStatusOptions = [
+    'Not Started', 'In Production', 'QC', 'Shipping', 'Shipped', 'Cancelled', 'Rush Replacement'
   ];
 
   const getStatusColor = (status) => {
@@ -188,7 +606,9 @@ const BaubleBarDemo = () => {
       'QC': 'bg-yellow-100 text-yellow-700',
       'Shipping': 'bg-purple-100 text-purple-700',
       'Shipped': 'bg-green-100 text-green-700',
-      'Receive PO': 'bg-gray-100 text-gray-700'
+      'Receive PO': 'bg-gray-100 text-gray-700',
+      'Cancelled': 'bg-red-100 text-red-700',
+      'Rush Replacement': 'bg-orange-100 text-orange-700'
     };
     return colors[status] || 'bg-gray-100 text-gray-700';
   };
@@ -238,14 +658,193 @@ const BaubleBarDemo = () => {
   // BRAND VIEW - Complete with all features
   const BrandView = () => (
     <div className="max-w-7xl mx-auto space-y-6">
+      {/* Best Products Overview */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <Award className="h-5 w-5 text-yellow-500" />
+              Best Products Overview
+            </h2>
+            <p className="text-gray-600 mt-1">Top performing SKUs by volume, delays, and ratings</p>
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setShowLocationMap(true)}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              <MapPin className="h-4 w-4" />
+              Location Map
+            </button>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {bestProducts.map((product) => (
+            <div 
+              key={product.sku} 
+              className="group relative bg-gradient-to-br from-white to-gray-50 border rounded-xl p-4 hover:shadow-lg transition-all cursor-pointer"
+              style={{ backgroundColor: product.color }}
+              onClick={() => setSelectedProduct(product)}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="text-2xl">{product.icon}</div>
+                <div className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
+                  product.trend === 'up' ? 'bg-green-100 text-green-700' :
+                  product.trend === 'down' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
+                }`}>
+                  {product.trend === 'up' ? <TrendingUp className="h-3 w-3" /> : 
+                   product.trend === 'down' ? <AlertTriangle className="h-3 w-3" /> :
+                   <BarChart3 className="h-3 w-3" />}
+                  {product.trend}
+                </div>
+              </div>
+              
+              <h3 className="font-semibold text-gray-900 mb-1">{product.name}</h3>
+              <p className="text-xs text-gray-600 mb-3">{product.type}</p>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Volume</span>
+                  <span className="font-medium">{product.orderVolume}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Delays</span>
+                  <span className={`font-medium ${product.delayFreq > 10 ? 'text-red-600' : 'text-green-600'}`}>
+                    {product.delayFreq}%
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Rating</span>
+                  <div className="flex items-center gap-1">
+                    <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                    <span className="font-medium">{product.rating}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 rounded-xl transition-all"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* MTO Volume Analytics */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <PieChart className="h-5 w-5 text-blue-500" />
+              MTO Volume Analytics
+            </h2>
+            <p className="text-gray-600 mt-1">Track MTO volume by product type over time</p>
+          </div>
+          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setSelectedTimeframe('day')}
+              className={`px-3 py-1 rounded text-sm font-medium ${
+                selectedTimeframe === 'day' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Per Day
+            </button>
+            <button
+              onClick={() => setSelectedTimeframe('month')}
+              className={`px-3 py-1 rounded text-sm font-medium ${
+                selectedTimeframe === 'month' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Per Month
+            </button>
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <div className="min-w-[600px]">
+            <div className="flex items-end justify-between h-64 gap-2">
+              {mtoVolumeData[selectedTimeframe].map((data, index) => {
+                const total = data.initialTote + data.iconTote + data.blanket + data.toteBag;
+                const maxTotal = Math.max(...mtoVolumeData[selectedTimeframe].map(d => 
+                  d.initialTote + d.iconTote + d.blanket + d.toteBag
+                ));
+                return (
+                  <div key={index} className="flex-1 flex flex-col items-center">
+                    <div className="w-full bg-gray-100 rounded-t relative" style={{ height: `${(total / maxTotal) * 200}px` }}>
+                      <div 
+                        className="bg-blue-500 rounded-t absolute bottom-0 w-full"
+                        style={{ height: `${(data.initialTote / total) * 100}%` }}
+                        title={`Initial Tote: ${data.initialTote}`}
+                      ></div>
+                      <div 
+                        className="bg-purple-500 absolute w-full"
+                        style={{ 
+                          height: `${(data.iconTote / total) * 100}%`,
+                          bottom: `${(data.initialTote / total) * 100}%`
+                        }}
+                        title={`Icon Tote: ${data.iconTote}`}
+                      ></div>
+                      <div 
+                        className="bg-yellow-500 absolute w-full"
+                        style={{ 
+                          height: `${(data.blanket / total) * 100}%`,
+                          bottom: `${((data.initialTote + data.iconTote) / total) * 100}%`
+                        }}
+                        title={`Blanket: ${data.blanket}`}
+                      ></div>
+                      <div 
+                        className="bg-green-500 absolute w-full"
+                        style={{ 
+                          height: `${(data.toteBag / total) * 100}%`,
+                          bottom: `${((data.initialTote + data.iconTote + data.blanket) / total) * 100}%`
+                        }}
+                        title={`Tote Bag: ${data.toteBag}`}
+                      ></div>
+                    </div>
+                    <div className="mt-2 text-xs text-center">
+                      <div className="font-medium">{data.period}</div>
+                      <div className="text-gray-600">{total}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-center gap-6 mt-4">
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                <span>Initial Tote</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-3 h-3 bg-purple-500 rounded"></div>
+                <span>Icon Tote</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                <span>Blanket</span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className="w-3 h-3 bg-green-500 rounded"></div>
+                <span>Tote Bag</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Upload Section */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Purchase Orders Dashboard</h1>
-            <p className="text-gray-600 mt-1">Upload and track PO fulfillment progress</p>
+            <h1 className="text-2xl font-bold text-gray-900">PO Management</h1>
+            <p className="text-gray-600 mt-1">Upload and track PO/MTO fulfillment progress</p>
           </div>
           <div className="flex gap-3">
+            <button 
+              onClick={() => setShowAdvancedSearch(true)}
+              className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50"
+            >
+              <Search className="h-4 w-4" />
+              Advanced Search
+            </button>
             <button 
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -264,11 +863,7 @@ const BaubleBarDemo = () => {
             </button>
           </div>
         </div>
-        <div className="bg-blue-50 border border-blue-200 rounded p-3">
-          <p className="text-sm text-blue-800">
-            <strong>File Format:</strong> CSV/Excel with columns: PO#, Line ID, Quantity, Requested Delivery Date, Spot1-6 customization details
-          </p>
-        </div>
+        
         <input
           ref={fileInputRef}
           type="file"
@@ -278,151 +873,515 @@ const BaubleBarDemo = () => {
         />
       </div>
 
-      {/* PO Dashboard */}
+      {/* MTO-Centric Dashboard with Nested Hierarchy */}
       <div className="space-y-4">
-        {/* Add filter UI above PO Dashboard */}
-        <FilterBar filters={brandFilters} setFilters={setBrandFilters} showAdvanced={showBrandAdvanced} setShowAdvanced={setShowBrandAdvanced} factoryList={["GZ Totes", "EcoManufacturing Inc"]} />
-        <AdvancedFilterModal filters={brandFilters} setFilters={setBrandFilters} show={showBrandAdvanced} setShow={setShowBrandAdvanced} factoryList={["GZ Totes", "EcoManufacturing Inc"]} />
-        {brandPOs
-          .filter(po => !brandFilters.status || po.status === brandFilters.status)
-          .filter(po => !brandFilters.factory || po.factory === brandFilters.factory)
-          .filter(po => !brandFilters.dateFrom || new Date(po.uploadDate) >= new Date(brandFilters.dateFrom))
-          .filter(po => !brandFilters.dateTo || new Date(po.uploadDate) <= new Date(brandFilters.dateTo))
-          .map((po) => (
-          <div key={po.po} className={`bg-white rounded-lg shadow-sm border-l-4 transition-all ${
-            po.urgent ? 'border-red-500' : po.status === 'Shipped' ? 'border-green-500' : 'border-blue-500'
-          }`}>
-            {/* PO Header */}
-            <div 
-              className="p-6 cursor-pointer hover:bg-gray-50"
-              onClick={() => togglePOExpansion(po.po)}
-            >
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    {expandedPOs.has(po.po) ? 
-                      <ChevronDown className="h-5 w-5 text-gray-400" /> : 
-                      <ChevronRight className="h-5 w-5 text-gray-400" />
-                    }
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{po.po}</h3>
-                      {/* In PO card header, add factory and PO size */}
-                      <div className="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                        <span>Factory: {po.factory || 'GZ Totes'}</span>
-                        <span>•</span>
-                        <span>PO Size: {po.totalUnits} units</span>
+        {/* MTO Categories by Product Type */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">MTO Management by Product Category</h2>
+            <div className="flex gap-2">
+              <FilterBar filters={brandFilters} setFilters={setBrandFilters} showAdvanced={showBrandAdvanced} setShowAdvanced={setShowBrandAdvanced} factoryList={["GZ Totes", "EcoManufacturing Inc"]} />
+            </div>
+          </div>
+          
+          {/* Product Type Tabs */}
+          <div className="flex gap-1 bg-gray-100 rounded-lg p-1 mb-6">
+            {['All Products', 'Initial Tote', 'Icon Tote', 'Blanket', 'Tote Bag'].map((product) => (
+              <button
+                key={product}
+                onClick={() => setSelectedProduct(product === 'All Products' ? null : { type: product })}
+                className={`px-4 py-2 rounded text-sm font-medium transition-colors flex-1 ${
+                  (selectedProduct?.type || 'All Products') === product ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {product}
+              </button>
+            ))}
+          </div>
+          
+          {/* Monthly MTO View - Top Level */}
+          <div className="space-y-4">
+            {mtoVolumeData.month.map((monthData) => {
+              const monthlyMTOs = brandPOs.flatMap(po => 
+                po.mtos.filter(mto => {
+                  if (selectedProduct?.type && (mto.productType || 'Initial Tote') !== selectedProduct.type) {
+                    return false;
+                  }
+                  return true;
+                })
+              );
+              
+              return (
+                <div key={monthData.period} className="border-2 border-gray-200 rounded-lg overflow-hidden">
+                  {/* Monthly Header */}
+                  <div 
+                    className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 cursor-pointer hover:from-blue-100 hover:to-blue-200"
+                    onClick={() => togglePOExpansion(monthData.period)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
+                          {expandedPOs.has(monthData.period) ? 
+                            <ChevronDown className="h-6 w-6 text-blue-600" /> : 
+                            <ChevronRight className="h-6 w-6 text-blue-600" />
+                          }
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-900">📅 {monthData.period}</h3>
+                            <p className="text-sm text-gray-700">
+                              {selectedProduct?.type ? 
+                                `${monthData[selectedProduct.type.toLowerCase().replace(' ', '')] || 0} ${selectedProduct.type} MTOs` :
+                                `${monthData.initialTote + monthData.iconTote + monthData.blanket + monthData.toteBag} Total MTOs`
+                              }
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Monthly Summary */}
+                      <div className="flex items-center gap-6">
+                        <div className="grid grid-cols-4 gap-3 text-center">
+                          <div className="bg-white rounded-lg px-3 py-2">
+                            <div className="text-xs text-gray-600">Initial</div>
+                            <div className="font-bold text-lg">{monthData.initialTote}</div>
+                          </div>
+                          <div className="bg-white rounded-lg px-3 py-2">
+                            <div className="text-xs text-gray-600">Icon</div>
+                            <div className="font-bold text-lg">{monthData.iconTote}</div>
+                          </div>
+                          <div className="bg-white rounded-lg px-3 py-2">
+                            <div className="text-xs text-gray-600">Blanket</div>
+                            <div className="font-bold text-lg">{monthData.blanket}</div>
+                          </div>
+                          <div className="bg-white rounded-lg px-3 py-2">
+                            <div className="text-xs text-gray-600">Tote</div>
+                            <div className="font-bold text-lg">{monthData.toteBag}</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{po.completed}</div>
-                    <div className="text-sm text-gray-600">completed ({po.percent}%)</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(po.status)}`}>
-                      {po.status}
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">ETA: {po.eta}</div>
-                    {po.urgent && <div className="text-red-600 text-xs font-medium mt-1">🔥 URGENT</div>}
-                  </div>
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowChat(true);
-                    }}
-                    className="p-2 text-gray-400 hover:text-blue-600"
-                    title={`Chat about ${po.po}`}
-                  >
-                    <MessageCircle className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-              
-              {/* Progress bar */}
-              <div className="mt-4">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      po.status === 'Shipped' ? 'bg-green-600' : 'bg-blue-600'
-                    }`}
-                    style={{ width: `${po.percent}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-
-            {/* MTO Details (Expanded) */}
-            {expandedPOs.has(po.po) && (
-              <div className="border-t bg-gray-50">
-                <div className="p-6">
-                  <h4 className="font-semibold mb-4">MTO (Line Item) Details</h4>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-white">
-                        <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Line ID</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Qty</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Style</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customization</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ETA</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progress</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {po.mtos.map((mto) => (
-                          <tr key={mto.lineId} className="hover:bg-gray-50">
-                            <td className="px-4 py-4 font-medium">{mto.lineId}</td>
-                            <td className="px-4 py-4">{mto.qty}</td>
-                            <td className="px-4 py-4 text-sm">{mto.style}</td>
-                            <td className="px-4 py-4 text-sm">{mto.customization}</td>
-                            <td className="px-4 py-4">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mto.status)}`}>
-                                {mto.status}
-                              </span>
-                            </td>
-                            <td className="px-4 py-4">{mto.eta}</td>
-                            <td className="px-4 py-4">
-                              <div className="flex items-center gap-2">
-                                <div className="w-20 bg-gray-200 rounded-full h-2">
-                                  <div 
-                                    className="bg-blue-600 h-2 rounded-full transition-all"
-                                    style={{ width: `${mto.progress}%` }}
-                                  ></div>
+                  
+                  {/* Daily MTO View - Nested within Month */}
+                  {expandedPOs.has(monthData.period) && (
+                    <div className="bg-gray-50 p-4">
+                      <h4 className="font-semibold mb-3 text-gray-700">📆 Daily MTO Breakdown</h4>
+                      <div className="space-y-3">
+                        {mtoVolumeData.day.map((dayData) => (
+                          <div key={`${monthData.period}-${dayData.period}`} className="bg-white border rounded-lg overflow-hidden">
+                            {/* Daily Header */}
+                            <div 
+                              className="bg-gray-100 p-3 cursor-pointer hover:bg-gray-200"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                togglePOExpansion(`${monthData.period}-${dayData.period}`);
+                              }}
+                            >
+                              <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-2">
+                                    {expandedPOs.has(`${monthData.period}-${dayData.period}`) ? 
+                                      <ChevronDown className="h-5 w-5 text-gray-600" /> : 
+                                      <ChevronRight className="h-5 w-5 text-gray-600" />
+                                    }
+                                    <div>
+                                      <h5 className="font-semibold">{dayData.period}</h5>
+                                      <p className="text-sm text-gray-600">
+                                        {dayData.initialTote + dayData.iconTote + dayData.blanket + dayData.toteBag} MTOs
+                                      </p>
+                                    </div>
+                                  </div>
                                 </div>
-                                <span className="text-xs text-gray-600">{mto.progress}%</span>
+                                
+                                {/* Daily Product Counts */}
+                                <div className="flex gap-4 text-sm">
+                                  <span className="text-gray-600">IT: <strong>{dayData.initialTote}</strong></span>
+                                  <span className="text-gray-600">IC: <strong>{dayData.iconTote}</strong></span>
+                                  <span className="text-gray-600">BL: <strong>{dayData.blanket}</strong></span>
+                                  <span className="text-gray-600">TB: <strong>{dayData.toteBag}</strong></span>
+                                </div>
                               </div>
-                            </td>
-                            <td className="px-4 py-4">
-                              <button 
-                                onClick={() => {
-                                  setShowChat(true);
-                                }}
-                                className="text-blue-600 hover:text-blue-800 mr-3"
-                                title={`Chat about ${po.po} Line ${mto.lineId}`}
-                              >
-                                <MessageCircle className="h-4 w-4" />
-                              </button>
-                              <button 
-                                onClick={() => setViewMtoDetail({ mto, po })}
-                                className="text-gray-600 hover:text-gray-800"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </button>
-                            </td>
-                          </tr>
+                            </div>
+                            
+                            {/* Individual MTOs with Unique IDs */}
+                            {expandedPOs.has(`${monthData.period}-${dayData.period}`) && (
+                              <div className="p-3 bg-gray-50">
+                                {/* Ultra-Compact Header */}
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                                      <span className="text-white text-xs font-bold">{monthlyMTOs.slice(0, dayData.initialTote + dayData.iconTote + dayData.blanket + dayData.toteBag).length}</span>
+                                    </div>
+                                    <div>
+                                      <h5 className="text-sm font-semibold text-gray-900">{dayData.period} Production</h5>
+                                      <div className="flex items-center gap-3 text-xs text-gray-600">
+                                        <span>🟢 {monthlyMTOs.filter(m => m.status === 'cutting' || m.status === 'QC').length} Active</span>
+                                        <span>🟡 {monthlyMTOs.filter(m => m.status === 'pending').length} Pending</span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <input type="text" placeholder="Search ID..." className="text-xs border border-gray-300 rounded px-2 py-1 w-24" />
+                                    <button className="px-2 py-1 text-xs bg-blue-600 text-white rounded">Filter</button>
+                                  </div>
+                                </div>
+                                
+                                {/* Ultra-Dense Table for 100+ Items */}
+                                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                  <div className="overflow-x-auto max-h-96">
+                                    <table className="w-full text-xs">
+                                      <thead className="bg-gray-50 sticky top-0 z-10">
+                                        <tr className="border-b border-gray-200">
+                                          <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-32">MTO ID & Internal</th>
+                                          <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-48">Product Details</th>
+                                          <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-32">Order Info</th>
+                                          <th className="px-2 py-1.5 text-center font-medium text-gray-700 w-16">Q</th>
+                                          <th className="px-2 py-1.5 text-center font-medium text-gray-700 w-20">Status</th>
+                                          <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-28">Key Dates</th>
+                                          <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-32">Shipping Details</th>
+                                          <th className="px-2 py-1.5 text-center font-medium text-gray-700 w-40">
+                                            <div className="flex items-center justify-center gap-2">
+                                              <span>Customization Spots</span>
+                                              <button
+                                                onClick={() => setShowCustomizationGallery(true)}
+                                                className="p-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded transition-colors"
+                                                title="View Customization Gallery"
+                                              >
+                                                <Palette className="h-3 w-3" />
+                                              </button>
+                                            </div>
+                                          </th>
+                                          <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-28">Production Info</th>
+                                          <th className="px-2 py-1.5 text-center font-medium text-gray-700 w-12"></th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-gray-100">
+                                        {monthlyMTOs.slice(0, dayData.initialTote + dayData.iconTote + dayData.blanket + dayData.toteBag).map((mto, idx) => {
+                                          const uniqueMtoId = `MTO-${monthData.period.replace(' ', '')}-${dayData.period}-${mto.internalId || mto.lineId}-${idx}`;
+                                          const filledSpots = [1, 2, 3, 4, 5, 6].filter(spot => mto[`spot${spot}`]).length;
+                                          const isActive = mto.status === 'cutting' || mto.status === 'QC';
+                                          const progress = (filledSpots / 6) * 100;
+                                          
+                                          return (
+                                            <tr 
+                                              key={uniqueMtoId} 
+                                              className={`hover:bg-blue-50 cursor-pointer transition-colors ${
+                                                isActive ? 'bg-green-50/30' : ''
+                                              }`}
+                                              onClick={() => setViewMtoDetail({ 
+                                                mto: { ...mto, uniqueId: uniqueMtoId }, 
+                                                po: brandPOs.find(po => po.mtos.includes(mto)) 
+                                              })}
+                                            >
+                                              {/* MTO ID & Internal Details */}
+                                              <td className="px-2 py-1.5">
+                                                <div className="flex items-center gap-1">
+                                                  <div className={`w-1.5 h-10 rounded-full ${isActive ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                                                  <div>
+                                                    <div className="font-mono text-xs font-bold text-blue-700">
+                                                      {uniqueMtoId}
+                                                    </div>
+                                                    <div className="text-xs text-gray-700 font-semibold">
+                                                      Internal: {mto.internalId || '37483586'}
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                      Line: {mto.poLineId || mto.lineId}
+                                                    </div>
+                                                    <div className="text-xs text-gray-400 font-mono">
+                                                      Ref: {mto.referenceNumber || 'md6a4z3j45we9'}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </td>
+                                              
+                                              {/* Product Details */}
+                                              <td className="px-2 py-1.5">
+                                                <div>
+                                                  <div className="text-xs font-semibold text-gray-900 line-clamp-2">
+                                                    {mto.displayName || mto.style}
+                                                  </div>
+                                                  <div className="text-xs text-gray-600 mt-0.5">
+                                                    Product Type: {mto.productType || 'Initial Tote'}
+                                                  </div>
+                                                  <div className="text-xs text-gray-500">
+                                                    Bag Base PID: {mto.bagBasePid || mto.bagBasePID || '133938'}
+                                                  </div>
+                                                </div>
+                                              </td>
+                                              
+                                              {/* Order Information */}
+                                              <td className="px-2 py-1.5">
+                                                <div>
+                                                  <div className="text-xs font-semibold text-blue-600">
+                                                    SO: {mto.salesOrderNumber || 'SO2508459'}
+                                                  </div>
+                                                  <div className="text-xs text-gray-600">
+                                                    Shopify: {mto.shopifyOrderDateTime || '07/16/25 02:15 PM'}
+                                                  </div>
+                                                  <div className="text-xs text-gray-500">
+                                                    SO Date: {mto.soDate || '16/07/2025'}
+                                                  </div>
+                                                </div>
+                                              </td>
+                                              
+                                              {/* Quantity */}
+                                              <td className="px-2 py-1.5 text-center">
+                                                <span className="inline-flex items-center justify-center w-8 h-8 bg-gray-100 rounded-lg text-sm font-bold">
+                                                  {mto.qty || mto.quantity || 1}
+                                                </span>
+                                              </td>
+                                              
+                                              {/* Status Details */}
+                                              <td className="px-2 py-1.5 text-center">
+                                                <div className="flex flex-col items-center gap-0.5">
+                                                  <div className={`w-4 h-4 rounded-full ${
+                                                    isActive ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'
+                                                  }`}></div>
+                                                  <span className="text-xs text-gray-700 font-medium">
+                                                    {mto.vendorPoStatus || mto.status || 'process'}
+                                                  </span>
+                                                  <span className="text-xs text-gray-500">
+                                                    {mto.priority === 'high' ? '🔥 HIGH' : 'Normal'}
+                                                  </span>
+                                                </div>
+                                              </td>
+                                              
+                                              {/* Key Dates */}
+                                              <td className="px-2 py-1.5">
+                                                <div>
+                                                  <div className="text-xs font-semibold text-blue-600">
+                                                    Expected: {mto.expectedShipDate || mto.eta}
+                                                  </div>
+                                                  <div className="text-xs text-green-600">
+                                                    Actual: {mto.actualShipDate || 'Pending'}
+                                                  </div>
+                                                  <div className="text-xs text-gray-500">
+                                                    Submit: {mto.orderSubmitDate || '16/07/2025'}
+                                                  </div>
+                                                  <div className="text-xs text-gray-500">
+                                                    CPSD: {mto.cpsd || '06/08/2025'}
+                                                  </div>
+                                                </div>
+                                              </td>
+                                              
+                                              {/* Shipping Details */}
+                                              <td className="px-2 py-1.5">
+                                                <div>
+                                                  <div className="text-xs font-medium text-gray-900">
+                                                    AWB: {mto.awb || 'Not Assigned'}
+                                                  </div>
+                                                  <div className="text-xs text-gray-600">
+                                                    Track: {mto.poLineTrackingNumber || 'Not Available'}
+                                                  </div>
+                                                  <div className="text-xs text-gray-500">
+                                                    Master: {mto.masterCarton || 'TBD'}
+                                                  </div>
+                                                </div>
+                                              </td>
+                                              
+                                              {/* Visual Customization Spots with Icons */}
+                                              <td className="px-2 py-1.5">
+                                                <div>
+                                                  <div className="grid grid-cols-6 gap-0.5 mb-1">
+                                                    {[1, 2, 3, 4, 5, 6].map((spot) => {
+                                                      const patchRef = mto[`spot${spot}PatchRef`];
+                                                      const iconData = getIconFromPatchRef(patchRef);
+                                                      const hasPatch = mto[`spot${spot}`];
+                                                      const patchPreview = hasPatch ? generatePatchPreview(patchRef, mto[`spot${spot}`]) : null;
+                                                      
+                                                      return (
+                                                        <div 
+                                                          key={spot}
+                                                          className={`relative w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold border-2 group cursor-help transition-all hover:scale-110 ${
+                                                            hasPatch 
+                                                              ? iconData 
+                                                                ? `${iconData.bg} ${iconData.color} border-current shadow-sm`
+                                                                : 'bg-blue-500 text-white border-blue-600 shadow-sm'
+                                                              : 'bg-gray-100 text-gray-400 border-gray-300'
+                                                          }`}
+                                                        >
+                                                          {hasPatch && iconData ? (
+                                                            // Render the actual icon
+                                                            React.createElement(iconData.icon, { 
+                                                              size: 12, 
+                                                              className: 'drop-shadow-sm' 
+                                                            })
+                                                          ) : (
+                                                            // Show spot number if no icon
+                                                            <span className="text-xs font-bold">{spot}</span>
+                                                          )}
+                                                          
+                                                          {/* Enhanced Hover Tooltip with Actual Patch Preview */}
+                                                          {hasPatch && (
+                                                            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-30">
+                                                              <div className="bg-white border border-gray-200 rounded-lg shadow-xl px-4 py-3 whitespace-nowrap max-w-80">
+                                                                {/* Header with Patch Preview */}
+                                                                <div className="flex items-center gap-3 mb-2">
+                                                                  {patchPreview && (
+                                                                    <PatchPreview 
+                                                                      patchData={patchPreview} 
+                                                                      size="large" 
+                                                                    />
+                                                                  )}
+                                                                  <div>
+                                                                    <div className="font-bold text-gray-900 text-sm">
+                                                                      Spot {spot} - {patchPreview?.iconName || 'Custom'}
+                                                                    </div>
+                                                                    <div className="text-xs text-gray-500">
+                                                                      {iconData ? iconData.category : 'Custom'} • {patchPreview?.patchStyle.material || 'Embroidered'}
+                                                                    </div>
+                                                                  </div>
+                                                                </div>
+                                                                
+                                                                {/* Patch Specifications */}
+                                                                <div className="border-t border-gray-100 pt-2 space-y-1">
+                                                                  <div className="text-xs font-medium text-gray-700">
+                                                                    SKU: <span className="text-blue-600 font-mono">{mto[`spot${spot}`]}</span>
+                                                                  </div>
+                                                                  <div className="text-xs text-gray-600">
+                                                                    {patchRef || 'No description'}
+                                                                  </div>
+                                                                  {patchPreview && (
+                                                                    <div className="text-xs text-gray-500 mt-1 pt-1 border-t border-gray-50">
+                                                                      <div>Shape: {patchPreview.patchStyle.shape} • Size: {patchPreview.patchStyle.size}</div>
+                                                                      <div>Material: {patchPreview.patchStyle.material} • {patchPreview.patchStyle.texture}</div>
+                                                                    </div>
+                                                                  )}
+                                                                </div>
+                                                                
+                                                                {/* Additional Patch Examples */}
+                                                                {patchPreview && (
+                                                                  <div className="border-t border-gray-100 pt-2 mt-2">
+                                                                    <div className="text-xs font-medium text-gray-700 mb-1">Preview Variations:</div>
+                                                                    <div className="flex items-center gap-2">
+                                                                      <PatchPreview 
+                                                                        patchData={{...patchPreview, patchStyle: {...patchPreview.patchStyle, shape: 'circle'}}} 
+                                                                        size="small" 
+                                                                      />
+                                                                      <PatchPreview 
+                                                                        patchData={{...patchPreview, patchStyle: {...patchPreview.patchStyle, shape: 'square'}}} 
+                                                                        size="small" 
+                                                                      />
+                                                                      <PatchPreview 
+                                                                        patchData={{...patchPreview, patchStyle: {...patchPreview.patchStyle, material: 'vinyl'}}} 
+                                                                        size="small" 
+                                                                      />
+                                                                      <div className="text-xs text-gray-400 ml-1">+more</div>
+                                                                    </div>
+                                                                  </div>
+                                                                )}
+                                                              </div>
+                                                              {/* Tooltip Arrow */}
+                                                              <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                                                                <div className="border-4 border-transparent border-t-white"></div>
+                                                                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -mt-1">
+                                                                  <div className="border-4 border-transparent border-t-gray-200"></div>
+                                                                </div>
+                                                              </div>
+                                                            </div>
+                                                          )}
+                                                        </div>
+                                                      );
+                                                    })}
+                                                  </div>
+                                                  
+                                                  {/* Progress Bar with Category Breakdown */}
+                                                  <div className="text-xs text-gray-600 mb-1 flex items-center justify-between">
+                                                    <span>Fill: {filledSpots}/6 ({Math.round(progress)}%)</span>
+                                                    <div className="flex items-center gap-1">
+                                                      {Object.values([1,2,3,4,5,6].reduce((acc, spot) => {
+                                                        const patchRef = mto[`spot${spot}PatchRef`];
+                                                        const iconData = getIconFromPatchRef(patchRef);
+                                                        if (iconData && mto[`spot${spot}`]) {
+                                                          acc[iconData.category] = (acc[iconData.category] || 0) + 1;
+                                                        }
+                                                        return acc;
+                                                      }, {})).slice(0, 3).map((count, idx) => (
+                                                        <div key={idx} className="w-1 h-1 bg-blue-400 rounded-full"></div>
+                                                      ))}
+                                                    </div>
+                                                  </div>
+                                                  
+                                                  <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                                    <div 
+                                                      className={`h-full transition-all ${
+                                                        progress === 100 ? 'bg-green-500' : 
+                                                        progress > 50 ? 'bg-blue-500' : 'bg-orange-500'
+                                                      }`}
+                                                      style={{ width: `${progress}%` }}
+                                                    ></div>
+                                                  </div>
+                                                  
+                                                  <div className="text-xs text-gray-500 mt-0.5">
+                                                    Hover for visual preview
+                                                  </div>
+                                                </div>
+                                              </td>
+                                              
+                                              {/* Production Information */}
+                                              <td className="px-2 py-1.5">
+                                                <div>
+                                                  <div className="text-xs font-medium text-gray-900">
+                                                    {mto.progress ? `Step ${mto.progress}/4` : 'Not Started'}
+                                                  </div>
+                                                  <div className="text-xs text-gray-600">
+                                                    XF Date: {mto.xfDate || 'TBD'}
+                                                  </div>
+                                                  <div className="text-xs text-gray-500">
+                                                    Factory: {mto.factory || 'Main'}
+                                                  </div>
+                                                  <div className="text-xs text-gray-500">
+                                                    Started: {mto.actualStartDate || 'Pending'}
+                                                  </div>
+                                                </div>
+                                              </td>
+                                              
+                                              {/* Action */}
+                                              <td className="px-2 py-1.5 text-center">
+                                                <div className="flex flex-col items-center gap-1">
+                                                  <ChevronRight className="h-4 w-4 text-gray-400 hover:text-blue-600" />
+                                                  <span className="text-xs text-gray-400">Details</span>
+                                                </div>
+                                              </td>
+                                            </tr>
+                                          );
+                                        })}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                  
+                                  {/* Pagination for 100+ items */}
+                                  <div className="px-3 py-2 bg-gray-50 border-t text-xs text-gray-600 flex items-center justify-between">
+                                    <span>1-{Math.min(100, monthlyMTOs.length)} of {monthlyMTOs.length}</span>
+                                    <div className="flex items-center gap-1">
+                                      <button className="px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-100">Prev</button>
+                                      <button className="px-2 py-1 border border-gray-300 rounded text-xs hover:bg-gray-100">Next</button>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                {/* Bottom Quick Stats - Minimal */}
+                                <div className="mt-3 flex items-center justify-between text-xs text-gray-600">
+                                  <div className="flex items-center gap-4">
+                                    <span>Active: <strong className="text-green-600">{monthlyMTOs.filter(m => m.status === 'cutting' || m.status === 'QC').length}</strong></span>
+                                    <span>Pending: <strong className="text-yellow-600">{monthlyMTOs.filter(m => m.status === 'pending').length}</strong></span>
+                                    <span>Units: <strong className="text-blue-600">{monthlyMTOs.reduce((sum, m) => sum + (m.qty || 1), 0)}</strong></span>
+                                  </div>
+                                  <div>
+                                    Completion: <strong className="text-indigo-600">{Math.round(monthlyMTOs.reduce((sum, m) => sum + ([1,2,3,4,5,6].filter(s => m[`spot${s}`]).length), 0) / (monthlyMTOs.length * 6) * 100)}%</strong>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })}
           </div>
-        ))}
+        </div>
       </div>
       {viewMtoDetail && <MtoDetailModal mto={viewMtoDetail.mto} po={viewMtoDetail.po} onClose={() => setViewMtoDetail(null)} />}
     </div>
@@ -777,8 +1736,23 @@ const BaubleBarDemo = () => {
                       )}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {item.usedBy.join(', ')}
+                  <td className="px-6 py-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">{item.usedBy.join(', ')}</span>
+                      {item.status === 'short' && (
+                        <button 
+                          onClick={() => {
+                            setShowChat(true);
+                            // Auto-create chat for material inquiry
+                          }}
+                          className="text-blue-600 hover:text-blue-800 text-xs bg-blue-50 px-2 py-1 rounded flex items-center gap-1"
+                          title="AutoChat with factory about material availability"
+                        >
+                          <MessageCircle className="h-3 w-3" />
+                          Inquiry
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -883,6 +1857,157 @@ const BaubleBarDemo = () => {
       </div>
     );
 
+    const AuditLogsTab = () => (
+      <div className="space-y-6">
+        <div className="bg-white rounded-lg shadow-sm">
+          <div className="p-6 border-b">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-blue-500" />
+                  Audit Logs & Quality Control
+                </h2>
+                <p className="text-gray-600 mt-1">Track SKU to Carton mapping and identify missing product trends</p>
+              </div>
+              <button 
+                onClick={() => setShowAuditLogs(true)}
+                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              >
+                <Search className="h-4 w-4" />
+                View Full Logs
+              </button>
+            </div>
+          </div>
+          
+          {/* Missing Product Alert */}
+          <div className="p-6 border-b bg-red-50">
+            <div className="flex items-center gap-2 mb-3">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <h3 className="font-semibold text-red-800">Missing Product Trend Alert</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center p-3 bg-white rounded border">
+                <div className="text-2xl font-bold text-red-600">
+                  {auditLogs.filter(log => log.status === 'shortage').length}
+                </div>
+                <div className="text-sm text-gray-600">Recent Shortages</div>
+              </div>
+              <div className="text-center p-3 bg-white rounded border">
+                <div className="text-2xl font-bold text-red-600">12%</div>
+                <div className="text-sm text-gray-600">Avg Shortage Rate</div>
+              </div>
+              <div className="text-center p-3 bg-white rounded border">
+                <div className="text-2xl font-bold text-green-600">
+                  {auditLogs.filter(log => log.status === 'ok').length}
+                </div>
+                <div className="text-sm text-gray-600">Successful Mappings</div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Master Carton Section */}
+          <div className="p-6 border-b">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Package className="h-5 w-5 text-purple-500" />
+              Master Carton Management
+            </h3>
+            <div className="space-y-3">
+              {masterCartonData.map((carton) => (
+                <div key={carton.id} className="border rounded-lg hover:bg-gray-50">
+                  <div 
+                    className="p-4 cursor-pointer flex justify-between items-center"
+                    onClick={() => setExpandedCarton(expandedCarton === carton.id ? null : carton.id)}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        {expandedCarton === carton.id ? 
+                          <ChevronDown className="h-4 w-4 text-gray-400" /> : 
+                          <ChevronRight className="h-4 w-4 text-gray-400" />
+                        }
+                        <div>
+                          <h4 className="font-medium">{carton.id}</h4>
+                          <p className="text-sm text-gray-600">SKU: {carton.sku}</p>
+                        </div>
+                      </div>
+                      <div className="text-sm">
+                        <div><strong>AWB:</strong> {carton.awb}</div>
+                        <div><strong>ETA:</strong> {carton.eta}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        carton.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {carton.status}
+                      </span>
+                      <span className="text-sm text-gray-500">{carton.mtos.length} MTOs</span>
+                    </div>
+                  </div>
+                  
+                  {expandedCarton === carton.id && (
+                    <div className="border-t bg-gray-50 p-4">
+                      <h5 className="font-medium mb-3">MTO Line Breakdown:</h5>
+                      <div className="space-y-2">
+                        {carton.mtos.map((mto, idx) => (
+                          <div key={idx} className="flex justify-between items-center p-2 bg-white rounded border">
+                            <div>
+                              <span className="font-medium">{mto.po} - Line {mto.lineId}</span>
+                              <span className="text-sm text-gray-600 ml-2">({mto.qty}x {mto.style})</span>
+                            </div>
+                            <button className="text-blue-600 hover:text-blue-800 text-sm">
+                              View Details
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Recent Activity Log */}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Timestamp</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Carton</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Variance</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {auditLogs.slice(0, 5).map((log) => (
+                  <tr key={log.id} className={`hover:bg-gray-50 ${log.status === 'shortage' ? 'bg-red-50' : ''}`}>
+                    <td className="px-6 py-4 text-sm font-mono">{log.timestamp}</td>
+                    <td className="px-6 py-4 font-medium">{log.sku}</td>
+                    <td className="px-6 py-4">{log.cartonId}</td>
+                    <td className="px-6 py-4 text-sm">{log.action}</td>
+                    <td className="px-6 py-4">
+                      <span className={`font-medium ${log.variance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        {log.variance}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        log.status === 'shortage' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                      }`}>
+                        {log.status === 'shortage' ? 'Shortage' : 'OK'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+
     return (
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
@@ -956,6 +2081,20 @@ const BaubleBarDemo = () => {
                 </span>
               )}
             </button>
+            <button
+              onClick={() => setActiveTab('audit-logs')}
+              className={`px-4 py-2 rounded text-sm font-medium transition-colors flex items-center gap-2 ${
+                activeTab === 'audit-logs' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <Activity className="h-4 w-4" />
+              Audit Logs
+              {auditLogs.filter(log => log.status === 'shortage').length > 0 && (
+                <span className="bg-red-100 text-red-600 rounded-full text-xs px-2 py-1">
+                  {auditLogs.filter(log => log.status === 'shortage').length}
+                </span>
+              )}
+            </button>
           </div>
         </div>
 
@@ -978,6 +2117,7 @@ const BaubleBarDemo = () => {
         )}
         {activeTab === 'inventory' && <InventoryTab />}
         {activeTab === 'shipping' && <ShippingTab />}
+        {activeTab === 'audit-logs' && <AuditLogsTab />}
       </div>
     );
   };
@@ -1215,7 +2355,7 @@ const BaubleBarDemo = () => {
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                 placeholder={`Type message for ${currentChatTarget.title}...`}
                 className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
@@ -1246,6 +2386,8 @@ const BaubleBarDemo = () => {
     { value: 'In Production', label: 'In Production', icon: <Play className="h-4 w-4" /> },
     { value: 'QC', label: 'QC', icon: <CheckCircle2 className="h-4 w-4" /> },
     { value: 'Shipped', label: 'Shipped', icon: <Truck className="h-4 w-4" /> },
+    { value: 'Cancelled', label: 'Cancelled', icon: <X className="h-4 w-4" /> },
+    { value: 'Rush Replacement', label: 'Rush Replacement', icon: <Zap className="h-4 w-4" /> },
   ];
 
   function FilterBar({ filters, setFilters, showAdvanced, setShowAdvanced, factoryList }) {
@@ -1334,29 +2476,185 @@ const BaubleBarDemo = () => {
     );
   }
 
-  // Add MTO Detail Modal component
+  // Enhanced MTO Detail Modal with complete raw data
   function MtoDetailModal({ mto, po, onClose }) {
     if (!mto) return null;
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
-        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg border border-blue-200 relative">
+        <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-6xl border border-blue-200 relative max-h-[90vh] overflow-y-auto">
           <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-blue-600"><X className="h-5 w-5" /></button>
-          <h2 className="text-xl font-bold text-blue-700 mb-2">Peak Order – MTO Details</h2>
-          <div className="mb-4 text-sm text-gray-500">PO: <span className="font-semibold text-gray-900">{po.po}</span> | Line ID: <span className="font-semibold text-gray-900">{mto.lineId}</span></div>
-          <div className="space-y-2">
-            <div><span className="font-medium text-gray-700">Style:</span> {mto.style}</div>
-            <div><span className="font-medium text-gray-700">Quantity:</span> {mto.qty}</div>
-            <div><span className="font-medium text-gray-700">Customization:</span> {mto.customization}</div>
-            <div><span className="font-medium text-gray-700">Status:</span> <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mto.status)}`}>{mto.status}</span></div>
-            <div><span className="font-medium text-gray-700">ETA:</span> {mto.eta}</div>
-            <div className="flex items-center gap-2"><span className="font-medium text-gray-700">Progress:</span>
-              <div className="w-32 bg-gray-200 rounded-full h-2">
-                <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${mto.progress}%` }}></div>
+          <h2 className="text-xl font-bold text-blue-700 mb-4">🧵 MTO Details View - Complete Raw Data</h2>
+          
+          {/* Basic Info Header */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="grid grid-cols-4 gap-4">
+              <div>
+                <span className="text-xs text-gray-600">Unique MTO ID</span>
+                <div className="font-mono font-bold text-blue-600">{mto.uniqueId || `MTO-${mto.internalId || mto.lineId}`}</div>
               </div>
-              <span className="text-xs text-gray-600">{mto.progress}%</span>
+              <div>
+                <span className="text-xs text-gray-600">PO #</span>
+                <div className="font-semibold">{po.po}</div>
+              </div>
+              <div>
+                <span className="text-xs text-gray-600">Line ID</span>
+                <div className="font-semibold">{mto.lineId || mto.poLineId}</div>
+              </div>
+              <div>
+                <span className="text-xs text-gray-600">Internal ID</span>
+                <div className="font-semibold">{mto.internalId || '37483586'}</div>
+              </div>
             </div>
           </div>
-          {/* Add more details as needed, e.g. files, comments */}
+          
+          {/* Complete Raw Data Table */}
+          <div className="overflow-x-auto mb-6">
+            <table className="w-full text-sm">
+              <tbody className="divide-y divide-gray-200">
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700 w-1/3">Internal ID</td>
+                  <td className="px-4 py-3">{mto.internalId || '37483586'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">PO Line ID</td>
+                  <td className="px-4 py-3">{mto.poLineId || mto.lineId}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Expected Ship Date</td>
+                  <td className="px-4 py-3">{mto.expectedShipDate || mto.eta}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Actual Ship Date</td>
+                  <td className="px-4 py-3">{mto.actualShipDate || '-'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">PO Line Tracking #</td>
+                  <td className="px-4 py-3">{mto.poLineTrackingNumber || '-'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">AWB</td>
+                  <td className="px-4 py-3">{mto.awb || '-'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Master Carton</td>
+                  <td className="px-4 py-3">{mto.masterCarton || '-'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Vendor PO Status</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(mto.vendorPoStatus || mto.status)}`}>
+                      {mto.vendorPoStatus || mto.status}
+                    </span>
+                  </td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Order Submit Date</td>
+                  <td className="px-4 py-3">{mto.orderSubmitDate || '16/07/2025'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">SO Date</td>
+                  <td className="px-4 py-3">{mto.soDate || '16/07/2025'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Shopify Order Date/Time</td>
+                  <td className="px-4 py-3">{mto.shopifyOrderDateTime || '07/16/25 02:15 PM'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Sales Order #</td>
+                  <td className="px-4 py-3">{mto.salesOrderNumber || 'SO2508459'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">CPSD</td>
+                  <td className="px-4 py-3">{mto.cpsd || '06/08/2025'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Display Name</td>
+                  <td className="px-4 py-3">{mto.displayName || mto.style}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Reference #</td>
+                  <td className="px-4 py-3">{mto.referenceNumber || 'md6a4z3j45we9'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Quantity</td>
+                  <td className="px-4 py-3 font-semibold">{mto.quantity || mto.qty}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Bag Base PID</td>
+                  <td className="px-4 py-3">{mto.bagBasePid || '133938'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">XF Date</td>
+                  <td className="px-4 py-3">{mto.xfDate || '01/07/2025'}</td>
+                </tr>
+                <tr className="hover:bg-gray-50">
+                  <td className="px-4 py-3 font-medium text-gray-700">Product Type</td>
+                  <td className="px-4 py-3">{mto.productType || 'Initial Tote'}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Spot Breakdown Section */}
+          <div className="bg-gray-50 rounded-lg p-6">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Target className="h-5 w-5 text-purple-500" />
+              🎯 Spot Breakdown
+            </h3>
+            <div className="grid grid-cols-6 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((spot) => {
+                const spotValue = mto[`spot${spot}`] || (spot === 1 ? '129559' : spot === 2 ? '137234' : spot === 3 ? '128687' : spot === 4 ? '128698' : spot === 5 ? '128954' : '');
+                const spotRef = mto[`spot${spot}PatchRef`] || (spot === 1 ? '63 - Camera Icon' : spot === 2 ? '171 - Music Notes Icon' : spot === 3 ? '17 - Spicy Margarita Icon' : spot === 4 ? '30 - Airplane Icon' : spot === 5 ? '38 - H - Classic Letter' : '');
+                
+                return (
+                  <div key={spot} className="text-center">
+                    <div className="font-bold text-blue-600 mb-2">SPOT {spot}</div>
+                    <div className={`bg-white rounded-lg p-4 border-2 ${spotValue ? 'border-blue-300' : 'border-gray-300'}`}>
+                      <div className="font-mono text-sm mb-1">{spotValue || '—'}</div>
+                      <div className="text-xs text-gray-600">{spotRef || '—'}</div>
+                      {spotValue && (
+                        <button
+                          onClick={() => setQrSpot({ mto, spot: `spot${spot}`, value: spotValue })}
+                          className="mt-2 p-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
+                          title="Generate QR"
+                        >
+                          <Scan className="h-4 w-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="mt-4 flex justify-center gap-3">
+              <button
+                onClick={() => setQrMto(mto)}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center gap-2"
+              >
+                <Scan className="h-4 w-4" />
+                Generate MTO QR Code
+              </button>
+              <button
+                onClick={() => setAutoGenerateQr(mto)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+              >
+                <Layers className="h-4 w-4" />
+                Auto Generate All Spot QRs
+              </button>
+            </div>
+          </div>
+          
+          {/* Production Progress */}
+          <div className="mt-6">
+            <h4 className="font-medium mb-2">Production Progress</h4>
+            <div className="flex items-center gap-2">
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div className="bg-blue-600 h-3 rounded-full transition-all" style={{ width: `${mto.progress}%` }}></div>
+              </div>
+              <span className="text-sm font-medium">{mto.progress}%</span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -1440,6 +2738,630 @@ const BaubleBarDemo = () => {
     );
   }
 
+  // CUSTOMIZATION VIEW - Next-Gen Product Builder
+  const CustomizationView = () => (
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Palette className="h-6 w-6 text-purple-500" />
+              Next-Gen Product Customization
+            </h1>
+            <p className="text-gray-600 mt-1">Design and customize products with real-time 3D preview</p>
+          </div>
+          <button 
+            onClick={() => navigate('/products')}
+            className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"
+          >
+            <Box className="h-4 w-4" />
+            Launch 3D Builder
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg p-8">
+            <div className="text-center">
+              <Box className="h-24 w-24 mx-auto mb-4 text-purple-500" />
+              <h3 className="text-xl font-bold mb-2">Interactive 3D Product Builder</h3>
+              <p className="text-gray-600 mb-4">Design custom products with real-time visualization</p>
+              <button 
+                onClick={() => navigate('/products')}
+                className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-medium"
+              >
+                Start Customizing
+              </button>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-semibold mb-3">Features</h4>
+              <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Real-time 3D preview
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  6 customizable spots
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Direct factory submission
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-green-500" />
+                  Material cost calculator
+                </li>
+              </ul>
+            </div>
+            
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Zap className="h-4 w-4 text-yellow-600" />
+                <span className="font-semibold text-yellow-800">Coming Soon</span>
+              </div>
+              <p className="text-sm text-yellow-700">AI-powered design suggestions and automated quality checks</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Location Map Modal
+  const LocationMapModal = ({ onClose }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl border border-blue-200 relative max-h-[80vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-blue-600">
+          <X className="h-5 w-5" />
+        </button>
+        <h2 className="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
+          <Globe className="h-5 w-5" />
+          Factory & Brand Location Map
+        </h2>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-gray-100 rounded-lg p-4 h-64 flex items-center justify-center">
+            <div className="text-center text-gray-600">
+              <MapPin className="h-12 w-12 mx-auto mb-2" />
+              <p className="text-sm">Interactive map would be integrated here</p>
+              <p className="text-xs text-gray-500">showing factory locations with PO status</p>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <h3 className="font-semibold">Locations Overview</h3>
+            {locationData.map((location) => (
+              <div key={location.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h4 className="font-medium">{location.name}</h4>
+                    <p className="text-sm text-gray-600">{location.location}</p>
+                    <p className="text-xs text-gray-500">{location.region}</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    location.type === 'factory' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                  }`}>
+                    {location.type}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-600">Active POs:</span>
+                    <span className="ml-2 font-medium">{location.activePOs}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-600">Completion:</span>
+                    <span className="ml-2 font-medium">{location.completionRate}%</span>
+                  </div>
+                </div>
+                
+                <div className="mt-2">
+                  <p className="text-xs text-gray-600">Specialties:</p>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {location.specialties.map((specialty, idx) => (
+                      <span key={idx} className="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs">
+                        {specialty}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Product Detail Modal
+  const ProductDetailModal = ({ product, onClose }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg border border-blue-200 relative">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-blue-600">
+          <X className="h-5 w-5" />
+        </button>
+        <div className="text-center mb-6">
+          <div className="text-4xl mb-2">{product.icon}</div>
+          <h2 className="text-xl font-bold text-blue-700">{product.name}</h2>
+          <p className="text-gray-600">{product.type}</p>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-2xl font-bold text-blue-600">{product.orderVolume}</div>
+              <div className="text-sm text-gray-600">Total Orders</div>
+            </div>
+            <div className="text-center p-4 bg-yellow-50 rounded-lg">
+              <div className="flex items-center justify-center gap-1">
+                <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                <span className="text-2xl font-bold text-yellow-600">{product.rating}</span>
+              </div>
+              <div className="text-sm text-gray-600">Avg Rating</div>
+            </div>
+          </div>
+          
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-gray-600">Delay Frequency</span>
+              <span className={`font-medium ${product.delayFreq > 10 ? 'text-red-600' : 'text-green-600'}`}>
+                {product.delayFreq}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className={`h-2 rounded-full ${product.delayFreq > 10 ? 'bg-red-500' : 'bg-green-500'}`}
+                style={{ width: `${product.delayFreq}%` }}
+              ></div>
+            </div>
+          </div>
+          
+          <div className="p-4 border rounded-lg">
+            <h4 className="font-medium mb-2">Performance Trend</h4>
+            <div className={`flex items-center gap-2 ${
+              product.trend === 'up' ? 'text-green-600' :
+              product.trend === 'down' ? 'text-red-600' : 'text-gray-600'
+            }`}>
+              {product.trend === 'up' ? <TrendingUp className="h-4 w-4" /> :
+               product.trend === 'down' ? <AlertTriangle className="h-4 w-4" /> :
+               <BarChart3 className="h-4 w-4" />}
+              <span className="capitalize font-medium">{product.trend}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Audit Logs Modal
+  const AuditLogsModal = ({ onClose }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl border border-blue-200 relative max-h-[80vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-blue-600">
+          <X className="h-5 w-5" />
+        </button>
+        <h2 className="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
+          <Activity className="h-5 w-5" />
+          Audit Logs - SKU to Carton Mapping
+        </h2>
+        
+        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center gap-2 mb-2">
+            <AlertTriangle className="h-5 w-5 text-yellow-600" />
+            <span className="font-semibold text-yellow-800">Missing Product Alert</span>
+          </div>
+          <p className="text-sm text-yellow-700">
+            Detected {auditLogs.filter(log => log.status === 'shortage').length} instances of 10-15% missing products in recent shipments
+          </p>
+        </div>
+        
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Timestamp</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Carton ID</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expected</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actual</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Variance</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {auditLogs.map((log) => (
+                <tr key={log.id} className={`hover:bg-gray-50 ${log.status === 'shortage' ? 'bg-red-50' : ''}`}>
+                  <td className="px-4 py-4 text-sm font-mono">{log.timestamp}</td>
+                  <td className="px-4 py-4 font-medium">{log.sku}</td>
+                  <td className="px-4 py-4">{log.cartonId}</td>
+                  <td className="px-4 py-4 text-sm">{log.action}</td>
+                  <td className="px-4 py-4">{log.expectedQty}</td>
+                  <td className="px-4 py-4">{log.actualQty}</td>
+                  <td className="px-4 py-4">
+                    <span className={`font-medium ${log.variance < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                      {log.variance}
+                    </span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      log.status === 'shortage' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                    }`}>
+                      {log.status === 'shortage' ? (
+                        <>
+                          <AlertTriangle className="h-3 w-3 inline mr-1" />
+                          Shortage
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-3 w-3 inline mr-1" />
+                          OK
+                        </>
+                      )}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Next-Gen Customization Modal (2D/3D Product Builder)
+  const CustomizationModal = ({ onClose }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-6xl border border-blue-200 relative max-h-[90vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-blue-600">
+          <X className="h-5 w-5" />
+        </button>
+        <h2 className="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
+          <Palette className="h-5 w-5" />
+          Next-Gen Product Customization Builder
+        </h2>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="bg-gray-100 rounded-lg p-8 h-96 flex items-center justify-center">
+              <div className="text-center text-gray-600">
+                <Box className="h-16 w-16 mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">3D Product Preview</h3>
+                <p className="text-sm">Interactive 3D model would be rendered here</p>
+                <p className="text-xs text-gray-500 mt-2">Real-time customization preview with spot placement</p>
+              </div>
+            </div>
+            
+            <div className="mt-4 flex justify-center gap-2">
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                <Maximize2 className="h-4 w-4" />
+                3D View
+              </button>
+              <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 flex items-center gap-2">
+                <Minimize2 className="h-4 w-4" />
+                2D View
+              </button>
+            </div>
+          </div>
+          
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-semibold mb-3">Product Selection</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {bestProducts.map((product) => (
+                  <div key={product.sku} className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
+                    <div className="text-center">
+                      <div className="text-xl mb-1">{product.icon}</div>
+                      <div className="text-xs font-medium">{product.type}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-3">Customization Spots</h3>
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5, 6].map((spot) => (
+                  <div key={spot} className="flex items-center gap-3 p-2 border rounded">
+                    <span className="text-sm font-medium w-12">Spot {spot}</span>
+                    <select className="flex-1 border rounded px-2 py-1 text-sm">
+                      <option value="">Select Icon</option>
+                      <option value="129559">Camera Icon</option>
+                      <option value="137234">Music Notes Icon</option>
+                      <option value="128687">Spicy Margarita Icon</option>
+                      <option value="128698">Airplane Icon</option>
+                      <option value="128954">Letter Icon</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <button className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">
+                Submit to Factory
+              </button>
+              <button className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                Save Design
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Customization Gallery Modal - Shows all available icons and patches
+  const CustomizationGalleryModal = ({ onClose }) => {
+    const categories = [...new Set(Object.values(CUSTOMIZATION_ICONS).map(icon => icon.category))];
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    
+    const filteredIcons = selectedCategory === 'All' 
+      ? Object.entries(CUSTOMIZATION_ICONS)
+      : Object.entries(CUSTOMIZATION_ICONS).filter(([name, data]) => data.category === selectedCategory);
+    
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
+        <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[80vh] border relative flex flex-col">
+          <div className="flex items-center justify-between p-6 border-b">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg text-white">
+                <Palette className="h-6 w-6" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Customization Gallery</h2>
+                <p className="text-sm text-gray-600">Browse all available patch icons and designs</p>
+              </div>
+            </div>
+            <button onClick={onClose} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+          
+          {/* Category Filter Bar */}
+          <div className="px-6 py-4 border-b bg-gray-50">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-sm font-medium text-gray-700 mr-2">Categories:</span>
+              {['All', ...categories].map(category => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedCategory === category
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'bg-white text-gray-600 hover:bg-blue-50 border border-gray-200'
+                  }`}
+                >
+                  {category}
+                  <span className="ml-1 text-xs opacity-75">
+                    ({category === 'All' 
+                      ? Object.keys(CUSTOMIZATION_ICONS).length 
+                      : Object.values(CUSTOMIZATION_ICONS).filter(icon => icon.category === category).length})
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Icons Grid */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {filteredIcons.map(([iconName, iconData]) => (
+                <div 
+                  key={iconName}
+                  className="group relative bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all hover:scale-105 cursor-pointer"
+                >
+                  {/* Icon Display */}
+                  <div className={`w-16 h-16 mx-auto mb-3 rounded-xl flex items-center justify-center ${iconData.bg} ${iconData.color} shadow-sm group-hover:shadow-md transition-shadow`}>
+                    {React.createElement(iconData.icon, { 
+                      size: 24,
+                      className: 'drop-shadow-sm'
+                    })}
+                  </div>
+                  
+                  {/* Icon Details */}
+                  <div className="text-center">
+                    <h3 className="font-semibold text-sm text-gray-900 mb-1 line-clamp-2">
+                      {iconName}
+                    </h3>
+                    <div className="flex items-center justify-center gap-1 mb-2">
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${iconData.bg} ${iconData.color}`}>
+                        {iconData.category}
+                      </span>
+                    </div>
+                    
+                    {/* Example Usage */}
+                    <div className="text-xs text-gray-500 space-y-1">
+                      <div>Example SKU: <span className="font-mono text-blue-600">#{Math.floor(Math.random() * 900000) + 100000}</span></div>
+                      <div>Usage: <span className="text-green-600">Active</span></div>
+                    </div>
+                  </div>
+                  
+                  {/* Hover Actions */}
+                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-5 rounded-lg transition-all flex items-end justify-center pb-2 opacity-0 group-hover:opacity-100">
+                    <div className="flex gap-1">
+                      <button className="px-2 py-1 bg-white shadow-sm rounded text-xs font-medium text-gray-700 hover:bg-gray-50">
+                        Preview
+                      </button>
+                      <button className="px-2 py-1 bg-blue-500 text-white shadow-sm rounded text-xs font-medium hover:bg-blue-600">
+                        Use
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Empty State */}
+            {filteredIcons.length === 0 && (
+              <div className="text-center py-12">
+                <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <Search className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No icons found</h3>
+                <p className="text-gray-500">Try selecting a different category to see more options.</p>
+              </div>
+            )}
+          </div>
+          
+          {/* Footer */}
+          <div className="border-t p-4 bg-gray-50">
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <div>
+                Showing {filteredIcons.length} of {Object.keys(CUSTOMIZATION_ICONS).length} customization options
+              </div>
+              <div className="flex items-center gap-4">
+                <button className="text-blue-600 hover:text-blue-700 font-medium">
+                  Request Custom Icon
+                </button>
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
+                  Apply to MTO
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Advanced Search Modal
+  const AdvancedSearchModal = ({ onClose }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 animate-fade-in">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl border border-blue-200 relative max-h-[80vh] overflow-y-auto">
+        <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-blue-600">
+          <X className="h-5 w-5" />
+        </button>
+        <h2 className="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
+          <Search className="h-5 w-5" />
+          Advanced Search
+        </h2>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">PO #</label>
+            <input 
+              type="text"
+              value={searchFilters.po}
+              onChange={(e) => setSearchFilters(f => ({ ...f, po: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter PO number"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
+            <input 
+              type="text"
+              value={searchFilters.sku}
+              onChange={(e) => setSearchFilters(f => ({ ...f, sku: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter SKU"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Brand</label>
+            <input 
+              type="text"
+              value={searchFilters.brand}
+              onChange={(e) => setSearchFilters(f => ({ ...f, brand: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter brand name"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Factory</label>
+            <select 
+              value={searchFilters.factory}
+              onChange={(e) => setSearchFilters(f => ({ ...f, factory: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Factories</option>
+              <option value="GZ Totes">GZ Totes</option>
+              <option value="EcoManufacturing Inc">EcoManufacturing Inc</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">XF Date</label>
+            <input 
+              type="date"
+              value={searchFilters.xfDate}
+              onChange={(e) => setSearchFilters(f => ({ ...f, xfDate: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">AWB #</label>
+            <input 
+              type="text"
+              value={searchFilters.awb}
+              onChange={(e) => setSearchFilters(f => ({ ...f, awb: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter AWB number"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select 
+              value={searchFilters.status}
+              onChange={(e) => setSearchFilters(f => ({ ...f, status: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Statuses</option>
+              {allStatusOptions.map(status => (
+                <option key={status} value={status}>{status}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Product Type</label>
+            <select 
+              value={searchFilters.productType}
+              onChange={(e) => setSearchFilters(f => ({ ...f, productType: e.target.value }))}
+              className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Products</option>
+              <option value="Initial Tote">Initial Tote</option>
+              <option value="Icon Tote">Icon Tote</option>
+              <option value="Blanket">Blanket</option>
+              <option value="Tote Bag">Tote Bag</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="flex justify-end gap-3 mt-6">
+          <button 
+            onClick={() => {
+              setSearchFilters({
+                po: '', sku: '', brand: '', factory: '', xfDate: '', awb: '', status: '', productType: ''
+              });
+            }}
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          >
+            Clear All
+          </button>
+          <button 
+            onClick={onClose}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Apply Search
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -1472,6 +3394,14 @@ const BaubleBarDemo = () => {
                   }`}
                 >
                   Admin Panel
+                </button>
+                <button
+                  onClick={() => setCurrentView('customization')}
+                  className={`px-4 py-2 rounded text-sm font-medium ${
+                    currentView === 'customization' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Customization
                 </button>
               </div>
             </div>
@@ -1537,6 +3467,7 @@ const BaubleBarDemo = () => {
         {currentView === 'brand' && <BrandView />}
         {currentView === 'factory' && <FactoryView />}
         {currentView === 'admin' && <AdminView />}
+        {currentView === 'customization' && <CustomizationView />}
       </div>
 
       {/* Chat Overlay */}
@@ -1544,8 +3475,25 @@ const BaubleBarDemo = () => {
       {qrMto && <QrModal mto={qrMto} onClose={() => setQrMto(null)} />}
       {qrSpot && <QrSpotModal mto={qrSpot.mto} spot={qrSpot.spot} value={qrSpot.value} onClose={() => setQrSpot(null)} />}
       {autoGenerateQr && <AutoGenerateQrModal mto={autoGenerateQr} onClose={() => setAutoGenerateQr(null)} />}
+      {showLocationMap && <LocationMapModal onClose={() => setShowLocationMap(false)} />}
+      {selectedProduct && <ProductDetailModal product={selectedProduct} onClose={() => setSelectedProduct(null)} />}
+      {showAuditLogs && <AuditLogsModal onClose={() => setShowAuditLogs(false)} />}
+      {showAdvancedSearch && <AdvancedSearchModal onClose={() => setShowAdvancedSearch(false)} />}
+      {showCustomizationGallery && <CustomizationGalleryModal onClose={() => setShowCustomizationGallery(false)} />}
     </div>
   );
 };
 
-export default BaubleBarDemo;
+const App = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<BaubleBarDemo />} />
+        <Route path="/products" element={<ProductCatalog />} />
+        <Route path="/customize" element={<CustomizationRouter />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
