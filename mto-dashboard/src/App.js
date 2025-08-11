@@ -1,12 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { Upload, MessageCircle, Bell, Package, Truck, CheckCircle2, AlertTriangle, Eye, Paperclip, Edit, Building2, FileText, Download, X, ChevronDown, ChevronRight, BarChart3, Clock, Play, Filter, Calendar, TrendingUp, MapPin, Layers, Star, ShoppingBag, Palette, Box, Search, Users, Zap, AlertCircle, Award, Target, Globe, Warehouse, Scan, PieChart, Activity, Maximize2, Minimize2, Camera, Music, Coffee, Plane, Flower, Heart, Sparkles, Baby, Cat, Dog, Home, Car, Utensils, Palette as PaletteIcon, Trophy, Gift, Sun, Moon, CloudRain, Zap as Lightning, Anchor, Mountain, Leaf, Diamond, Crown, Flame, Snowflake, Feather, Circle, Bug, Fish, Bird, TreePine, Apple, Cherry, Grape, Pizza, IceCream, Cake, Cookie } from 'lucide-react';
+import { Upload, MessageCircle, Bell, Package, Truck, CheckCircle2, AlertTriangle, Eye, Paperclip, Edit, Building2, FileText, Download, X, ChevronDown, ChevronRight, BarChart3, Clock, Play, Filter, Calendar, TrendingUp, MapPin, Layers, Star, ShoppingBag, Palette, Box, Search, Users, Zap, AlertCircle, Award, Target, Globe, Warehouse, Scan, PieChart, Activity, Maximize2, Minimize2, Camera, Music, Coffee, Plane, Flower, Heart, Sparkles, Baby, Cat, Dog, Home, Car, Utensils, Palette as PaletteIcon, Trophy, Gift, Sun, Moon, CloudRain, Zap as Lightning, Anchor, Mountain, Leaf, Diamond, Crown, Flame, Snowflake, Feather, Circle, Bug, Fish, Bird, TreePine, Apple, Cherry, Grape, Pizza, IceCream, Cake, Cookie, RefreshCw, Database } from 'lucide-react';
 import CustomizationRouter from './components/CustomizationRouter';
 import ProductCatalog from './components/ProductCatalog';
 import InventoryCartonSplit from './components/InventoryCartonSplit';
 import InventorySupervision from './components/InventorySupervision';
 import FactoryMTOManager from './components/FactoryMTOManager';
 import FactoryOverview from './components/FactoryOverview';
+import AnalyticsDashboard from './components/AnalyticsDashboard';
+import DefectManagement from './components/DefectManagement';
+import FactoryDefectManagement from './components/FactoryDefectManagement';
+import ERPSyncDashboard from './components/ERPSyncDashboard';
+import NetSuiteLogin from './components/NetSuiteLogin';
 
 // Comprehensive Icon Library for Customization Patches
 const CUSTOMIZATION_ICONS = {
@@ -175,10 +180,13 @@ const BaubleBarDemo = () => {
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState('brand');
   const [showChat, setShowChat] = useState(false);
+  const [chatContext, setChatContext] = useState(null);
   const [newMessage, setNewMessage] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [expandedPOs, setExpandedPOs] = useState(new Set());
   const [activeChatTab, setActiveChatTab] = useState('general');
+  const [showNetSuiteLogin, setShowNetSuiteLogin] = useState(false);
+  const [netsuiteAuth, setNetsuiteAuth] = useState(null);
   const [chatTabs, setChatTabs] = useState([
     { id: 'general', title: 'General', type: 'general', po: '', mto: '' }
   ]);
@@ -1402,6 +1410,32 @@ const BaubleBarDemo = () => {
                 Messages
               </div>
             </button>
+            <button
+              onClick={() => setBrandActiveTab('defects')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                brandActiveTab === 'defects'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Defects
+              </div>
+            </button>
+            <button
+              onClick={() => setBrandActiveTab('connections')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                brandActiveTab === 'connections'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Database className="h-4 w-4" />
+                Connections
+              </div>
+            </button>
           </nav>
         </div>
       </div>
@@ -1691,6 +1725,25 @@ const BaubleBarDemo = () => {
         )}
       </div>
 
+      {/* Analytics Dashboard Integration */}
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-blue-600" />
+              AWB Analytics Overview
+            </h2>
+            <p className="text-gray-600 mt-1">Air Waybill analysis and embroidery statistics</p>
+          </div>
+          <button
+            onClick={() => setBrandActiveTab('analytics-full')}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+          >
+            View Full Analytics →
+          </button>
+        </div>
+        <AnalyticsDashboard mtoData={brandPOs.flatMap(po => po.mtos || [])} />
+      </div>
 
         </div>
       )}
@@ -1926,6 +1979,22 @@ const BaubleBarDemo = () => {
                               <div className="font-bold text-lg">{monthData.toteBag}</div>
                             </div>
                           </div>
+                          {/* Month Chat Button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowChat(true);
+                              setChatContext({
+                                type: 'month',
+                                id: monthData.period,
+                                title: `Monthly Planning - ${monthData.period}`
+                              });
+                            }}
+                            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            title={`Chat about ${monthData.period} production`}
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -1974,11 +2043,29 @@ const BaubleBarDemo = () => {
                                   </div>
                                   
                                   {/* Daily Product Counts */}
-                                  <div className="flex gap-3 text-xs">
-                                    <span className="text-gray-600">IT: <strong>{dayData.initialTote}</strong></span>
-                                    <span className="text-gray-600">IC: <strong>{dayData.iconTote}</strong></span>
-                                    <span className="text-gray-600">BL: <strong>{dayData.blanket}</strong></span>
-                                    <span className="text-gray-600">TB: <strong>{dayData.toteBag}</strong></span>
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex gap-3 text-xs">
+                                      <span className="text-gray-600">IT: <strong>{dayData.initialTote}</strong></span>
+                                      <span className="text-gray-600">IC: <strong>{dayData.iconTote}</strong></span>
+                                      <span className="text-gray-600">BL: <strong>{dayData.blanket}</strong></span>
+                                      <span className="text-gray-600">TB: <strong>{dayData.toteBag}</strong></span>
+                                    </div>
+                                    {/* Day Chat Button */}
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setShowChat(true);
+                                        setChatContext({
+                                          type: 'day',
+                                          id: dayData.isoDate,
+                                          title: `Daily Production - ${dayData.fullDate}`
+                                        });
+                                      }}
+                                      className="p-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                                      title={`Chat about ${dayData.fullDate} production`}
+                                    >
+                                      <MessageCircle className="h-3 w-3" />
+                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -2032,7 +2119,7 @@ const BaubleBarDemo = () => {
                                               </div>
                                             </th>
                                             <th className="px-2 py-1.5 text-left font-medium text-gray-700 w-28">Production Info</th>
-                                            <th className="px-2 py-1.5 text-center font-medium text-gray-700 w-12"></th>
+                                            <th className="px-2 py-1.5 text-center font-medium text-gray-700 w-12">Chat</th>
                                           </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
@@ -2127,6 +2214,20 @@ const BaubleBarDemo = () => {
                                                     <span className="text-xs text-gray-500">
                                                       {mto.priority === 'high' ? '🔥 HIGH' : 'Normal'}
                                                     </span>
+                                                    {/* Defect Indicator */}
+                                                    {(Math.random() > 0.8 || mto.hasDefect) && (
+                                                      <button
+                                                        onClick={(e) => {
+                                                          e.stopPropagation();
+                                                          setBrandActiveTab('defects');
+                                                        }}
+                                                        className="flex items-center gap-1 mt-1 px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium hover:bg-red-200 transition-colors"
+                                                        title="This MTO has reported defects - Click to view"
+                                                      >
+                                                        <AlertTriangle className="h-3 w-3" />
+                                                        Defect
+                                                      </button>
+                                                    )}
                                                   </div>
                                                 </td>
                                                 
@@ -2322,10 +2423,22 @@ const BaubleBarDemo = () => {
                                                 
                                                 {/* Action */}
                                                 <td className="px-2 py-1.5 text-center">
-                                                  <div className="flex flex-col items-center gap-1">
-                                                    <ChevronRight className="h-4 w-4 text-gray-400 hover:text-blue-600" />
-                                                    <span className="text-xs text-gray-400">Details</span>
-                                                  </div>
+                                                  <button
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      setShowChat(true);
+                                                      setChatContext({
+                                                        type: 'mto',
+                                                        id: uniqueMtoId,
+                                                        title: `MTO ${uniqueMtoId}`,
+                                                        cartonId: mto.masterCarton
+                                                      });
+                                                    }}
+                                                    className="p-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+                                                    title={`Chat about MTO ${uniqueMtoId}`}
+                                                  >
+                                                    <MessageCircle className="h-3 w-3" />
+                                                  </button>
                                                 </td>
                                               </tr>
                                             );
@@ -2907,6 +3020,89 @@ const BaubleBarDemo = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Defects Tab */}
+      {brandActiveTab === 'defects' && (
+        <div className="space-y-6">
+          <DefectManagement 
+            mtoData={brandPOs.flatMap(po => po.mtos || [])} 
+            onOpenChat={(chatContext) => {
+              setShowChat(true);
+              setChatContext(chatContext);
+            }}
+          />
+        </div>
+      )}
+      
+      {/* Connections Tab */}
+      {brandActiveTab === 'connections' && (
+        <div className="space-y-6">
+          {/* NetSuite Connection Status */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <Database className="h-5 w-5 text-blue-600" />
+                  NetSuite Connection
+                </h2>
+                <p className="text-gray-600 mt-1">Manage your NetSuite integration and data sync</p>
+              </div>
+              <button
+                onClick={() => setShowNetSuiteLogin(true)}
+                className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
+                  netsuiteAuth
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+              >
+                {netsuiteAuth ? (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" />
+                    Connected
+                  </>
+                ) : (
+                  <>
+                    <Database className="h-4 w-4" />
+                    Connect
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {netsuiteAuth && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium text-green-900">Connected to NetSuite</p>
+                    <p className="text-sm text-green-700">Environment: {netsuiteAuth.environment} • Version: {netsuiteAuth.apiVersion}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* ERP Sync Dashboard */}
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <RefreshCw className="h-5 w-5 text-green-600" />
+                  ERP Sync Status
+                </h2>
+                <p className="text-gray-600 mt-1">Real-time synchronization between Factory, Brand, and NetSuite</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-green-600">Live Sync Active</span>
+                </div>
+              </div>
+            </div>
+            <ERPSyncDashboard />
           </div>
         </div>
       )}
@@ -3545,6 +3741,24 @@ const BaubleBarDemo = () => {
                     Messages
                   </div>
                 </button>
+                <button
+                  onClick={() => setFactoryActiveTab('defects')}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                    factoryActiveTab === 'defects'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    Defects
+                    {brandPOs.flatMap(po => po.mtos || []).filter(m => m.defectTag).length > 0 && (
+                      <span className="bg-red-100 text-red-600 rounded-full text-xs px-2 py-1">
+                        {brandPOs.flatMap(po => po.mtos || []).filter(m => m.defectTag).length}
+                      </span>
+                    )}
+                  </div>
+                </button>
               </nav>
             </div>
           </div>
@@ -3680,6 +3894,35 @@ const BaubleBarDemo = () => {
           </div>
         </div>
       )}
+      
+      {/* Defects Tab */}
+      {factoryActiveTab === 'defects' && (
+        <div className="space-y-6">
+          <FactoryDefectManagement 
+            mtoData={brandPOs.flatMap(po => po.mtos || [])} 
+            onOpenChat={(chatContext) => {
+              setShowChat(true);
+              setChatContext(chatContext);
+            }}
+            onCreateReproductionMTO={(reproductionData) => {
+              // Create reproduction MTO in the MTO management system
+              console.log('Creating reproduction MTO:', reproductionData);
+              // Add the reproduction MTO to the MTO management with defect tag
+              const newMTO = {
+                ...reproductionData,
+                id: `MTO-REP-${Date.now()}`,
+                status: 'pending',
+                priority: 'urgent',
+                defectTag: true,
+                reproductionFor: reproductionData.originalDefectId
+              };
+              // In a real app, you would update the MTO list here
+              alert(`Reproduction MTO created: ${newMTO.id}\nThis will appear in MTO Management with a DEFECT tag.`);
+            }}
+          />
+        </div>
+      )}
+      
       </div>
     );
   };
@@ -3689,6 +3932,45 @@ const BaubleBarDemo = () => {
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Admin Dashboard</h1>
+        
+        {/* New Component Navigation */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <button 
+            onClick={() => navigate('/analytics')}
+            className="p-6 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-center"
+          >
+            <BarChart3 className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+            <div className="font-semibold text-blue-900">Analytics Dashboard</div>
+            <div className="text-sm text-blue-700">AWB & Spots Analysis</div>
+          </button>
+          
+          <button 
+            onClick={() => navigate('/defects')}
+            className="p-6 bg-red-50 rounded-lg hover:bg-red-100 transition-colors text-center"
+          >
+            <AlertTriangle className="h-8 w-8 text-red-600 mx-auto mb-2" />
+            <div className="font-semibold text-red-900">Defect Management</div>
+            <div className="text-sm text-red-700">Pain Points & NetSuite</div>
+          </button>
+          
+          <button 
+            onClick={() => navigate('/sync')}
+            className="p-6 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-center"
+          >
+            <RefreshCw className="h-8 w-8 text-green-600 mx-auto mb-2" />
+            <div className="font-semibold text-green-900">ERP Sync</div>
+            <div className="text-sm text-green-700">Factory & Brand Sync</div>
+          </button>
+          
+          <button 
+            onClick={() => navigate('/factory')}
+            className="p-6 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors text-center"
+          >
+            <Package className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+            <div className="font-semibold text-orange-900">Factory Manager</div>
+            <div className="text-sm text-orange-700">Enhanced MTO System</div>
+          </button>
+        </div>
         
         {/* System Stats */}
         <div className="grid grid-cols-4 gap-6 mb-8">
@@ -4167,11 +4449,34 @@ const BaubleBarDemo = () => {
               {[1, 2, 3, 4, 5, 6].map((spot) => {
                 const spotValue = mto[`spot${spot}`] || (spot === 1 ? '129559' : spot === 2 ? '137234' : spot === 3 ? '128687' : spot === 4 ? '128698' : spot === 5 ? '128954' : '');
                 const spotRef = mto[`spot${spot}PatchRef`] || (spot === 1 ? '63 - Camera Icon' : spot === 2 ? '171 - Music Notes Icon' : spot === 3 ? '17 - Spicy Margarita Icon' : spot === 4 ? '30 - Airplane Icon' : spot === 5 ? '38 - H - Classic Letter' : '');
+                const iconData = getIconFromPatchRef(spotRef);
+                const patchPreview = spotValue ? generatePatchPreview(spotRef, spotValue) : null;
                 
                 return (
                   <div key={spot} className="text-center">
                     <div className="font-bold text-blue-600 mb-2">SPOT {spot}</div>
-                    <div className={`bg-white rounded-lg p-4 border-2 ${spotValue ? 'border-blue-300' : 'border-gray-300'}`}>
+                    <div className={`bg-white rounded-lg p-4 border-2 ${spotValue ? 'border-blue-300' : 'border-gray-300'} flex flex-col items-center`}>
+                      {/* Show actual icon/patch preview */}
+                      {patchPreview ? (
+                        <div className="mb-3">
+                          <PatchPreview 
+                            patchData={patchPreview} 
+                            size="xlarge" 
+                          />
+                        </div>
+                      ) : iconData ? (
+                        <div className={`w-20 h-20 mb-3 rounded-full flex items-center justify-center ${iconData.bg} ${iconData.color}`}>
+                          {React.createElement(iconData.icon, { 
+                            size: 32, 
+                            className: 'drop-shadow-sm' 
+                          })}
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+                          <span className="text-2xl text-gray-400">{spot}</span>
+                        </div>
+                      )}
+                      
                       <div className="font-mono text-sm mb-1">{spotValue || '—'}</div>
                       <div className="text-xs text-gray-600">{spotRef || '—'}</div>
                       {spotValue && (
@@ -5001,9 +5306,24 @@ const BaubleBarDemo = () => {
                   </div>
                 )}
               </div>
-              <div className="text-sm text-gray-600">
-                {currentView === 'brand' ? 'Alice Chen (BaubleBar)' : 
-                 currentView === 'factory' ? 'John Kim (GZ Totes)' : 'System Admin'}
+              <div className="flex items-center gap-4">
+                {currentView === 'brand' && (
+                  <button
+                    onClick={() => setShowNetSuiteLogin(true)}
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      netsuiteAuth 
+                        ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                        : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                    }`}
+                  >
+                    <Database className="h-4 w-4" />
+                    {netsuiteAuth ? 'NetSuite Connected' : 'Connect to NetSuite'}
+                  </button>
+                )}
+                <div className="text-sm text-gray-600">
+                  {currentView === 'brand' ? 'Alice Chen (BaubleBar)' : 
+                   currentView === 'factory' ? 'John Kim (GZ Totes)' : 'System Admin'}
+                </div>
               </div>
             </div>
           </div>
@@ -5027,6 +5347,16 @@ const BaubleBarDemo = () => {
       {showAuditLogs && <AuditLogsModal onClose={() => setShowAuditLogs(false)} />}
       {showAdvancedSearch && <AdvancedSearchModal onClose={() => setShowAdvancedSearch(false)} />}
       {showCustomizationGallery && <CustomizationGalleryModal onClose={() => setShowCustomizationGallery(false)} />}
+      {showNetSuiteLogin && (
+        <NetSuiteLogin 
+          onLogin={(authData) => {
+            setNetsuiteAuth(authData);
+            setShowNetSuiteLogin(false);
+            console.log('NetSuite authenticated:', authData);
+          }}
+          onClose={() => setShowNetSuiteLogin(false)}
+        />
+      )}
       {selectedCustomizationProduct && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-50">
           <div className="h-full w-full">
@@ -5048,6 +5378,10 @@ const App = () => {
         <Route path="/" element={<BaubleBarDemo />} />
         <Route path="/products" element={<ProductCatalog />} />
         <Route path="/customize" element={<CustomizationRouter />} />
+        <Route path="/analytics" element={<AnalyticsDashboard />} />
+        <Route path="/defects" element={<DefectManagement />} />
+        <Route path="/sync" element={<ERPSyncDashboard />} />
+        <Route path="/factory" element={<FactoryMTOManager />} />
       </Routes>
     </Router>
   );

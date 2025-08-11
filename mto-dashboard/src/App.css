@@ -36,3 +36,16 @@
     transform: rotate(360deg);
   }
 }
+
+@keyframes scan-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.animate-scan-progress {
+  animation: scan-progress 2s ease-in-out forwards;
+}

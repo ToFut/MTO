@@ -19,3 +19,26 @@ Brand dashboard -
 6.	Proactive Suggestions 
 Improve generally all system UI/UX yet make it super easy to use and intuitive 
 
+
+
+Customization 4
+
+
+Barcode – icons in line ID and in popup - put some random icons that will be visually
+
+
+Analytic per emoderiry just by AWB not what producing
+
+Account	PO#	Reference #/eTail Order Line Id	PID#	Q'TY(PCS)	Description of Goods	 spots statistics		by size by amount per spot
+
+
+Chat MTO month / day / id / carton make exist in all areas in the system 
+
+Pain points –defected replacement - missing, defect bag production defect embroidery --- fetch from Netsuite
+
+NEW add logic - Shipping -> check -> defect -> -> scanner for barcode ref SO -> issue drop (missing, defect bag production defect embroidery ) -> 
+Reproduce -> replacement MTO injection with defection highlight in MTO line 
+Reject -> Chat
+
+
+Showing Sync with Netsuite / ERP – factory / brand -- like system sync page to factory and to brand showing conenction and transferring to MTOs / POs from pure ERp data to fuly MTOs

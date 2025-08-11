@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Play, Pause, CheckCircle2, AlertCircle, Clock, Eye, Zap, ArrowRight, Circle, Dot, MoreHorizontal, Search, Filter, Calendar, User, Package2, Target, Timer, ChevronDown, ChevronRight, RefreshCw, FastForward, Image, X, MessageCircle, AlertTriangle, TrendingUp, Truck, Send, Users, Factory, BarChart3, TrendingDown, AlertOctagon, CheckSquare, Activity } from 'lucide-react';
+import { Play, Pause, CheckCircle2, AlertCircle, Clock, Eye, Zap, ArrowRight, Circle, Dot, MoreHorizontal, Search, Filter, Calendar, User, Package2, Target, Timer, ChevronDown, ChevronRight, RefreshCw, FastForward, Image, X, MessageCircle, AlertTriangle, TrendingUp, Truck, Send, Users, Factory, BarChart3, TrendingDown, AlertOctagon, CheckSquare, Activity, QrCode, Scan, Hash, Star, Camera, Coffee, Heart, Sun, Crown, Gift } from 'lucide-react';
 
 const FactoryMTOManager = ({ mtoData = [] }) => {
   const [selectedStatus, setSelectedStatus] = useState('active'); // active, completed, all
@@ -36,14 +36,25 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
       const station = stations[index % stations.length];
       const priority = priorities[index % priorities.length];
       
-      // Generate customization spots
+      // Generate customization spots with icons
       const spotCount = Math.floor(Math.random() * 6) + 1;
       const spotColors = ['#FF6B35', '#4ECDC4', '#FFE66D', '#9B59B6', '#E74C3C', '#2ECC71'];
+      const iconTypes = [
+        { icon: Star, name: 'Star' },
+        { icon: Heart, name: 'Heart' },
+        { icon: Camera, name: 'Camera' },
+        { icon: Coffee, name: 'Coffee' },
+        { icon: Sun, name: 'Sun' },
+        { icon: Crown, name: 'Crown' },
+        { icon: Gift, name: 'Gift' }
+      ];
+      
       const customizations = Array.from({ length: spotCount }, (_, spotIdx) => ({
         spot: spotIdx + 1,
         type: ['Patch', 'Embroidery', 'Print', 'Logo', 'Text', 'Icon'][spotIdx % 6],
         name: [`Logo ${spotIdx + 1}`, `Text ${spotIdx + 1}`, `Icon ${spotIdx + 1}`, `Patch ${spotIdx + 1}`][spotIdx % 4],
         color: spotColors[spotIdx % spotColors.length],
+        icon: iconTypes[spotIdx % iconTypes.length],
         status: status === 'completed' ? 'completed' : 
                 status === 'quality_check' ? 'in_review' :
                 status === 'in_progress' ? (spotIdx < 2 ? 'completed' : 'in_progress') : 'ready'
@@ -411,13 +422,31 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
   const sendChatMessage = () => {
     if (!chatMessage.trim()) return;
     
-    console.log('Sending message:', {
+    const messageData = {
       context: chatContext,
       message: chatMessage,
-      timestamp: new Date().toISOString()
-    });
+      timestamp: new Date().toISOString(),
+      sender: 'Production Manager',
+      messageId: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      // Enhanced tracking data
+      trackingInfo: {
+        month: chatContext.type === 'month' ? chatContext.id : new Date().toISOString().slice(0, 7),
+        day: chatContext.type === 'day' ? chatContext.id : new Date().toISOString().split('T')[0],
+        mtoId: chatContext.type === 'mto' ? chatContext.id : null,
+        cartonId: chatContext.cartonId || null,
+        facility: 'Main Production Floor',
+        department: 'MTO Assembly'
+      }
+    };
     
-    // In real implementation, this would send to backend
+    console.log('Enhanced Chat Message:', messageData);
+    
+    // In real implementation, this would integrate with:
+    // - Slack/Teams channels
+    // - Production management system
+    // - Quality control notifications
+    // - Supplier communications
+    
     setChatMessage('');
     setShowChat(false);
   };
@@ -638,11 +667,17 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
                                     <div key={mto.id} className="p-4 hover:bg-slate-50 transition-colors">
                                       <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4">
-                                          {/* MTO Info */}
+                                          {/* MTO Info with Barcode Icons */}
                                           <div className="flex items-center gap-2">
                                             <div className={`w-3 h-3 rounded-full ${statusConfig.dot}`}></div>
                                             <div>
-                                              <p className="font-bold text-slate-900 text-sm">{mto.id}</p>
+                                              <div className="flex items-center gap-2">
+                                                <p className="font-bold text-slate-900 text-sm">{mto.id}</p>
+                                                <div className="flex items-center gap-1">
+                                                  <QrCode className="h-3 w-3 text-blue-600 cursor-pointer hover:text-blue-800" title="QR Code" />
+                                                  <Hash className="h-3 w-3 text-green-600 cursor-pointer hover:text-green-800" title="Barcode" />
+                                                </div>
+                                              </div>
                                               <p className="text-xs text-slate-500">{mto.sku}</p>
                                             </div>
                                           </div>
@@ -771,11 +806,17 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
                           <div className="flex items-center justify-between">
                             {/* Left Section: MTO Number, Spots, SKU */}
                             <div className="flex items-center gap-4">
-                              {/* MTO Number with Status Indicator */}
+                              {/* MTO Number with Status Indicator and Barcode Icons */}
                               <div className="flex items-center gap-2">
                                 <div className={`w-3 h-3 rounded-full ${statusConfig.dot}`}></div>
                                 <div>
-                                  <p className="font-bold text-slate-900 text-sm">{mto.id}</p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-bold text-slate-900 text-sm">{mto.id}</p>
+                                    <div className="flex items-center gap-1">
+                                      <QrCode className="h-4 w-4 text-blue-600 cursor-pointer hover:text-blue-800" title="QR Code" />
+                                      <Hash className="h-4 w-4 text-green-600 cursor-pointer hover:text-green-800" title="Barcode" />
+                                    </div>
+                                  </div>
                                   <p className="text-xs text-slate-500">MTO Number</p>
                                 </div>
                               </div>
@@ -783,23 +824,26 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
                               {/* Customization Spots with Icons */}
                               <div className="flex flex-col">
                                 <div className="flex items-center gap-1 mb-1">
-                                  {mto.customizations.slice(0, 4).map((spot, idx) => (
-                                    <div
-                                      key={idx}
-                                      className="w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold text-white shadow-sm"
-                                      style={{ backgroundColor: spot.color }}
-                                      title={`Spot ${spot.spot}: ${spot.name} - ${spot.status}`}
-                                    >
-                                      {spot.spot}
-                                    </div>
-                                  ))}
+                                  {mto.customizations.slice(0, 4).map((spot, idx) => {
+                                    const IconComponent = spot.icon?.icon || Star;
+                                    return (
+                                      <div
+                                        key={idx}
+                                        className="w-8 h-8 rounded-md flex items-center justify-center shadow-sm border border-white"
+                                        style={{ backgroundColor: spot.color }}
+                                        title={`Spot ${spot.spot}: ${spot.name} (${spot.icon?.name || 'Icon'}) - ${spot.status}`}
+                                      >
+                                        <IconComponent className="h-4 w-4 text-white" />
+                                      </div>
+                                    );
+                                  })}
                                   {mto.customizations.length > 4 && (
-                                    <div className="w-7 h-7 rounded-md bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">
+                                    <div className="w-8 h-8 rounded-md bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 border border-slate-300">
                                       +{mto.customizations.length - 4}
                                     </div>
                                   )}
                                 </div>
-                                <p className="text-xs text-slate-500">{mto.customizations.length} spots</p>
+                                <p className="text-xs text-slate-500">{mto.customizations.length} spots with icons</p>
                               </div>
 
                               {/* SKU & Product Image */}

@@ -31,3 +31,25 @@ ETA Shipment
 
 New tab end user
 2D / 3D product customization next gen tab 
+
+
+Customization 4
+
+
+Barcode – icons in each MTO line id
+Analytic per emoderiry just by AWB not what producing
+Login to Netsuite and then get MTO final
+
+Chat MTO month / day / id / carton
+
+Pain points –defected replacement - missing, defect bag production defect embroidery --- fetch from Netsuite
+
+Shipping -> check -> defect -> -> scanner for barcode ref SO -> issue drop (missing, defect bag production defect embroidery ) -> 
+Reproduce -> replacement MTO injection with defection highlight in MTO line 
+Reject -> Chat
+MTO -> mail -> approval -> re-production on same MTO ID
+
+Invesntory gap 
+
+Showing Sync with Netsuite / ERP – factory / brand
+
