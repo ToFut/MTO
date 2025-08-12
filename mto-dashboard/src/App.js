@@ -12,6 +12,8 @@ import DefectManagement from './components/DefectManagement';
 import FactoryDefectManagement from './components/FactoryDefectManagement';
 import ERPSyncDashboard from './components/ERPSyncDashboard';
 import NetSuiteLogin from './components/NetSuiteLogin';
+import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
+import LanguageToggle from './components/ui/LanguageToggle';
 
 // Comprehensive Icon Library for Customization Patches
 const CUSTOMIZATION_ICONS = {
@@ -178,6 +180,7 @@ const PatchPreview = ({ patchData, size = 'small' }) => {
 
 const BaubleBarDemo = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [currentView, setCurrentView] = useState('brand');
   const [showChat, setShowChat] = useState(false);
   const [chatContext, setChatContext] = useState(null);
@@ -1249,8 +1252,8 @@ const BaubleBarDemo = () => {
       <div className="p-6 border-b">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-semibold">Inventory Management</h2>
-            <p className="text-gray-600 mt-1">Auto-calculated material needs and allocation</p>
+            <h2 className="text-xl font-semibold">{t('nav.inventory', 'Inventory Management')}</h2>
+            <p className="text-gray-600 mt-1">{t('common.autoCalculatedMaterial', 'Auto-calculated material needs and allocation')}</p>
           </div>
           <div className="flex gap-2">
             <span className="text-sm text-gray-600">
@@ -1263,13 +1266,13 @@ const BaubleBarDemo = () => {
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Material</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Needed</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">In Stock</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Allocated</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Used By MTOs</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('table.material', 'Material')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('table.needed', 'Needed')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('table.inStock', 'In Stock')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('table.allocated', 'Allocated')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('table.available', 'Available')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('table.status', 'Status')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('table.usedByMTOs', 'Used By MTOs')}</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -1311,7 +1314,7 @@ const BaubleBarDemo = () => {
                           // Auto-create chat for material inquiry
                         }}
                         className="text-blue-600 hover:text-blue-800 text-xs bg-blue-50 px-2 py-1 rounded flex items-center gap-1"
-                        title="AutoChat with factory about material availability"
+                        title={t('descriptions.autoChatWithFactory', 'AutoChat with factory about material availability')}
                       >
                         <MessageCircle className="h-3 w-3" />
                         Inquiry
@@ -1329,7 +1332,7 @@ const BaubleBarDemo = () => {
       <div className="p-6 border-t bg-gray-50">
         <div className="flex justify-between items-center">
           <div className="text-sm text-gray-600">
-            Inventory auto-deducted when MTOs marked "Shipped"
+            {t('descriptions.inventoryAutoDeducted', 'Inventory auto-deducted when MTOs marked "Shipped"')}
           </div>
           <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 text-sm">
             Update Stock Levels
@@ -1355,7 +1358,7 @@ const BaubleBarDemo = () => {
             >
               <div className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Overview
+                {t('nav.overview', 'Overview')}
               </div>
             </button>
             <button
@@ -1368,7 +1371,7 @@ const BaubleBarDemo = () => {
             >
               <div className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
-                MTO Management
+                {t('nav.mtoManagement', 'MTO Management')}
               </div>
             </button>
             <button
@@ -1381,7 +1384,7 @@ const BaubleBarDemo = () => {
             >
               <div className="flex items-center gap-2">
                 <Truck className="h-4 w-4" />
-                Shipping
+                {t('nav.shipping', 'Shipping')}
               </div>
             </button>
             <button
@@ -1394,7 +1397,7 @@ const BaubleBarDemo = () => {
             >
               <div className="flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
-                Inventory
+                {t('nav.inventory', 'Inventory')}
               </div>
             </button>
             <button
@@ -1407,7 +1410,7 @@ const BaubleBarDemo = () => {
             >
               <div className="flex items-center gap-2">
                 <MessageCircle className="h-4 w-4" />
-                Messages
+                {t('nav.messages', 'Messages')}
               </div>
             </button>
             <button
@@ -1420,7 +1423,7 @@ const BaubleBarDemo = () => {
             >
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" />
-                Defects
+                {t('nav.defects', 'Defects')}
               </div>
             </button>
             <button
@@ -1433,7 +1436,7 @@ const BaubleBarDemo = () => {
             >
               <div className="flex items-center gap-2">
                 <Database className="h-4 w-4" />
-                Connections
+                {t('nav.connections', 'Connections')}
               </div>
             </button>
           </nav>
@@ -1449,9 +1452,9 @@ const BaubleBarDemo = () => {
           <div>
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <Award className="h-5 w-5 text-yellow-500" />
-              Best Products Overview
+              {t('brand.bestProducts', 'Best Products Overview')}
             </h2>
-            <p className="text-gray-600 mt-1">Top performing SKUs by volume, delays, and ratings</p>
+            <p className="text-gray-600 mt-1">{t('brand.topPerformingSKUs', 'Top performing SKUs by volume, delays, and ratings')}</p>
           </div>
         </div>
         
@@ -1481,17 +1484,17 @@ const BaubleBarDemo = () => {
               
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Volume</span>
+                  <span className="text-gray-600">{t('common.volume', 'Volume')}</span>
                   <span className="font-medium">{product.orderVolume}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Delays</span>
+                  <span className="text-gray-600">{t('common.delays', 'Delays')}</span>
                   <span className={`font-medium ${product.delayFreq > 10 ? 'text-red-600' : 'text-green-600'}`}>
                     {product.delayFreq}%
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-600">Rating</span>
+                  <span className="text-gray-600">{t('common.rating', 'Rating')}</span>
                   <div className="flex items-center gap-1">
                     <Star className="h-3 w-3 text-yellow-500 fill-current" />
                     <span className="font-medium">{product.rating}</span>
@@ -1511,9 +1514,9 @@ const BaubleBarDemo = () => {
           <div>
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
               <PieChart className="h-5 w-5 text-blue-500" />
-              MTO Volume Analytics
+              {t('brand.mtoVolumeAnalytics', 'MTO Volume Analytics')}
             </h2>
-            <p className="text-gray-600 mt-1">Track MTO volume by product type over time</p>
+            <p className="text-gray-600 mt-1">{t('brand.trackMTOVolume', 'Track MTO volume by product type over time')}</p>
           </div>
           <div className="flex items-center gap-3">
             <button 
@@ -1525,7 +1528,7 @@ const BaubleBarDemo = () => {
               }`}
             >
               <MapPin className="h-4 w-4" />
-              {showLocationView ? 'Hide Location View' : 'Sales by Location'}
+              {showLocationView ? t('common.hideLocationView', 'Hide Location View') : t('common.salesByLocation', 'Sales by Location')}
             </button>
             <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
               <button
@@ -1534,7 +1537,7 @@ const BaubleBarDemo = () => {
                   selectedTimeframe === 'day' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Per Day
+                {t('common.perDay', 'Per Day')}
               </button>
               <button
                 onClick={() => setSelectedTimeframe('month')}
@@ -1542,7 +1545,7 @@ const BaubleBarDemo = () => {
                   selectedTimeframe === 'month' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Per Month
+                {t('common.perMonth', 'Per Month')}
               </button>
             </div>
           </div>
@@ -1600,19 +1603,19 @@ const BaubleBarDemo = () => {
             <div className="flex justify-center gap-6 mt-4">
               <div className="flex items-center gap-2 text-sm">
                 <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                <span>Initial Tote</span>
+                <span>{t('products.initialTote', 'Initial Tote')}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <div className="w-3 h-3 bg-purple-500 rounded"></div>
-                <span>Icon Tote</span>
+                <span>{t('products.iconTote', 'Icon Tote')}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                <span>Blanket</span>
+                <span>{t('products.blanket', 'Blanket')}</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <div className="w-3 h-3 bg-green-500 rounded"></div>
-                <span>Tote Bag</span>
+                <span>{t('products.toteBag', 'Tote Bag')}</span>
               </div>
             </div>
           </div>
@@ -1624,9 +1627,9 @@ const BaubleBarDemo = () => {
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                 <Globe className="h-5 w-5 text-blue-500" />
-                Sales by Location
+                {t('common.salesByLocation', 'Sales by Location')}
               </h3>
-              <p className="text-sm text-gray-600 mt-1">Revenue distribution by shipping regions and zip codes</p>
+              <p className="text-sm text-gray-600 mt-1">{t('descriptions.revenueDistribution', 'Revenue distribution by shipping regions and zip codes')}</p>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1634,7 +1637,7 @@ const BaubleBarDemo = () => {
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg p-6 h-80 flex items-center justify-center">
                 <div className="text-center text-gray-700">
                   <Globe className="h-16 w-16 mx-auto mb-4 text-blue-500" />
-                  <p className="text-lg font-medium mb-2">Interactive Sales Map</p>
+                  <p className="text-lg font-medium mb-2">{t('descriptions.interactiveSalesMap', 'Interactive Sales Map')}</p>
                   <p className="text-sm text-gray-600 mb-2">Visual distribution of sales data:</p>
                   <div className="text-xs text-gray-500 space-y-1">
                     <p>• Regional performance by zip codes</p>
@@ -1647,7 +1650,7 @@ const BaubleBarDemo = () => {
               {/* Sales Regions Data */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <h4 className="font-medium text-gray-900">Regional Overview</h4>
+                  <h4 className="font-medium text-gray-900">{t('descriptions.regionalOverview', 'Regional Overview')}</h4>
                   <div className="text-sm text-gray-500">
                     Total: ${brandSalesLocationData.reduce((sum, region) => sum + region.totalSales, 0).toLocaleString()}
                   </div>
@@ -1670,15 +1673,15 @@ const BaubleBarDemo = () => {
                       <div className="grid grid-cols-3 gap-3 text-sm mb-3">
                         <div className="text-center">
                           <div className="font-bold text-blue-600">${(region.totalSales / 1000).toFixed(0)}k</div>
-                          <div className="text-xs text-gray-600">Sales</div>
+                          <div className="text-xs text-gray-600">{t('table.sales', 'Sales')}</div>
                         </div>
                         <div className="text-center">
                           <div className="font-bold text-green-600">{region.totalOrders}</div>
-                          <div className="text-xs text-gray-600">Orders</div>
+                          <div className="text-xs text-gray-600">{t('table.orders', 'Orders')}</div>
                         </div>
                         <div className="text-center">
                           <div className="font-bold text-purple-600">${Math.round(region.totalSales / region.totalOrders)}</div>
-                          <div className="text-xs text-gray-600">Avg</div>
+                          <div className="text-xs text-gray-600">{t('table.avg', 'Avg')}</div>
                         </div>
                       </div>
                       
@@ -1703,13 +1706,13 @@ const BaubleBarDemo = () => {
                       <div className="font-bold text-blue-600">
                         {brandSalesLocationData.reduce((sum, region) => sum + region.totalOrders, 0).toLocaleString()}
                       </div>
-                      <div className="text-gray-600">Total Orders</div>
+                      <div className="text-gray-600">{t('table.totalOrders', 'Total Orders')}</div>
                     </div>
                     <div>
                       <div className="font-bold text-green-600">
                         {Math.round(brandSalesLocationData.reduce((sum, region) => sum + region.growth, 0) / brandSalesLocationData.length)}%
                       </div>
-                      <div className="text-gray-600">Avg Growth</div>
+                      <div className="text-gray-600">{t('table.avgGrowth', 'Avg Growth')}</div>
                     </div>
                     <div>
                       <div className="font-bold text-purple-600">
@@ -1820,18 +1823,18 @@ const BaubleBarDemo = () => {
                   <input 
                     type="date" 
                     className="border border-gray-300 rounded px-2 py-1 text-xs w-28"
-                    placeholder="From"
+                    placeholder={t('forms.from', 'From')}
                   />
                   <span className="text-xs text-gray-500">to</span>
                   <input 
                     type="date" 
                     className="border border-gray-300 rounded px-2 py-1 text-xs w-28"
-                    placeholder="To"
+                    placeholder={t('forms.to', 'To')}
                   />
                 </div>
                 <div className="flex items-center gap-1">
                   <button className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Apply
+                    {t('common.apply', 'Apply')}
                   </button>
                   <button className="px-2 py-1 text-xs border border-gray-300 rounded hover:bg-gray-50">
                     Clear
@@ -1870,12 +1873,12 @@ const BaubleBarDemo = () => {
 
                          {/* Product Type Tabs */}
              <div className="flex gap-1 bg-gray-100 rounded p-1 mb-3">
-               {['All Products', 'Initial Tote', 'Icon Tote', 'Blanket', 'Tote Bag'].map((product) => (
+               {[t('common.allProducts', 'All Products'), t('products.initialTote', 'Initial Tote'), t('products.iconTote', 'Icon Tote'), t('products.blanket', 'Blanket'), t('products.toteBag', 'Tote Bag')].map((product, index) => (
                  <button
                    key={product}
-                   onClick={() => setSelectedProductType(product === 'All Products' ? null : product)}
+                   onClick={() => setSelectedProductType(index === 0 ? null : product)}
                    className={`px-2 py-1 rounded text-xs font-medium transition-colors flex-1 ${
-                     (selectedProductType || 'All Products') === product ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                     (selectedProductType || t('common.allProducts', 'All Products')) === product ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                    }`}
                  >
                    {product}
@@ -2088,7 +2091,7 @@ const BaubleBarDemo = () => {
                                       </div>
                                     </div>
                                     <div className="flex items-center gap-1">
-                                      <input type="text" placeholder="Search ID..." className="text-xs border border-gray-300 rounded px-2 py-1 w-24" />
+                                      <input type="text" placeholder={t('forms.searchID', 'Search ID...')} className="text-xs border border-gray-300 rounded px-2 py-1 w-24" />
                                       <button className="px-2 py-1 text-xs bg-blue-600 text-white rounded">Filter</button>
                                     </div>
                                   </div>
@@ -2112,7 +2115,7 @@ const BaubleBarDemo = () => {
                                                 <button
                                                   onClick={() => setShowCustomizationGallery(true)}
                                                   className="p-1 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded transition-colors"
-                                                  title="View Customization Gallery"
+                                                  title={t('descriptions.viewCustomizationGallery', 'View Customization Gallery')}
                                                 >
                                                   <Palette className="h-3 w-3" />
                                                 </button>
@@ -2609,13 +2612,13 @@ const BaubleBarDemo = () => {
                 <div className="flex gap-2">
                   <input 
                     type="text" 
-                    placeholder="Search shipments..." 
+                    placeholder={t('forms.searchShipments', 'Search shipments...')} 
                     className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                   <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                    <option>All Status</option>
-                    <option>In Transit</option>
-                    <option>Delivered</option>
+                    <option>{t('common.allStatus', 'All Status')}</option>
+                    <option>{t('mto.inTransit', 'In Transit')}</option>
+                    <option>{t('mto.delivered', 'Delivered')}</option>
                     <option>Pending</option>
                   </select>
                 </div>
@@ -2649,7 +2652,7 @@ const BaubleBarDemo = () => {
                             <div 
                               className="font-medium text-blue-600 hover:text-blue-800 cursor-pointer flex items-center gap-1 group"
                               onClick={() => handleReferenceNumberClick(shipment)}
-                              title="Click to view MTO details"
+                              title={t('descriptions.viewMTODetails', 'Click to view MTO details')}
                             >
                               <span>Ref: {shipment.referenceNumber}</span>
                               <Eye className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -2866,8 +2869,8 @@ const BaubleBarDemo = () => {
             {/* Recent Conversations */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Recent Conversations</h3>
-                <button className="text-blue-600 hover:text-blue-800 text-sm">View All</button>
+                <h3 className="text-lg font-semibold text-gray-900">{t('factory.recentConversations', 'Recent Conversations')}</h3>
+                <button className="text-blue-600 hover:text-blue-800 text-sm">{t('common.viewAll', 'View All')}</button>
               </div>
               <div className="space-y-3">
                 {chatTabs.slice(0, 5).map((tab) => (
@@ -2882,7 +2885,7 @@ const BaubleBarDemo = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <div className="font-medium text-gray-900">{tab.title}</div>
-                        <div className="text-sm text-gray-600">{tab.type === 'general' ? 'General Discussion' : `PO: ${tab.po} Line: ${tab.mto}`}</div>
+                        <div className="text-sm text-gray-600">{tab.type === 'general' ? t('factory.generalDiscussion', 'General Discussion') : `PO: ${tab.po} Line: ${tab.mto}`}</div>
                       </div>
                       <div className="text-xs text-gray-500">2m ago</div>
                     </div>
@@ -2894,23 +2897,23 @@ const BaubleBarDemo = () => {
             {/* Priority Issues */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Priority Issues</h3>
+                <h3 className="text-lg font-semibold text-gray-900">{t('factory.priorityIssues', 'Priority Issues')}</h3>
                 <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">3 Active</span>
               </div>
               <div className="space-y-3">
                 <div className="border-l-4 border-red-500 pl-3 py-2">
-                  <div className="font-medium text-gray-900">Material Shortage - PO124</div>
-                  <div className="text-sm text-gray-600">Patch 129559 out of stock</div>
+                  <div className="font-medium text-gray-900">{t('factory.materialShortage', 'Material Shortage')} - PO124</div>
+                  <div className="text-sm text-gray-600">{t('factory.patchOutOfStock', 'Patch 129559 out of stock')}</div>
                   <div className="text-xs text-gray-500 mt-1">2 hours ago</div>
                 </div>
                 <div className="border-l-4 border-yellow-500 pl-3 py-2">
-                  <div className="font-medium text-gray-900">Quality Issue - PO123</div>
-                  <div className="text-sm text-gray-600">QC photos need review</div>
+                  <div className="font-medium text-gray-900">{t('factory.qualityIssue', 'Quality Issue')} - PO123</div>
+                  <div className="text-sm text-gray-600">{t('factory.qcPhotosReview', 'QC photos need review')}</div>
                   <div className="text-xs text-gray-500 mt-1">4 hours ago</div>
                 </div>
                 <div className="border-l-4 border-orange-500 pl-3 py-2">
-                  <div className="font-medium text-gray-900">Shipping Delay - PO125</div>
-                  <div className="text-sm text-gray-600">Carrier pickup delayed</div>
+                  <div className="font-medium text-gray-900">{t('factory.shippingDelay', 'Shipping Delay')} - PO125</div>
+                  <div className="text-sm text-gray-600">{t('factory.carrierPickupDelayed', 'Carrier pickup delayed')}</div>
                   <div className="text-xs text-gray-500 mt-1">6 hours ago</div>
                 </div>
               </div>
@@ -2966,14 +2969,14 @@ const BaubleBarDemo = () => {
               <h3 className="text-lg font-semibold text-gray-900">Recent Messages</h3>
               <div className="flex gap-2">
                 <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm">
-                  <option>All Messages</option>
-                  <option>PO Related</option>
-                  <option>General</option>
+                  <option>{t('common.allMessages', 'All Messages')}</option>
+                  <option>{t('mto.poRelated', 'PO Related')}</option>
+                  <option>{t('mto.general', 'General')}</option>
                   <option>Issues</option>
                 </select>
                 <input 
                   type="text" 
-                  placeholder="Search messages..." 
+                  placeholder={t('forms.searchMessages', 'Search messages...')} 
                   className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-48"
                 />
               </div>
@@ -3357,7 +3360,7 @@ const BaubleBarDemo = () => {
                           <button
                             onClick={e => { e.stopPropagation(); setQrSpot({ mto, spot, value }); }}
                             className="mt-1 p-1 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700 border border-blue-300 shadow focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            title="Generate QR for this spot"
+                            title={t('descriptions.generateQRCode', 'Generate QR for this spot')}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h4v4H3V3zm0 14h4v4H3v-4zm14-14h4v4h-4V3zm0 14h4v4h-4v-4z" /></svg>
                           </button>
@@ -3407,19 +3410,19 @@ const BaubleBarDemo = () => {
       <div className="space-y-6">
         <div className="bg-white rounded-lg shadow-sm">
           <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold">Shipping & Tracking</h2>
-            <p className="text-gray-600 mt-1">Manage shipments and tracking information</p>
+            <h2 className="text-xl font-semibold">{t('factory.shippingTracking', 'Shipping & Tracking')}</h2>
+            <p className="text-gray-600 mt-1">{t('factory.manageShipments', 'Manage shipments and tracking information')}</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">PO / Line ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ship Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Carrier</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tracking Number</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Files</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('factory.poLineID', 'PO / Line ID')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('factory.shipDate', 'Ship Date')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('factory.carrier', 'Carrier')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('factory.trackingNumber', 'Tracking Number')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.files', 'Files')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('common.actions', 'Actions')}</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
@@ -3464,7 +3467,7 @@ const BaubleBarDemo = () => {
                       </select>
                     </td>
                     <td className="px-6 py-4">
-                      <input type="text" placeholder="Enter tracking #" className="border rounded px-2 py-1 text-sm font-mono" />
+                      <input type="text" placeholder={t('forms.enterTracking', 'Enter tracking #')} className="border rounded px-2 py-1 text-sm font-mono" />
                     </td>
                     <td className="px-6 py-4">
                       <button className="text-blue-600 hover:text-blue-800 text-sm">
@@ -3643,8 +3646,8 @@ const BaubleBarDemo = () => {
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Factory Dashboard</h1>
-              <p className="text-gray-600 mt-1">Manage production, inventory, and shipping</p>
+              <h1 className="text-2xl font-bold text-gray-900">{t('factory.dashboardTitle', 'Factory Dashboard')}</h1>
+              <p className="text-gray-600 mt-1">{t('factory.manageProduction', 'Manage production, inventory, and shipping')}</p>
             </div>
             <button 
               onClick={() => {
@@ -3653,7 +3656,7 @@ const BaubleBarDemo = () => {
               className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50"
             >
               <MessageCircle className="h-4 w-4" />
-              Messages
+              {t('factory.messages', 'Messages')}
             </button>
           </div>
 
@@ -3671,7 +3674,7 @@ const BaubleBarDemo = () => {
                 >
                   <div className="flex items-center gap-2">
                     <BarChart3 className="h-4 w-4" />
-                    Overview
+                    {t('nav.overview', 'Overview')}
                   </div>
                 </button>
                 <button
@@ -3684,7 +3687,7 @@ const BaubleBarDemo = () => {
                 >
                   <div className="flex items-center gap-2">
                     <Package className="h-4 w-4" />
-                    MTO Management
+                    {t('nav.mtoManagement', 'MTO Management')}
                     {factoryMTOs.filter(m => m.progress < 4).length > 0 && (
                       <span className="bg-blue-100 text-blue-600 rounded-full text-xs px-2 py-1">
                         {factoryMTOs.filter(m => m.progress < 4).length}
@@ -3702,7 +3705,7 @@ const BaubleBarDemo = () => {
                 >
                   <div className="flex items-center gap-2">
                     <Truck className="h-4 w-4" />
-                    Shipping
+                    {t('nav.shipping', 'Shipping')}
                     {factoryMTOs.filter(m => m.progress === 3).length > 0 && (
                       <span className="bg-green-100 text-green-600 rounded-full text-xs px-2 py-1">
                         {factoryMTOs.filter(m => m.progress === 3).length}
@@ -3720,7 +3723,7 @@ const BaubleBarDemo = () => {
                 >
                   <div className="flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
-                    Inventory
+                    {t('nav.inventory', 'Inventory')}
                     {inventoryData.filter(i => i.status === 'short').length > 0 && (
                       <span className="bg-red-100 text-red-600 rounded-full text-xs px-2 py-1">
                         {inventoryData.filter(i => i.status === 'short').length}
@@ -3738,7 +3741,7 @@ const BaubleBarDemo = () => {
                 >
                   <div className="flex items-center gap-2">
                     <MessageCircle className="h-4 w-4" />
-                    Messages
+                    {t('nav.messages', 'Messages')}
                   </div>
                 </button>
                 <button
@@ -3751,7 +3754,7 @@ const BaubleBarDemo = () => {
                 >
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4" />
-                    Defects
+                    {t('nav.defects', 'Defects')}
                     {brandPOs.flatMap(po => po.mtos || []).filter(m => m.defectTag).length > 0 && (
                       <span className="bg-red-100 text-red-600 rounded-full text-xs px-2 py-1">
                         {brandPOs.flatMap(po => po.mtos || []).filter(m => m.defectTag).length}
@@ -3795,15 +3798,15 @@ const BaubleBarDemo = () => {
           <div className="bg-white rounded-lg shadow-sm p-6">
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Factory Messages</h2>
-                <p className="text-gray-600 mt-1">Communicate with brands and manage production updates</p>
+                <h2 className="text-xl font-bold text-gray-900">{t('factory.factoryMessages', 'Factory Messages')}</h2>
+                <p className="text-gray-600 mt-1">{t('factory.communicateWithBrands', 'Communicate with brands and manage production updates')}</p>
               </div>
               <button 
                 onClick={() => setShowChat(true)}
                 className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
               >
                 <MessageCircle className="h-4 w-4" />
-                New Message
+                {t('factory.newMessage', 'New Message')}
               </button>
             </div>
 
@@ -3861,7 +3864,7 @@ const BaubleBarDemo = () => {
                       <div className="flex justify-between items-start">
                         <div>
                           <div className="font-medium text-gray-900">{tab.title}</div>
-                          <div className="text-sm text-gray-600">{tab.type === 'general' ? 'General Discussion' : `PO: ${tab.po} Line: ${tab.mto}`}</div>
+                          <div className="text-sm text-gray-600">{tab.type === 'general' ? t('factory.generalDiscussion', 'General Discussion') : `PO: ${tab.po} Line: ${tab.mto}`}</div>
                         </div>
                         <div className="text-xs text-gray-500">2m ago</div>
                       </div>
@@ -3931,7 +3934,7 @@ const BaubleBarDemo = () => {
   const AdminView = () => (
     <div className="max-w-7xl mx-auto space-y-6">
       <div className="bg-white rounded-lg shadow-sm p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Admin Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">{t('nav.adminDashboard', 'Admin Dashboard')}</h1>
         
         {/* New Component Navigation */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
@@ -3940,8 +3943,8 @@ const BaubleBarDemo = () => {
             className="p-6 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors text-center"
           >
             <BarChart3 className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-            <div className="font-semibold text-blue-900">Analytics Dashboard</div>
-            <div className="text-sm text-blue-700">AWB & Spots Analysis</div>
+            <div className="font-semibold text-blue-900">{t('nav.analyticsDashboard', 'Analytics Dashboard')}</div>
+            <div className="text-sm text-blue-700">{t('nav.awbSpotsAnalysis', 'AWB & Spots Analysis')}</div>
           </button>
           
           <button 
@@ -3949,8 +3952,8 @@ const BaubleBarDemo = () => {
             className="p-6 bg-red-50 rounded-lg hover:bg-red-100 transition-colors text-center"
           >
             <AlertTriangle className="h-8 w-8 text-red-600 mx-auto mb-2" />
-            <div className="font-semibold text-red-900">Defect Management</div>
-            <div className="text-sm text-red-700">Pain Points & NetSuite</div>
+            <div className="font-semibold text-red-900">{t('nav.defectManagement', 'Defect Management')}</div>
+            <div className="text-sm text-red-700">{t('nav.painPointsNetSuite', 'Pain Points & NetSuite')}</div>
           </button>
           
           <button 
@@ -3958,8 +3961,8 @@ const BaubleBarDemo = () => {
             className="p-6 bg-green-50 rounded-lg hover:bg-green-100 transition-colors text-center"
           >
             <RefreshCw className="h-8 w-8 text-green-600 mx-auto mb-2" />
-            <div className="font-semibold text-green-900">ERP Sync</div>
-            <div className="text-sm text-green-700">Factory & Brand Sync</div>
+            <div className="font-semibold text-green-900">{t('nav.erpSync', 'ERP Sync')}</div>
+            <div className="text-sm text-green-700">{t('nav.factoryBrandSync', 'Factory & Brand Sync')}</div>
           </button>
           
           <button 
@@ -3967,8 +3970,8 @@ const BaubleBarDemo = () => {
             className="p-6 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors text-center"
           >
             <Package className="h-8 w-8 text-orange-600 mx-auto mb-2" />
-            <div className="font-semibold text-orange-900">Factory Manager</div>
-            <div className="text-sm text-orange-700">Enhanced MTO System</div>
+            <div className="font-semibold text-orange-900">{t('nav.factoryManager', 'Factory Manager')}</div>
+            <div className="text-sm text-orange-700">{t('nav.enhancedMTOSystem', 'Enhanced MTO System')}</div>
           </button>
         </div>
         
@@ -3976,17 +3979,17 @@ const BaubleBarDemo = () => {
         <div className="grid grid-cols-4 gap-6 mb-8">
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <div className="text-3xl font-bold text-blue-600">{brandPOs.length}</div>
-            <div className="text-gray-600">Active POs</div>
+            <div className="text-gray-600">{t('nav.activePOs', 'Active POs')}</div>
           </div>
           <div className="text-center p-4 bg-green-50 rounded-lg">
             <div className="text-3xl font-bold text-green-600">8</div>
-            <div className="text-gray-600">Active Users</div>
+            <div className="text-gray-600">{t('nav.activeUsers', 'Active Users')}</div>
           </div>
           <div className="text-center p-4 bg-yellow-50 rounded-lg">
             <div className="text-3xl font-bold text-yellow-600">
               {inventoryData.filter(m => m.status === 'short').length}
             </div>
-            <div className="text-gray-600">Material Alerts</div>
+            <div className="text-gray-600">{t('nav.materialAlerts', 'Material Alerts')}</div>
           </div>
           <div className="text-center p-4 bg-purple-50 rounded-lg">
             <div className="text-3xl font-bold text-purple-600">2</div>
@@ -4206,7 +4209,7 @@ const BaubleBarDemo = () => {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="p-2 border rounded-lg hover:bg-gray-50"
-                title="Attach file"
+                title={t('descriptions.attachFile', 'Attach file')}
               >
                 <Paperclip className="h-4 w-4" />
               </button>
@@ -4298,7 +4301,7 @@ const BaubleBarDemo = () => {
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Factory</label>
                 <select value={filters.factory} onChange={e => setFilters(f => ({ ...f, factory: e.target.value }))} className="border rounded px-2 py-1 text-sm w-full">
-                  <option value="">All</option>
+                  <option value="">{t('common.allStatus', 'All')}</option>
                   {factoryList.map(fac => <option key={fac} value={fac}>{fac}</option>)}
                 </select>
               </div>
@@ -4313,7 +4316,7 @@ const BaubleBarDemo = () => {
             </div>
           </div>
           <div className="flex justify-end mt-6">
-            <button onClick={() => setShow(false)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Apply</button>
+            <button onClick={() => setShow(false)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">{t('common.apply', 'Apply')}</button>
           </div>
         </div>
       </div>
@@ -4483,7 +4486,7 @@ const BaubleBarDemo = () => {
                         <button
                           onClick={() => setQrSpot({ mto, spot: `spot${spot}`, value: spotValue })}
                           className="mt-2 p-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-700"
-                          title="Generate QR"
+                          title={t('descriptions.generateQRCode', 'Generate QR')}
                         >
                           <Scan className="h-4 w-4" />
                         </button>
@@ -4538,7 +4541,7 @@ const BaubleBarDemo = () => {
           <button onClick={onClose} className="absolute top-3 right-3 text-gray-400 hover:text-blue-600"><X className="h-5 w-5" /></button>
           <h2 className="text-lg font-bold text-blue-700 mb-2">MTO QR Code</h2>
           <div className="mb-2 text-xs text-gray-500">PO: {mto.po} | Line: {mto.lineId}</div>
-          <img src={qrUrl} alt="QR Code" className="mb-4 border rounded" />
+          <img src={qrUrl} alt={t('descriptions.qrCodeAlt', 'QR Code')} className="mb-4 border rounded" />
           <a href={qrUrl} download={`PeakOrder_PO${mto.po}_Line${mto.lineId}_QR.png`} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Download QR</a>
         </div>
       </div>
@@ -4557,7 +4560,7 @@ const BaubleBarDemo = () => {
           <h2 className="text-lg font-bold text-blue-700 mb-2">Spot QR Code</h2>
           <div className="mb-2 text-xs text-gray-500">PO: {mto.po} | Line: {mto.lineId} | {spot.replace('spot', 'SPOT ').toUpperCase()}</div>
           <div className="mb-2 text-xs text-gray-700">Value: {value}</div>
-          <img src={qrUrl} alt="QR Code" className="mb-4 border rounded" />
+          <img src={qrUrl} alt={t('descriptions.qrCodeAlt', 'QR Code')} className="mb-4 border rounded" />
           <a href={qrUrl} download={`PeakOrder_PO${mto.po}_Line${mto.lineId}_${spot.toUpperCase()}_QR.png`} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Download QR</a>
         </div>
       </div>
@@ -4627,7 +4630,7 @@ const BaubleBarDemo = () => {
         </button>
         <h2 className="text-xl font-bold text-blue-700 mb-4 flex items-center gap-2">
           <MapPin className="h-5 w-5" />
-          Brand Sales by Location
+          {t('common.brandSalesByLocation', 'Brand Sales by Location')}
         </h2>
         <p className="text-sm text-gray-600 mb-6">Sales data recognized by shipping zip codes and product categories</p>
         
@@ -5071,7 +5074,7 @@ const BaubleBarDemo = () => {
                   Request Custom Icon
                 </button>
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium">
-                  Apply to MTO
+                  {t('common.applyToMTO', 'Apply to MTO')}
                 </button>
               </div>
             </div>
@@ -5101,7 +5104,7 @@ const BaubleBarDemo = () => {
               value={searchFilters.po}
               onChange={(e) => setSearchFilters(f => ({ ...f, po: e.target.value }))}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter PO number"
+              placeholder={t('forms.enterPONumber', 'Enter PO number')}
             />
           </div>
           
@@ -5112,7 +5115,7 @@ const BaubleBarDemo = () => {
               value={searchFilters.sku}
               onChange={(e) => setSearchFilters(f => ({ ...f, sku: e.target.value }))}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter SKU"
+              placeholder={t('forms.enterSKU', 'Enter SKU')}
             />
           </div>
           
@@ -5123,7 +5126,7 @@ const BaubleBarDemo = () => {
               value={searchFilters.brand}
               onChange={(e) => setSearchFilters(f => ({ ...f, brand: e.target.value }))}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter brand name"
+              placeholder={t('forms.enterBrandName', 'Enter brand name')}
             />
           </div>
           
@@ -5134,7 +5137,7 @@ const BaubleBarDemo = () => {
               onChange={(e) => setSearchFilters(f => ({ ...f, factory: e.target.value }))}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Factories</option>
+              <option value="">{t('common.allFactories', 'All Factories')}</option>
               <option value="GZ Totes">GZ Totes</option>
               <option value="EcoManufacturing Inc">EcoManufacturing Inc</option>
             </select>
@@ -5157,7 +5160,7 @@ const BaubleBarDemo = () => {
               value={searchFilters.awb}
               onChange={(e) => setSearchFilters(f => ({ ...f, awb: e.target.value }))}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter AWB number"
+              placeholder={t('forms.enterAWBNumber', 'Enter AWB number')}
             />
           </div>
           
@@ -5168,7 +5171,7 @@ const BaubleBarDemo = () => {
               onChange={(e) => setSearchFilters(f => ({ ...f, status: e.target.value }))}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Statuses</option>
+              <option value="">{t('common.allStatuses', 'All Statuses')}</option>
               {allStatusOptions.map(status => (
                 <option key={status} value={status}>{status}</option>
               ))}
@@ -5182,11 +5185,11 @@ const BaubleBarDemo = () => {
               onChange={(e) => setSearchFilters(f => ({ ...f, productType: e.target.value }))}
               className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Products</option>
-              <option value="Initial Tote">Initial Tote</option>
-              <option value="Icon Tote">Icon Tote</option>
-              <option value="Blanket">Blanket</option>
-              <option value="Tote Bag">Tote Bag</option>
+              <option value="">{t('common.allProducts', 'All Products')}</option>
+              <option value="Initial Tote">{t('products.initialTote', 'Initial Tote')}</option>
+              <option value="Icon Tote">{t('products.iconTote', 'Icon Tote')}</option>
+              <option value="Blanket">{t('products.blanket', 'Blanket')}</option>
+              <option value="Tote Bag">{t('products.toteBag', 'Tote Bag')}</option>
             </select>
           </div>
         </div>
@@ -5200,13 +5203,13 @@ const BaubleBarDemo = () => {
             }}
             className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
           >
-            Clear All
+            {t('common.clearAll', 'Clear All')}
           </button>
           <button 
             onClick={onClose}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            Apply Search
+            {t('common.applySearch', 'Apply Search')}
           </button>
         </div>
       </div>
@@ -5230,7 +5233,7 @@ const BaubleBarDemo = () => {
                     currentView === 'brand' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Brand Dashboard
+                  {t('nav.brand', 'Brand Dashboard')}
                 </button>
                 <button
                   onClick={() => setCurrentView('factory')}
@@ -5238,7 +5241,7 @@ const BaubleBarDemo = () => {
                     currentView === 'factory' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Factory Dashboard
+                  {t('nav.factory', 'Factory Dashboard')}
                 </button>
                 <button
                   onClick={() => setCurrentView('admin')}
@@ -5246,7 +5249,7 @@ const BaubleBarDemo = () => {
                     currentView === 'admin' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Admin Panel
+                  {t('nav.admin', 'Admin Panel')}
                 </button>
                 <button
                   onClick={() => setCurrentView('customization')}
@@ -5254,12 +5257,12 @@ const BaubleBarDemo = () => {
                     currentView === 'customization' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Customization
+                  {t('nav.customization', 'Customization')}
                 </button>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
@@ -5276,7 +5279,7 @@ const BaubleBarDemo = () => {
                 {showNotifications && (
                   <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border z-50">
                     <div className="p-4 border-b">
-                      <h3 className="font-semibold">Notifications</h3>
+                      <h3 className="font-semibold">{t('common.notifications', 'Notifications')}</h3>
                     </div>
                     <div className="max-h-64 overflow-y-auto">
                       {notifications.map((notification) => (
@@ -5306,6 +5309,7 @@ const BaubleBarDemo = () => {
                   </div>
                 )}
               </div>
+              <LanguageToggle compact={true} />
               <div className="flex items-center gap-4">
                 {currentView === 'brand' && (
                   <button
@@ -5317,12 +5321,12 @@ const BaubleBarDemo = () => {
                     }`}
                   >
                     <Database className="h-4 w-4" />
-                    {netsuiteAuth ? 'NetSuite Connected' : 'Connect to NetSuite'}
+                    {netsuiteAuth ? t('common.netSuiteConnected', 'NetSuite Connected') : t('common.connectToNetSuite', 'Connect to NetSuite')}
                   </button>
                 )}
                 <div className="text-sm text-gray-600">
                   {currentView === 'brand' ? 'Alice Chen (BaubleBar)' : 
-                   currentView === 'factory' ? 'John Kim (GZ Totes)' : 'System Admin'}
+                   currentView === 'factory' ? 'John Kim (GZ Totes)' : t('common.systemAdmin', 'System Admin')}
                 </div>
               </div>
             </div>
@@ -5373,17 +5377,19 @@ const BaubleBarDemo = () => {
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<BaubleBarDemo />} />
-        <Route path="/products" element={<ProductCatalog />} />
-        <Route path="/customize" element={<CustomizationRouter />} />
-        <Route path="/analytics" element={<AnalyticsDashboard />} />
-        <Route path="/defects" element={<DefectManagement />} />
-        <Route path="/sync" element={<ERPSyncDashboard />} />
-        <Route path="/factory" element={<FactoryMTOManager />} />
-      </Routes>
-    </Router>
+    <LanguageProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<BaubleBarDemo />} />
+          <Route path="/products" element={<ProductCatalog />} />
+          <Route path="/customize" element={<CustomizationRouter />} />
+          <Route path="/analytics" element={<AnalyticsDashboard />} />
+          <Route path="/defects" element={<DefectManagement />} />
+          <Route path="/sync" element={<ERPSyncDashboard />} />
+          <Route path="/factory" element={<FactoryMTOManager />} />
+        </Routes>
+      </Router>
+    </LanguageProvider>
   );
 };
 

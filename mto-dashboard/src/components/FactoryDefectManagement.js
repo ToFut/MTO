@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { AlertTriangle, AlertCircle, CheckCircle2, X, Eye, Send, Package, MessageCircle, RefreshCw, Clock, ArrowRight, QrCode, Hash, Camera, Zap, ChevronRight, Upload, Factory, FileText, User } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductionMTO }) => {
+  const { t } = useLanguage();
   const [selectedDefect, setSelectedDefect] = useState(null);
   const [respondingTo, setRespondingTo] = useState(null);
   const [response, setResponse] = useState({
@@ -61,11 +63,11 @@ const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductio
 
   const getStatusConfig = (status) => {
     const configs = {
-      assigned: { color: 'bg-red-100 text-red-800', icon: AlertCircle, label: 'New Assignment' },
-      acknowledged: { color: 'bg-yellow-100 text-yellow-800', icon: Eye, label: 'Acknowledged' },
-      investigating: { color: 'bg-orange-100 text-orange-800', icon: AlertTriangle, label: 'Investigating' },
-      reproducing: { color: 'bg-blue-100 text-blue-800', icon: RefreshCw, label: 'Reproducing' },
-      completed: { color: 'bg-green-100 text-green-800', icon: CheckCircle2, label: 'Completed' }
+      assigned: { color: 'bg-red-100 text-red-800', icon: AlertCircle, label: t('quality.newAssignment', 'New Assignment') },
+      acknowledged: { color: 'bg-yellow-100 text-yellow-800', icon: Eye, label: t('quality.acknowledged', 'Acknowledged') },
+      investigating: { color: 'bg-orange-100 text-orange-800', icon: AlertTriangle, label: t('quality.investigating', 'Investigating') },
+      reproducing: { color: 'bg-blue-100 text-blue-800', icon: RefreshCw, label: t('quality.reproducing', 'Reproducing') },
+      completed: { color: 'bg-green-100 text-green-800', icon: CheckCircle2, label: t('quality.completed', 'Completed') }
     };
     return configs[status] || configs.assigned;
   };
@@ -147,9 +149,9 @@ const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductio
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
               <Factory className="h-8 w-8 text-orange-600" />
-              Factory Defect Management
+              {t('quality.factoryDefectManagement', 'Factory Defect Management')}
             </h1>
-            <p className="text-slate-600 mt-1">Respond to brand-reported defects and manage reproductions</p>
+            <p className="text-slate-600 mt-1">{t('quality.respondToDefects', 'Respond to brand-reported defects and manage reproductions')}</p>
           </div>
           
           <div className="flex items-center gap-4">
@@ -165,7 +167,7 @@ const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductio
           <div className="bg-red-50 p-4 rounded-xl border border-red-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-red-600 font-medium">New Assignments</p>
+                <p className="text-sm text-red-600 font-medium">{t('quality.newAssignments', 'New Assignments')}</p>
                 <p className="text-2xl font-bold text-red-900">{defectsByStatus.new.length}</p>
               </div>
               <AlertCircle className="h-8 w-8 text-red-600" />
@@ -175,7 +177,7 @@ const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductio
           <div className="bg-orange-50 p-4 rounded-xl border border-orange-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-orange-600 font-medium">Investigating</p>
+                <p className="text-sm text-orange-600 font-medium">{t('quality.investigating', 'Investigating')}</p>
                 <p className="text-2xl font-bold text-orange-900">
                   {defectData.filter(d => d.status === 'investigating').length}
                 </p>
@@ -187,7 +189,7 @@ const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductio
           <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-600 font-medium">Reproducing</p>
+                <p className="text-sm text-blue-600 font-medium">{t('quality.reproducing', 'Reproducing')}</p>
                 <p className="text-2xl font-bold text-blue-900">
                   {defectData.filter(d => d.status === 'reproducing').length}
                 </p>
@@ -199,7 +201,7 @@ const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductio
           <div className="bg-purple-50 p-4 rounded-xl border border-purple-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-purple-600 font-medium">Critical Priority</p>
+                <p className="text-sm text-purple-600 font-medium">{t('quality.criticalPriority', 'Critical Priority')}</p>
                 <p className="text-2xl font-bold text-purple-900">
                   {defectData.filter(d => d.severity === 'critical').length}
                 </p>
@@ -211,10 +213,163 @@ const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductio
           <div className="bg-green-50 p-4 rounded-xl border border-green-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-600 font-medium">Completed</p>
+                <p className="text-sm text-green-600 font-medium">{t('quality.completed', 'Completed')}</p>
                 <p className="text-2xl font-bold text-green-900">{defectsByStatus.completed.length}</p>
               </div>
               <CheckCircle2 className="h-8 w-8 text-green-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Factory Experience & Expertise Section */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-sm border border-blue-200 p-6 mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <Factory className="h-6 w-6 text-blue-600" />
+            {t('quality.factoryExperience', 'Factory Experience')}
+          </h2>
+          <span className="text-sm text-slate-600">{t('quality.last30Days', 'Last 30 Days')}</span>
+        </div>
+        
+        <div className="grid grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl p-4 border border-blue-100">
+            <div className="flex items-center justify-between mb-2">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">+15%</span>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">98.5%</p>
+            <p className="text-sm text-slate-600">{t('quality.defectResolutionRate', 'Defect Resolution Rate')}</p>
+            <div className="mt-2 text-xs text-slate-500">
+              <div>Total: 243 defects</div>
+              <div>Resolved: 239</div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 border border-blue-100">
+            <div className="flex items-center justify-between mb-2">
+              <Clock className="h-5 w-5 text-blue-600" />
+              <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">-2hrs</span>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">4.2 hrs</p>
+            <p className="text-sm text-slate-600">{t('quality.avgResponseTime', 'Avg Response Time')}</p>
+            <div className="mt-2 text-xs text-slate-500">
+              <div>Critical: 1.5 hrs</div>
+              <div>Normal: 6.8 hrs</div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 border border-blue-100">
+            <div className="flex items-center justify-between mb-2">
+              <RefreshCw className="h-5 w-5 text-purple-600" />
+              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">100%</span>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">87%</p>
+            <p className="text-sm text-slate-600">{t('quality.reproductionSuccess', 'Reproduction Success')}</p>
+            <div className="mt-2 text-xs text-slate-500">
+              <div>Reproductions: 45</div>
+              <div>Successful: 39</div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 border border-blue-100">
+            <div className="flex items-center justify-between mb-2">
+              <Zap className="h-5 w-5 text-yellow-600" />
+              <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">A+</span>
+            </div>
+            <p className="text-2xl font-bold text-slate-900">9.6/10</p>
+            <p className="text-sm text-slate-600">{t('quality.qualityScore', 'Quality Score')}</p>
+            <div className="mt-2 text-xs text-slate-500">
+              <div>{t('quality.defectsResolved', 'Defects Resolved')}: 239</div>
+              <div>{t('quality.pendingReview', 'Pending Review')}: 4</div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Experience Details */}
+        <div className="mt-6 grid grid-cols-3 gap-4">
+          <div className="bg-white/50 rounded-lg p-3 border border-blue-100">
+            <h4 className="font-semibold text-slate-900 text-sm mb-2">{t('quality.rootCauseAnalysis', 'Root Cause Analysis')}</h4>
+            <div className="space-y-1 text-xs">
+              <div className="flex justify-between">
+                <span className="text-slate-600">Material Issues</span>
+                <span className="font-medium">32%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-600">Process Deviation</span>
+                <span className="font-medium">28%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-600">Equipment Calibration</span>
+                <span className="font-medium">20%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-600">Human Error</span>
+                <span className="font-medium">15%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-600">Design Issue</span>
+                <span className="font-medium">5%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white/50 rounded-lg p-3 border border-blue-100">
+            <h4 className="font-semibold text-slate-900 text-sm mb-2">{t('quality.preventiveMeasures', 'Preventive Measures')}</h4>
+            <div className="space-y-1 text-xs text-slate-600">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="h-3 w-3 text-green-600 mt-0.5" />
+                <span>Enhanced QC checkpoints added</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="h-3 w-3 text-green-600 mt-0.5" />
+                <span>Staff retrained on critical processes</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="h-3 w-3 text-green-600 mt-0.5" />
+                <span>Equipment maintenance schedule updated</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="h-3 w-3 text-green-600 mt-0.5" />
+                <span>Material supplier quality audit completed</span>
+              </div>
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="h-3 w-3 text-green-600 mt-0.5" />
+                <span>SOP documentation improved</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white/50 rounded-lg p-3 border border-blue-100">
+            <h4 className="font-semibold text-slate-900 text-sm mb-2">Top Performing Areas</h4>
+            <div className="space-y-2 text-xs">
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-600">Embroidery Station</span>
+                  <span className="font-medium text-green-600">99.2%</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <div className="bg-green-500 h-1.5 rounded-full" style={{ width: '99.2%' }}></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-600">Material Prep</span>
+                  <span className="font-medium text-green-600">98.7%</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <div className="bg-green-500 h-1.5 rounded-full" style={{ width: '98.7%' }}></div>
+                </div>
+              </div>
+              <div>
+                <div className="flex justify-between mb-1">
+                  <span className="text-slate-600">Final QC</span>
+                  <span className="font-medium text-blue-600">97.5%</span>
+                </div>
+                <div className="w-full bg-slate-200 rounded-full h-1.5">
+                  <div className="bg-blue-500 h-1.5 rounded-full" style={{ width: '97.5%' }}></div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

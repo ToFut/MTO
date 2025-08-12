@@ -1,7 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { Play, Pause, CheckCircle2, AlertCircle, Clock, Eye, Zap, ArrowRight, Circle, Dot, MoreHorizontal, Search, Filter, Calendar, User, Package2, Target, Timer, ChevronDown, ChevronRight, RefreshCw, FastForward, Image, X, MessageCircle, AlertTriangle, TrendingUp, Truck, Send, Users, Factory, BarChart3, TrendingDown, AlertOctagon, CheckSquare, Activity, QrCode, Scan, Hash, Star, Camera, Coffee, Heart, Sun, Crown, Gift } from 'lucide-react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const FactoryMTOManager = ({ mtoData = [] }) => {
+  const { t } = useLanguage();
   const [selectedStatus, setSelectedStatus] = useState('active'); // active, completed, all
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPriority, setSelectedPriority] = useState('all');
@@ -25,11 +27,11 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
       const statuses = ['pending', 'in_progress', 'quality_check', 'completed', 'on_hold'];
       const priorities = ['urgent', 'high', 'medium', 'low'];
       const stations = [
-        { id: 'station-1', name: 'Material Prep Station' },
-        { id: 'station-2', name: 'Customization Station' },
-        { id: 'station-3', name: 'QC Station' },
-        { id: 'station-4', name: 'Packaging Station' },
-        { id: 'station-5', name: 'XF Transfer Station' }
+        { id: 'station-1', name: t('factory.materialPrepStation', 'Material Prep Station') },
+        { id: 'station-2', name: t('factory.customizationStation', 'Customization Station') },
+        { id: 'station-3', name: t('factory.qcStation', 'QC Station') },
+        { id: 'station-4', name: t('factory.packagingStation', 'Packaging Station') },
+        { id: 'station-5', name: t('factory.xfTransferStation', 'XF Transfer Station') }
       ];
       
       const status = statuses[index % statuses.length];
@@ -179,10 +181,10 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
       
       // Assign production stations based on status and index
       const stations = [
-        { id: 'station-1', name: 'Material Prep Station' },
-        { id: 'station-2', name: 'Customization Station' },
-        { id: 'station-3', name: 'QC Station' },
-        { id: 'station-4', name: 'Packaging Station' }
+        { id: 'station-1', name: t('factory.materialPrepStation', 'Material Prep Station') },
+        { id: 'station-2', name: t('factory.customizationStation', 'Customization Station') },
+        { id: 'station-3', name: t('factory.qcStation', 'QC Station') },
+        { id: 'station-4', name: t('factory.packagingStation', 'Packaging Station') }
       ];
       
       const station = stations[index % stations.length];
@@ -331,31 +333,31 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
       pending: { 
         color: 'bg-amber-100 text-amber-800 border-amber-200', 
         icon: Clock, 
-        label: 'Pending',
+        label: t('mto.pending', 'Pending'),
         dot: 'bg-amber-400'
       },
       in_progress: { 
         color: 'bg-blue-100 text-blue-800 border-blue-200', 
         icon: Play, 
-        label: 'In Progress',
+        label: t('mto.inProgress', 'In Progress'),
         dot: 'bg-blue-500'
       },
       quality_check: { 
         color: 'bg-purple-100 text-purple-800 border-purple-200', 
         icon: Eye, 
-        label: 'QC Review',
+        label: t('factory.qualityReview', 'QC Review'),
         dot: 'bg-purple-500'
       },
       completed: { 
         color: 'bg-green-100 text-green-800 border-green-200', 
         icon: CheckCircle2, 
-        label: 'Completed',
+        label: t('mto.completed', 'Completed'),
         dot: 'bg-green-500'
       },
       on_hold: { 
         color: 'bg-red-100 text-red-800 border-red-200', 
         icon: Pause, 
-        label: 'On Hold',
+        label: t('mto.onHold', 'On Hold'),
         dot: 'bg-red-500'
       }
     };
@@ -479,7 +481,7 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
                         : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    By Station
+                    {t('factory.byStation', 'By Station')}
                   </button>
                   <button
                     onClick={() => setViewType('timeline')}
@@ -489,7 +491,7 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
                         : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
-                    Timeline
+                    {t('factory.timeline', 'Timeline')}
                   </button>
                 </div>
               </div>
@@ -498,9 +500,9 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
                 {/* Status Filter Pills */}
                 <div className="flex items-center gap-2">
                 {[
-                  { key: 'active', label: 'Active', count: filteredMTOs.filter(m => ['pending', 'in_progress', 'quality_check'].includes(m.status)).length },
-                  { key: 'completed', label: 'Completed', count: filteredMTOs.filter(m => m.status === 'completed').length },
-                  { key: 'all', label: 'All', count: filteredMTOs.length }
+                  { key: 'active', label: t('factory.active', 'Active'), count: filteredMTOs.filter(m => ['pending', 'in_progress', 'quality_check'].includes(m.status)).length },
+                  { key: 'completed', label: t('factory.completedMTOs', 'Completed'), count: filteredMTOs.filter(m => m.status === 'completed').length },
+                  { key: 'all', label: t('common.viewAll', 'All'), count: filteredMTOs.length }
                 ].map(filter => (
                   <button
                     key={filter.key}
@@ -534,11 +536,11 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
                 onChange={(e) => setSelectedPriority(e.target.value)}
                 className="border border-slate-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="all">All Priorities</option>
-                <option value="urgent">Urgent</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
+                <option value="all">{t('factory.allPriorities', 'All Priorities')}</option>
+                <option value="urgent">{t('mto.urgent', 'Urgent')}</option>
+                <option value="high">{t('mto.high', 'High')}</option>
+                <option value="medium">{t('mto.medium', 'Medium')}</option>
+                <option value="low">{t('mto.low', 'Low')}</option>
               </select>
               </div>
             </div>
