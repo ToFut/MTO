@@ -12,6 +12,7 @@ import DefectManagement from './components/DefectManagement';
 import FactoryDefectManagement from './components/FactoryDefectManagement';
 import ERPSyncDashboard from './components/ERPSyncDashboard';
 import NetSuiteLogin from './components/NetSuiteLogin';
+import ShippingChat from './components/ShippingChat';
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import LanguageToggle from './components/ui/LanguageToggle';
 
@@ -2490,6 +2491,20 @@ const BaubleBarDemo = () => {
       {brandActiveTab === 'shipping' && (
         <div className="space-y-6">
           <InventoryCartonSplit mtoData={brandPOs.flatMap(po => po.mtos || [])} isShippingView={true} />
+          
+          {/* Shipping Chat Component */}
+          <ShippingChat 
+            shipmentData={shippingData}
+            onUpdateShipment={(id, updates) => {
+              // Handle shipment updates
+              console.log('Updating shipment:', id, updates);
+            }}
+            userRole="brand"
+            onOpenChat={(chatData) => {
+              // Handle opening chat
+              console.log('Opening chat:', chatData);
+            }}
+          />
         </div>
       )}
 

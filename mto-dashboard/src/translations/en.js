@@ -365,7 +365,19 @@ const translations = {
     destination: "Destination",
     origin: "Origin",
     packageWeight: "Package Weight",
-    dimensions: "Dimensions"
+    dimensions: "Dimensions",
+    chat: "Shipping Chat",
+    selectShipment: "Select a shipment",
+    chooseShipment: "Choose a shipment...",
+    po: "PO",
+    awb: "AWB",
+    carton: "Carton",
+    eta: "ETA",
+    status: "Status",
+    quickActions: "Quick Actions",
+    noMessages: "No messages yet. Start the conversation!",
+    typeMessage: "Type your message...",
+    send: "Send"
   },
 
   // Analytics & Reports

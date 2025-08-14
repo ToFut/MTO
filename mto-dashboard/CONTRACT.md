@@ -68,3 +68,9 @@ Per profile lang met
 ❌ No automated replacement order workflow (manual possible)
 ❌ No ongoing maintenance included (optional packages available)
 
+9.	Shipping Chat Process
+
+•	Brand System: Track shipment → Chat with factory about delays/issues → Monitor AWB status
+•	Factory System: Update shipping status → Chat with brand about logistics → Confirm delivery
+•	Shared System: Real-time chat during shipping phase → Track carton/AWB → Handle missing items (10-15%)
+

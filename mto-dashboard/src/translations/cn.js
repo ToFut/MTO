@@ -365,7 +365,19 @@ const translations = {
     destination: "目的地",
     origin: "起点",
     packageWeight: "包裹重量",
-    dimensions: "尺寸"
+    dimensions: "尺寸",
+    chat: "运输聊天",
+    selectShipment: "选择运输",
+    chooseShipment: "选择运输...",
+    po: "采购订单",
+    awb: "空运单",
+    carton: "纸箱",
+    eta: "预计到达时间",
+    status: "状态",
+    quickActions: "快速操作",
+    noMessages: "暂无消息。开始对话！",
+    typeMessage: "输入您的消息...",
+    send: "发送"
   },
 
   // Analytics & Reports

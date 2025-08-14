@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Play, Pause, CheckCircle2, AlertCircle, Clock, Eye, Zap, ArrowRight, Circle, Dot, MoreHorizontal, Search, Filter, Calendar, User, Package2, Target, Timer, ChevronDown, ChevronRight, RefreshCw, FastForward, Image, X, MessageCircle, AlertTriangle, TrendingUp, Truck, Send, Users, Factory, BarChart3, TrendingDown, AlertOctagon, CheckSquare, Activity, QrCode, Scan, Hash, Star, Camera, Coffee, Heart, Sun, Crown, Gift } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
+import ShippingChat from './ShippingChat';
 
 const FactoryMTOManager = ({ mtoData = [] }) => {
   const { t } = useLanguage();
@@ -1204,6 +1205,26 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
               </div>
             </div>
         )}
+
+        {/* Shipping Chat Component for Factory */}
+        <ShippingChat 
+          shipmentData={enhancedMTOData.filter(mto => mto.status === 'completed').map(mto => ({
+            id: mto.id,
+            po: mto.id,
+            awb: `AWB${mto.id.slice(-6)}`,
+            masterCarton: `MC${mto.id.slice(-4)}`,
+            eta: new Date(Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+            carrier: ['UPS', 'FedEx', 'DHL'][Math.floor(Math.random() * 3)],
+            status: ['Shipped', 'In Transit', 'Delivered'][Math.floor(Math.random() * 3)]
+          }))}
+          onUpdateShipment={(id, updates) => {
+            console.log('Factory updating shipment:', id, updates);
+          }}
+          userRole="factory"
+          onOpenChat={(chatData) => {
+            console.log('Factory opening chat:', chatData);
+          }}
+        />
       </div>
   );
 };
