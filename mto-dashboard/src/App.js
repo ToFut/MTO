@@ -263,7 +263,15 @@ const BaubleBarDemo = () => {
     
     // PO125 messages
     { id: 9, sender: 'Factory', message: 'PO125 Line 14 - Shipped! Tracking: 1Z0987654321', time: '1:00 PM', po: 'PO125', mto: '14', files: ['packing_slip_line14.pdf'] },
-    { id: 10, sender: 'Brand', message: 'PO125 - Perfect! All items received in good condition.', time: '4:00 PM', po: 'PO125', mto: '', files: [] }
+    { id: 10, sender: 'Brand', message: 'PO125 - Perfect! All items received in good condition.', time: '4:00 PM', po: 'PO125', mto: '', files: [] },
+    
+    // Shipping messages
+    { id: 11, sender: 'Brand', message: 'AWB123456 - When will PO123 Line 6 be shipped?', time: '10:30 AM', awb: 'AWB123456', files: [] },
+    { id: 12, sender: 'Factory', message: 'AWB123456 - Scheduled for July 24th. Will provide tracking number.', time: '10:35 AM', awb: 'AWB123456', files: [] },
+    { id: 13, sender: 'Factory', message: 'AWB123456 - Shipped! Tracking: 1Z1234567890', time: '2:15 PM', awb: 'AWB123456', files: ['tracking_info.pdf'] },
+    { id: 14, sender: 'Brand', message: 'AWB789012 - Missing 2 items from carton MC002', time: '9:00 AM', awb: 'AWB789012', files: [] },
+    { id: 15, sender: 'Factory', message: 'AWB789012 - Investigating. Will provide replacement timeline.', time: '9:15 AM', awb: 'AWB789012', files: [] },
+    { id: 16, sender: 'Factory', message: 'AWB789012 - Replacement items ready. New carton MC002-R will ship tomorrow', time: '11:30 AM', awb: 'AWB789012', files: ['replacement_order.pdf'] }
   ]);
 
   // Enhanced data with all required features - Complete MTO field set from improvements spec
@@ -2491,20 +2499,6 @@ const BaubleBarDemo = () => {
       {brandActiveTab === 'shipping' && (
         <div className="space-y-6">
           <InventoryCartonSplit mtoData={brandPOs.flatMap(po => po.mtos || [])} isShippingView={true} />
-          
-          {/* Shipping Chat Component */}
-          <ShippingChat 
-            shipmentData={shippingData}
-            onUpdateShipment={(id, updates) => {
-              // Handle shipment updates
-              console.log('Updating shipment:', id, updates);
-            }}
-            userRole="brand"
-            onOpenChat={(chatData) => {
-              // Handle opening chat
-              console.log('Opening chat:', chatData);
-            }}
-          />
         </div>
       )}
 
@@ -2715,6 +2709,16 @@ const BaubleBarDemo = () => {
                             </button>
                             <button className="text-gray-600 hover:text-gray-800 text-sm font-medium">
                               Details
+                            </button>
+                            <button 
+                              onClick={() => {
+                                addNewChat('shipping', shipment.po, '', shipment.awb, shipment.lineId);
+                                setShowChat(true);
+                              }}
+                              className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center gap-1"
+                            >
+                              <MessageCircle className="h-3 w-3" />
+                              Chat
                             </button>
                             {shipment.files.length > 0 && (
                               <button className="text-green-600 hover:text-green-800 text-sm font-medium">
@@ -4063,6 +4067,77 @@ const BaubleBarDemo = () => {
             </table>
           </div>
         </div>
+
+        {/* Shipping Chat Management */}
+        <div className="border-t pt-6 mt-8">
+          <h3 className="font-semibold mb-4">Shipping Chat Management</h3>
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">By Month</h4>
+                <div className="space-y-2">
+                  {['January', 'February', 'March', 'April', 'May', 'June'].map(month => (
+                    <button
+                      key={month}
+                      onClick={() => {
+                        setActiveChatTab(`shipping-month-${month}`);
+                        setShowChat(true);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
+                    >
+                      {month} 2025
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">By Day</h4>
+                <div className="space-y-2">
+                  {['Today', 'Yesterday', 'Last Week', 'This Week'].map(day => (
+                    <button
+                      key={day}
+                      onClick={() => {
+                        setActiveChatTab(`shipping-day-${day}`);
+                        setShowChat(true);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
+                    >
+                      {day}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-lg p-4">
+                <h4 className="font-medium text-gray-900 mb-3">By Shipment ID</h4>
+                <div className="space-y-2">
+                  {shippingData.slice(0, 6).map(shipment => (
+                    <button
+                      key={shipment.awb}
+                      onClick={() => {
+                        setActiveChatTab(`shipping-id-${shipment.awb}`);
+                        setShowChat(true);
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
+                    >
+                      {shipment.awb} - {shipment.po} Line {shipment.lineId}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={() => setShowChat(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Open Shipping Chat
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -4086,6 +4161,21 @@ const BaubleBarDemo = () => {
       return contexts;
     }, []);
 
+    // Add shipping chat contexts
+    shippingData.forEach(shipment => {
+      const contextId = `shipping-${shipment.awb}`;
+      if (!chatContexts.find(c => c.id === contextId)) {
+        chatContexts.push({ 
+          id: contextId, 
+          title: `${shipment.awb} - ${shipment.po} Line ${shipment.lineId}`, 
+          type: 'shipping', 
+          awb: shipment.awb, 
+          po: shipment.po, 
+          lineId: shipment.lineId 
+        });
+      }
+    });
+
     // Add new contexts to tabs if they don't exist
     chatContexts.forEach(context => {
       if (!chatTabs.find(tab => tab.id === context.id)) {
@@ -4099,15 +4189,18 @@ const BaubleBarDemo = () => {
       if (currentChatTarget.type === 'general') return true;
       if (currentChatTarget.type === 'po') return msg.po === currentChatTarget.po;
       if (currentChatTarget.type === 'mto') return msg.po === currentChatTarget.po && msg.mto === currentChatTarget.mto;
+      if (currentChatTarget.type === 'shipping') return msg.awb === currentChatTarget.awb;
       return true;
     });
 
-    const addNewChat = (type, po, mto) => {
+    const addNewChat = (type, po, mto, awb, lineId) => {
       let newTab;
       if (type === 'mto') {
         newTab = { id: `${po}-${mto}`, title: `${po} Line ${mto}`, type, po, mto };
       } else if (type === 'po') {
         newTab = { id: `po-${po}`, title: `PO ${po}`, type, po, mto: '' };
+      } else if (type === 'shipping') {
+        newTab = { id: `shipping-${awb}`, title: `${awb} - ${po} Line ${lineId}`, type, awb, po, lineId };
       } else {
         newTab = { id: 'general', title: 'General', type: 'general', po: '', mto: '' };
       }

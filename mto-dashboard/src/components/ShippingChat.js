@@ -158,9 +158,51 @@ const ShippingChat = ({
 
       {showChat && (
         <div className="p-4">
-          {/* Chat Tabs */}
+          {/* Chat Navigation Options */}
           <div className="mb-4">
             <div className="flex flex-wrap gap-2 mb-3">
+              {/* By Month */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-700">By Month:</span>
+                {['January', 'February', 'March', 'April', 'May', 'June'].map(month => (
+                  <button
+                    key={month}
+                    onClick={() => setActiveChatTab(`shipping-month-${month}`)}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                      activeChatTab === `shipping-month-${month}`
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {month}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap gap-2 mb-3">
+              {/* By Day */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-gray-700">By Day:</span>
+                {['Today', 'Yesterday', 'Last Week', 'This Week'].map(day => (
+                  <button
+                    key={day}
+                    onClick={() => setActiveChatTab(`shipping-day-${day}`)}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                      activeChatTab === `shipping-day-${day}`
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {day}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Chat Tabs */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              <span className="text-sm font-medium text-gray-700">By Shipment:</span>
               {chatTabs.map((tab) => (
                 <button
                   key={tab.id}

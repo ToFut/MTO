@@ -1206,26 +1206,7 @@ const FactoryMTOManager = ({ mtoData = [] }) => {
             </div>
         )}
 
-        {/* Shipping Chat Component for Factory */}
-        <ShippingChat 
-          shipmentData={enhancedMTOData.filter(mto => mto.status === 'completed').map(mto => ({
-            id: mto.id,
-            po: mto.id,
-            lineId: mto.id.split('-')[2] || '1',
-            awb: `AWB${mto.id.slice(-6)}`,
-            masterCarton: `MC${mto.id.slice(-4)}`,
-            eta: new Date(Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-            carrier: ['UPS', 'FedEx', 'DHL'][Math.floor(Math.random() * 3)],
-            status: ['Shipped', 'In Transit', 'Delivered'][Math.floor(Math.random() * 3)]
-          }))}
-          onUpdateShipment={(id, updates) => {
-            console.log('Factory updating shipment:', id, updates);
-          }}
-          userRole="factory"
-          onOpenChat={(chatData) => {
-            console.log('Factory opening chat:', chatData);
-          }}
-        />
+
       </div>
   );
 };
