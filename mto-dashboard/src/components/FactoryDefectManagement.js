@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { AlertTriangle, AlertCircle, CheckCircle2, X, Eye, Send, Package, MessageCircle, RefreshCw, Clock, ArrowRight, QrCode, Hash, Camera, Zap, ChevronRight, Upload, Factory, FileText, User } from 'lucide-react';
+import { AlertTriangle, AlertCircle, CheckCircle2, X, Eye, Send, Package, MessageCircle, RefreshCw, Clock, ArrowRight, QrCode, Hash, Camera, Zap, ChevronRight, Upload, Factory, FileText, User, Truck } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductionMTO }) => {
