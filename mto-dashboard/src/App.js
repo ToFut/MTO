@@ -3232,12 +3232,14 @@ const BaubleBarDemo = () => {
                             </button>
                             <button 
                               onClick={() => {
+                                addNewChat('mto', poData.po, mto.lineId);
                                 setShowChat(true);
                               }}
-                              className="text-gray-600 hover:text-gray-800"
-                              title={`Chat about ${mto.po} Line ${mto.lineId}`}
+                              className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center gap-1"
+                              title={`Chat about ${poData.po} Line ${mto.lineId}`}
                             >
-                              💬
+                              <MessageCircle className="h-3 w-3" />
+                              Chat
                             </button>
                           </div>
                         </div>
@@ -4073,12 +4075,25 @@ const BaubleBarDemo = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <button className="text-blue-600 hover:text-blue-800 mr-3">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button className="text-gray-600 hover:text-gray-800">
-                        <Download className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button className="text-blue-600 hover:text-blue-800">
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button className="text-gray-600 hover:text-gray-800">
+                          <Download className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            addNewChat('po', po.po, '');
+                            setShowChat(true);
+                          }}
+                          className="text-purple-600 hover:text-purple-800 flex items-center gap-1"
+                          title={`Chat about PO ${po.po}`}
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                          <span className="text-sm">Chat</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
