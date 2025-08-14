@@ -12,7 +12,7 @@ import DefectManagement from './components/DefectManagement';
 import FactoryDefectManagement from './components/FactoryDefectManagement';
 import ERPSyncDashboard from './components/ERPSyncDashboard';
 import NetSuiteLogin from './components/NetSuiteLogin';
-import ShippingChat from './components/ShippingChat';
+
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import LanguageToggle from './components/ui/LanguageToggle';
 
@@ -273,6 +273,25 @@ const BaubleBarDemo = () => {
     { id: 15, sender: 'Factory', message: 'AWB789012 - Investigating. Will provide replacement timeline.', time: '9:15 AM', awb: 'AWB789012', files: [] },
     { id: 16, sender: 'Factory', message: 'AWB789012 - Replacement items ready. New carton MC002-R will ship tomorrow', time: '11:30 AM', awb: 'AWB789012', files: ['replacement_order.pdf'] }
   ]);
+
+  // Function to add new chat tabs
+  const addNewChat = (type, po, mto, awb, lineId) => {
+    let newTab;
+    if (type === 'mto') {
+      newTab = { id: `${po}-${mto}`, title: `${po} Line ${mto}`, type, po, mto };
+    } else if (type === 'po') {
+      newTab = { id: `po-${po}`, title: `PO ${po}`, type, po, mto: '' };
+    } else if (type === 'shipping') {
+      newTab = { id: `shipping-${awb}`, title: `${awb} - ${po} Line ${lineId}`, type, awb, po, lineId };
+    } else {
+      newTab = { id: 'general', title: 'General', type: 'general', po: '', mto: '' };
+    }
+    
+    if (!chatTabs.find(tab => tab.id === newTab.id)) {
+      setChatTabs(prev => [...prev, newTab]);
+    }
+    setActiveChatTab(newTab.id);
+  };
 
   // Enhanced data with all required features - Complete MTO field set from improvements spec
   const brandPOs = [
@@ -4193,23 +4212,7 @@ const BaubleBarDemo = () => {
       return true;
     });
 
-    const addNewChat = (type, po, mto, awb, lineId) => {
-      let newTab;
-      if (type === 'mto') {
-        newTab = { id: `${po}-${mto}`, title: `${po} Line ${mto}`, type, po, mto };
-      } else if (type === 'po') {
-        newTab = { id: `po-${po}`, title: `PO ${po}`, type, po, mto: '' };
-      } else if (type === 'shipping') {
-        newTab = { id: `shipping-${awb}`, title: `${awb} - ${po} Line ${lineId}`, type, awb, po, lineId };
-      } else {
-        newTab = { id: 'general', title: 'General', type: 'general', po: '', mto: '' };
-      }
-      
-      if (!chatTabs.find(tab => tab.id === newTab.id)) {
-        setChatTabs(prev => [...prev, newTab]);
-      }
-      setActiveChatTab(newTab.id);
-    };
+
 
     const removeTab = (tabId) => {
       if (chatTabs.length > 1) {

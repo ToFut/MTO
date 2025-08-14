@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Play, Pause, CheckCircle2, AlertCircle, Clock, Eye, Zap, ArrowRight, Circle, Dot, MoreHorizontal, Search, Filter, Calendar, User, Package2, Target, Timer, ChevronDown, ChevronRight, RefreshCw, FastForward, Image, X, MessageCircle, AlertTriangle, TrendingUp, Truck, Send, Users, Factory, BarChart3, TrendingDown, AlertOctagon, CheckSquare, Activity, QrCode, Scan, Hash, Star, Camera, Coffee, Heart, Sun, Crown, Gift } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
-import ShippingChat from './ShippingChat';
+
 
 const FactoryMTOManager = ({ mtoData = [] }) => {
   const { t } = useLanguage();
