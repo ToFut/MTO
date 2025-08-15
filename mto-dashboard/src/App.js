@@ -271,7 +271,13 @@ const BaubleBarDemo = () => {
     { id: 13, sender: 'Factory', message: 'AWB123456 - Shipped! Tracking: 1Z1234567890', time: '2:15 PM', awb: 'AWB123456', files: ['tracking_info.pdf'] },
     { id: 14, sender: 'Brand', message: 'AWB789012 - Missing 2 items from carton MC002', time: '9:00 AM', awb: 'AWB789012', files: [] },
     { id: 15, sender: 'Factory', message: 'AWB789012 - Investigating. Will provide replacement timeline.', time: '9:15 AM', awb: 'AWB789012', files: [] },
-    { id: 16, sender: 'Factory', message: 'AWB789012 - Replacement items ready. New carton MC002-R will ship tomorrow', time: '11:30 AM', awb: 'AWB789012', files: ['replacement_order.pdf'] }
+    { id: 16, sender: 'Factory', message: 'AWB789012 - Replacement items ready. New carton MC002-R will ship tomorrow', time: '11:30 AM', awb: 'AWB789012', files: ['replacement_order.pdf'] },
+    
+    // Month and Day messages
+    { id: 17, sender: 'Brand', message: 'July 2025 - How is production looking for this month?', time: '9:00 AM', month: 'July', files: [] },
+    { id: 18, sender: 'Factory', message: 'July 2025 - On track for 85% completion. Two MTOs delayed due to material shortage.', time: '9:15 AM', month: 'July', files: [] },
+    { id: 19, sender: 'Brand', message: 'Today - Any urgent issues we need to address?', time: '8:30 AM', day: 'Today', files: [] },
+    { id: 20, sender: 'Factory', message: 'Today - All stations running smoothly. QC backlog cleared.', time: '8:45 AM', day: 'Today', files: [] }
   ]);
 
   // Function to add new chat tabs
@@ -283,6 +289,10 @@ const BaubleBarDemo = () => {
       newTab = { id: `po-${po}`, title: `PO ${po}`, type, po, mto: '' };
     } else if (type === 'shipping') {
       newTab = { id: `shipping-${awb}`, title: `${awb} - ${po} Line ${lineId}`, type, awb, po, lineId };
+    } else if (type === 'month') {
+      newTab = { id: `month-${po}`, title: `${po} 2025`, type, month: po, po: '', mto: '' };
+    } else if (type === 'day') {
+      newTab = { id: `day-${po}`, title: `${po}`, type, day: po, po: '', mto: '' };
     } else {
       newTab = { id: 'general', title: 'General', type: 'general', po: '', mto: '' };
     }
@@ -1868,6 +1878,77 @@ const BaubleBarDemo = () => {
                     Clear
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* MTO Chat Management */}
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <h3 className="font-semibold mb-4">MTO Chat Management</h3>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900 mb-3">By Month</h4>
+                  <div className="space-y-2">
+                    {['January', 'February', 'March', 'April', 'May', 'June'].map(month => (
+                      <button
+                        key={month}
+                        onClick={() => {
+                          addNewChat('month', month, '');
+                          setShowChat(true);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
+                      >
+                        {month} 2025
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900 mb-3">By Day</h4>
+                  <div className="space-y-2">
+                    {['Today', 'Yesterday', 'Last Week', 'This Week'].map(day => (
+                      <button
+                        key={day}
+                        onClick={() => {
+                          addNewChat('day', day, '');
+                          setShowChat(true);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
+                      >
+                        {day}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900 mb-3">By MTO ID</h4>
+                  <div className="space-y-2">
+                    {brandPOs.flatMap(po => po.mtos || []).slice(0, 6).map(mto => (
+                      <button
+                        key={`${po.po}-${mto.lineId}`}
+                        onClick={() => {
+                          addNewChat('mto', po.po, mto.lineId);
+                          setShowChat(true);
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
+                      >
+                        {po.po} Line {mto.lineId}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-4 flex justify-center">
+                <button
+                  onClick={() => setShowChat(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Open MTO Chat
+                </button>
               </div>
             </div>
           </div>
@@ -4191,6 +4272,16 @@ const BaubleBarDemo = () => {
         if (!contexts.find(c => c.id === contextId)) {
           contexts.push({ id: contextId, title: `PO ${msg.po}`, type: 'po', po: msg.po, mto: '' });
         }
+      } else if (msg.month) {
+        const contextId = `month-${msg.month}`;
+        if (!contexts.find(c => c.id === contextId)) {
+          contexts.push({ id: contextId, title: `${msg.month} 2025`, type: 'month', month: msg.month, po: '', mto: '' });
+        }
+      } else if (msg.day) {
+        const contextId = `day-${msg.day}`;
+        if (!contexts.find(c => c.id === contextId)) {
+          contexts.push({ id: contextId, title: `${msg.day}`, type: 'day', day: msg.day, po: '', mto: '' });
+        }
       }
       return contexts;
     }, []);
@@ -4224,6 +4315,8 @@ const BaubleBarDemo = () => {
       if (currentChatTarget.type === 'po') return msg.po === currentChatTarget.po;
       if (currentChatTarget.type === 'mto') return msg.po === currentChatTarget.po && msg.mto === currentChatTarget.mto;
       if (currentChatTarget.type === 'shipping') return msg.awb === currentChatTarget.awb;
+      if (currentChatTarget.type === 'month') return msg.month === currentChatTarget.month;
+      if (currentChatTarget.type === 'day') return msg.day === currentChatTarget.day;
       return true;
     });
 
