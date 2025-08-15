@@ -1926,16 +1926,18 @@ const BaubleBarDemo = () => {
                 <div className="bg-white rounded-lg p-4">
                   <h4 className="font-medium text-gray-900 mb-3">By MTO ID</h4>
                   <div className="space-y-2">
-                    {brandPOs.flatMap(po => po.mtos || []).slice(0, 6).map(mto => (
+                    {brandPOs.flatMap(po => 
+                      (po.mtos || []).map(mto => ({ ...mto, poNumber: po.po }))
+                    ).slice(0, 6).map(mto => (
                       <button
-                        key={`${po.po}-${mto.lineId}`}
+                        key={`${mto.poNumber}-${mto.lineId}`}
                         onClick={() => {
-                          addNewChat('mto', po.po, mto.lineId);
+                          addNewChat('mto', mto.poNumber, mto.lineId);
                           setShowChat(true);
                         }}
                         className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
                       >
-                        {po.po} Line {mto.lineId}
+                        {mto.poNumber} Line {mto.lineId}
                       </button>
                     ))}
                   </div>
