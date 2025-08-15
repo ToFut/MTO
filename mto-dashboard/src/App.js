@@ -2542,16 +2542,10 @@ const BaubleBarDemo = () => {
                                                       e.stopPropagation();
                                                       // Find the PO for this MTO
                                                       const po = brandPOs.find(po => po.mtos.includes(mto));
-                                                      if (po) {
+                                                                                                            if (po) {
                                                         addNewChat('mto', po.po, mto.lineId || mto.poLineId);
                                                         setShowChat(true);
                                                       }
-                                                    }}
-                                                    className="text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50 transition-colors"
-                                                    title={`Chat about ${uniqueMtoId}`}
-                                                  >
-                                                    <MessageCircle className="h-3 w-3" />
-                                                  </button>
                                                     }}
                                                     className="p-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
                                                     title={`Chat about MTO ${uniqueMtoId}`}
