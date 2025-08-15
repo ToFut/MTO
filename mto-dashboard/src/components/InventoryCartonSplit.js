@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Package, Box, Search, Filter, ChevronDown, ChevronRight, AlertCircle, CheckCircle2, Truck, Scan, FileText, Clock, MapPin, User, Hash, Layers, Calendar, TrendingUp, BarChart3, Archive, Palette, X, Eye } from 'lucide-react';
+import { Package, Box, Search, Filter, ChevronDown, ChevronRight, AlertCircle, CheckCircle2, Truck, Scan, FileText, Clock, MapPin, User, Hash, Layers, Calendar, TrendingUp, BarChart3, Archive, Palette, X, Eye, MessageCircle } from 'lucide-react';
 
-const InventoryCartonSplit = ({ mtoData = [], isShippingView = false }) => {
+const InventoryCartonSplit = ({ mtoData = [], isShippingView = false, onChatClick }) => {
   const [expandedCartons, setExpandedCartons] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
@@ -532,15 +532,32 @@ const InventoryCartonSplit = ({ mtoData = [], isShippingView = false }) => {
                               </td>
                             )}
                             <td className="px-3 py-2 text-center">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedMto(mto);
-                                }}
-                                className="text-blue-600 hover:text-blue-800"
-                              >
-                                <Eye className="h-4 w-4" />
-                              </button>
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedMto(mto);
+                                  }}
+                                  className="text-blue-600 hover:text-blue-800"
+                                  title="View Details"
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </button>
+                                {isShippingView && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (onChatClick) {
+                                        onChatClick('shipping', mto.poNumber || 'N/A', mto.lineId || 'N/A', mto.shippingInfo?.trackingNumber || '', mto.id);
+                                      }
+                                    }}
+                                    className="text-purple-600 hover:text-purple-800"
+                                    title="Chat about this shipment"
+                                  >
+                                    <MessageCircle className="h-4 w-4" />
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -682,12 +699,29 @@ const InventoryCartonSplit = ({ mtoData = [], isShippingView = false }) => {
                       </td>
                     )}
                     <td className="px-3 py-2 text-center">
-                      <button
-                        onClick={() => setSelectedMto(mto)}
-                        className="text-blue-600 hover:text-blue-800"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          onClick={() => setSelectedMto(mto)}
+                          className="text-blue-600 hover:text-blue-800"
+                          title="View Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        {isShippingView && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onChatClick) {
+                                onChatClick('shipping', mto.poNumber || 'N/A', mto.lineId || 'N/A', mto.shippingInfo?.trackingNumber || '', mto.id);
+                              }
+                            }}
+                            className="text-purple-600 hover:text-purple-800"
+                            title="Chat about this shipment"
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

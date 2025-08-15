@@ -228,6 +228,7 @@ const translations = {
     active: "Active",
     byStation: "By Station",
     timeline: "Timeline",
+    active: "Active",
     allPriorities: "All Priorities",
     materialPrepStation: "Material Prep Station",
     customizationStation: "Customization Station",
@@ -329,6 +330,7 @@ const translations = {
     underReview: "Under Review",
     resolved: "Resolved",
     rejected: "Rejected",
+    qualityScore: "Quality Score",
     passRate: "Pass Rate",
     defectRate: "Defect Rate",
     inspection: "Inspection",
@@ -363,21 +365,7 @@ const translations = {
     destination: "Destination",
     origin: "Origin",
     packageWeight: "Package Weight",
-    dimensions: "Dimensions",
-    chat: "Shipping Chat",
-    selectShipment: "Select a shipment",
-    chooseShipment: "Choose a shipment...",
-    po: "PO",
-    awb: "AWB",
-    carton: "Carton",
-    eta: "ETA",
-    line: "Line",
-    status: "Status",
-    quickActions: "Quick Actions",
-    noMessages: "No messages yet. Start the conversation!",
-    typeMessage: "Type your message...",
-    selectChat: "Select a chat tab first...",
-    send: "Send"
+    dimensions: "Dimensions"
   },
 
   // Analytics & Reports

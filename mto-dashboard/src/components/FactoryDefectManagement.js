@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { AlertTriangle, AlertCircle, CheckCircle2, X, Eye, Send, Package, MessageCircle, RefreshCw, Clock, ArrowRight, QrCode, Hash, Camera, Zap, ChevronRight, Upload, Factory, FileText, User, Truck } from 'lucide-react';
+import { AlertTriangle, AlertCircle, CheckCircle2, X, Eye, Send, Package, MessageCircle, RefreshCw, Clock, ArrowRight, QrCode, Hash, Camera, Zap, ChevronRight, Upload, Factory, FileText, User } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductionMTO }) => {
@@ -21,9 +21,7 @@ const FactoryDefectManagement = ({ mtoData = [], onOpenChat, onCreateReproductio
       { type: 'defect_bag', category: 'Bag Production Defect', icon: AlertTriangle, severity: 'critical' },
       { type: 'defect_embroidery', category: 'Embroidery Defect', icon: AlertCircle, severity: 'medium' },
       { type: 'quality', category: 'Quality Issue', icon: Eye, severity: 'medium' },
-      { type: 'damage', category: 'Shipping Damage', icon: Package, severity: 'high' },
-      { type: 'lost_transit', category: 'Lost in Transit', icon: Truck, severity: 'high' },
-      { type: 'order_swap', category: 'Order Swap', icon: RefreshCw, severity: 'medium' }
+      { type: 'damage', category: 'Shipping Damage', icon: Package, severity: 'high' }
     ];
 
     // Simulate defects assigned to factory

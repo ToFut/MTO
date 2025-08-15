@@ -12,7 +12,6 @@ import DefectManagement from './components/DefectManagement';
 import FactoryDefectManagement from './components/FactoryDefectManagement';
 import ERPSyncDashboard from './components/ERPSyncDashboard';
 import NetSuiteLogin from './components/NetSuiteLogin';
-
 import { LanguageProvider, useLanguage } from './contexts/LanguageContext';
 import LanguageToggle from './components/ui/LanguageToggle';
 
@@ -263,45 +262,8 @@ const BaubleBarDemo = () => {
     
     // PO125 messages
     { id: 9, sender: 'Factory', message: 'PO125 Line 14 - Shipped! Tracking: 1Z0987654321', time: '1:00 PM', po: 'PO125', mto: '14', files: ['packing_slip_line14.pdf'] },
-    { id: 10, sender: 'Brand', message: 'PO125 - Perfect! All items received in good condition.', time: '4:00 PM', po: 'PO125', mto: '', files: [] },
-    
-    // Shipping messages
-    { id: 11, sender: 'Brand', message: 'AWB123456 - When will PO123 Line 6 be shipped?', time: '10:30 AM', awb: 'AWB123456', files: [] },
-    { id: 12, sender: 'Factory', message: 'AWB123456 - Scheduled for July 24th. Will provide tracking number.', time: '10:35 AM', awb: 'AWB123456', files: [] },
-    { id: 13, sender: 'Factory', message: 'AWB123456 - Shipped! Tracking: 1Z1234567890', time: '2:15 PM', awb: 'AWB123456', files: ['tracking_info.pdf'] },
-    { id: 14, sender: 'Brand', message: 'AWB789012 - Missing 2 items from carton MC002', time: '9:00 AM', awb: 'AWB789012', files: [] },
-    { id: 15, sender: 'Factory', message: 'AWB789012 - Investigating. Will provide replacement timeline.', time: '9:15 AM', awb: 'AWB789012', files: [] },
-    { id: 16, sender: 'Factory', message: 'AWB789012 - Replacement items ready. New carton MC002-R will ship tomorrow', time: '11:30 AM', awb: 'AWB789012', files: ['replacement_order.pdf'] },
-    
-    // Month and Day messages
-    { id: 17, sender: 'Brand', message: 'July 2025 - How is production looking for this month?', time: '9:00 AM', month: 'July', files: [] },
-    { id: 18, sender: 'Factory', message: 'July 2025 - On track for 85% completion. Two MTOs delayed due to material shortage.', time: '9:15 AM', month: 'July', files: [] },
-    { id: 19, sender: 'Brand', message: 'Today - Any urgent issues we need to address?', time: '8:30 AM', day: 'Today', files: [] },
-    { id: 20, sender: 'Factory', message: 'Today - All stations running smoothly. QC backlog cleared.', time: '8:45 AM', day: 'Today', files: [] }
+    { id: 10, sender: 'Brand', message: 'PO125 - Perfect! All items received in good condition.', time: '4:00 PM', po: 'PO125', mto: '', files: [] }
   ]);
-
-  // Function to add new chat tabs
-  const addNewChat = (type, po, mto, awb, lineId) => {
-    let newTab;
-    if (type === 'mto') {
-      newTab = { id: `${po}-${mto}`, title: `${po} Line ${mto}`, type, po, mto };
-    } else if (type === 'po') {
-      newTab = { id: `po-${po}`, title: `PO ${po}`, type, po, mto: '' };
-    } else if (type === 'shipping') {
-      newTab = { id: `shipping-${awb}`, title: `${awb} - ${po} Line ${lineId}`, type, awb, po, lineId };
-    } else if (type === 'month') {
-      newTab = { id: `month-${po}`, title: `${po} 2025`, type, month: po, po: '', mto: '' };
-    } else if (type === 'day') {
-      newTab = { id: `day-${po}`, title: `${po}`, type, day: po, po: '', mto: '' };
-    } else {
-      newTab = { id: 'general', title: 'General', type: 'general', po: '', mto: '' };
-    }
-    
-    if (!chatTabs.find(tab => tab.id === newTab.id)) {
-      setChatTabs(prev => [...prev, newTab]);
-    }
-    setActiveChatTab(newTab.id);
-  };
 
   // Enhanced data with all required features - Complete MTO field set from improvements spec
   const brandPOs = [
@@ -1882,79 +1844,6 @@ const BaubleBarDemo = () => {
             </div>
           </div>
 
-          {/* MTO Chat Management */}
-          <div className="bg-white rounded-lg shadow-sm p-4">
-            <h3 className="font-semibold mb-4">MTO Chat Management</h3>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">By Month</h4>
-                  <div className="space-y-2">
-                    {['January', 'February', 'March', 'April', 'May', 'June'].map(month => (
-                      <button
-                        key={month}
-                        onClick={() => {
-                          addNewChat('month', month, '');
-                          setShowChat(true);
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
-                      >
-                        {month} 2025
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="bg-white rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">By Day</h4>
-                  <div className="space-y-2">
-                    {['Today', 'Yesterday', 'Last Week', 'This Week'].map(day => (
-                      <button
-                        key={day}
-                        onClick={() => {
-                          addNewChat('day', day, '');
-                          setShowChat(true);
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
-                      >
-                        {day}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="bg-white rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">By MTO ID</h4>
-                  <div className="space-y-2">
-                    {brandPOs.flatMap(po => 
-                      (po.mtos || []).map(mto => ({ ...mto, poNumber: po.po }))
-                    ).slice(0, 6).map(mto => (
-                      <button
-                        key={`${mto.poNumber}-${mto.lineId}`}
-                        onClick={() => {
-                          addNewChat('mto', mto.poNumber, mto.lineId);
-                          setShowChat(true);
-                        }}
-                        className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
-                      >
-                        {mto.poNumber} Line {mto.lineId}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="mt-4 flex justify-center">
-                <button
-                  onClick={() => setShowChat(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Open MTO Chat
-                </button>
-              </div>
-            </div>
-          </div>
-
           {/* MTO Management by Product Category */}
           <div className="bg-white rounded-lg shadow-sm p-4">
             <div className="flex justify-between items-center mb-3">
@@ -2540,12 +2429,13 @@ const BaubleBarDemo = () => {
                                                   <button
                                                     onClick={(e) => {
                                                       e.stopPropagation();
-                                                      // Find the PO for this MTO
-                                                      const po = brandPOs.find(po => po.mtos.includes(mto));
-                                                                                                            if (po) {
-                                                        addNewChat('mto', po.po, mto.lineId || mto.poLineId);
-                                                        setShowChat(true);
-                                                      }
+                                                      setShowChat(true);
+                                                      setChatContext({
+                                                        type: 'mto',
+                                                        id: uniqueMtoId,
+                                                        title: `MTO ${uniqueMtoId}`,
+                                                        cartonId: mto.masterCarton
+                                                      });
                                                     }}
                                                     className="p-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
                                                     title={`Chat about MTO ${uniqueMtoId}`}
@@ -2599,7 +2489,20 @@ const BaubleBarDemo = () => {
       {/* Shipping Tab */}
       {brandActiveTab === 'shipping' && (
         <div className="space-y-6">
-          <InventoryCartonSplit mtoData={brandPOs.flatMap(po => po.mtos || [])} isShippingView={true} />
+          <InventoryCartonSplit 
+            mtoData={brandPOs.flatMap(po => po.mtos || [])} 
+            isShippingView={true} 
+            onChatClick={(type, po, lineId, awb, mtoId) => {
+              setShowChat(true);
+              setChatContext({
+                type: type,
+                id: `${po}-${lineId}`,
+                title: `Shipping Chat - ${po} Line ${lineId}`,
+                awb: awb,
+                mtoId: mtoId
+              });
+            }}
+          />
         </div>
       )}
 
@@ -2810,16 +2713,6 @@ const BaubleBarDemo = () => {
                             </button>
                             <button className="text-gray-600 hover:text-gray-800 text-sm font-medium">
                               Details
-                            </button>
-                            <button 
-                              onClick={() => {
-                                addNewChat('shipping', shipment.po, '', shipment.awb, shipment.lineId);
-                                setShowChat(true);
-                              }}
-                              className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center gap-1 px-2 py-1 rounded border border-purple-200 hover:bg-purple-50"
-                            >
-                              <MessageCircle className="h-3 w-3" />
-                              Chat
                             </button>
                             {shipment.files.length > 0 && (
                               <button className="text-green-600 hover:text-green-800 text-sm font-medium">
@@ -3314,14 +3207,12 @@ const BaubleBarDemo = () => {
                             </button>
                             <button 
                               onClick={() => {
-                                addNewChat('mto', poData.po, mto.lineId);
                                 setShowChat(true);
                               }}
-                              className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center gap-1"
-                              title={`Chat about ${poData.po} Line ${mto.lineId}`}
+                              className="text-gray-600 hover:text-gray-800"
+                              title={`Chat about ${mto.po} Line ${mto.lineId}`}
                             >
-                              <MessageCircle className="h-3 w-3" />
-                              Chat
+                              💬
                             </button>
                           </div>
                         </div>
@@ -3564,12 +3455,30 @@ const BaubleBarDemo = () => {
                       ))}
                     </td>
                     <td className="px-6 py-4">
-                      <button className="text-blue-600 hover:text-blue-800 mr-3">
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button className="text-gray-600 hover:text-gray-800">
-                        <Download className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button className="text-blue-600 hover:text-blue-800">
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button className="text-gray-600 hover:text-gray-800">
+                          <Download className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setShowChat(true);
+                            setChatContext({
+                              type: 'shipping',
+                              id: `${shipment.po}-${shipment.lineId}`,
+                              title: `Shipping Chat - ${shipment.po} Line ${shipment.lineId}`,
+                              awb: shipment.trackingNumber,
+                              lineId: shipment.lineId
+                            });
+                          }}
+                          className="text-purple-600 hover:text-purple-800"
+                          title="Chat about this shipment"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -4157,101 +4066,17 @@ const BaubleBarDemo = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <button className="text-blue-600 hover:text-blue-800">
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button className="text-gray-600 hover:text-gray-800">
-                          <Download className="h-4 w-4" />
-                        </button>
-                        <button 
-                          onClick={() => {
-                            addNewChat('po', po.po, '');
-                            setShowChat(true);
-                          }}
-                          className="text-purple-600 hover:text-purple-800 flex items-center gap-1"
-                          title={`Chat about PO ${po.po}`}
-                        >
-                          <MessageCircle className="h-4 w-4" />
-                          <span className="text-sm">Chat</span>
-                        </button>
-                      </div>
+                      <button className="text-blue-600 hover:text-blue-800 mr-3">
+                        <Edit className="h-4 w-4" />
+                      </button>
+                      <button className="text-gray-600 hover:text-gray-800">
+                        <Download className="h-4 w-4" />
+                      </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-
-        {/* Shipping Chat Management */}
-        <div className="border-t pt-6 mt-8">
-          <h3 className="font-semibold mb-4">Shipping Chat Management</h3>
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">By Month</h4>
-                <div className="space-y-2">
-                  {['January', 'February', 'March', 'April', 'May', 'June'].map(month => (
-                    <button
-                      key={month}
-                      onClick={() => {
-                        setActiveChatTab(`shipping-month-${month}`);
-                        setShowChat(true);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
-                    >
-                      {month} 2025
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">By Day</h4>
-                <div className="space-y-2">
-                  {['Today', 'Yesterday', 'Last Week', 'This Week'].map(day => (
-                    <button
-                      key={day}
-                      onClick={() => {
-                        setActiveChatTab(`shipping-day-${day}`);
-                        setShowChat(true);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
-                    >
-                      {day}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-3">By Shipment ID</h4>
-                <div className="space-y-2">
-                  {shippingData.slice(0, 6).map(shipment => (
-                    <button
-                      key={shipment.awb}
-                      onClick={() => {
-                        setActiveChatTab(`shipping-id-${shipment.awb}`);
-                        setShowChat(true);
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-md hover:bg-blue-50 text-sm"
-                    >
-                      {shipment.awb} - {shipment.po} Line {shipment.lineId}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-4 flex justify-center">
-              <button
-                onClick={() => setShowChat(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Open Shipping Chat
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -4273,34 +4098,9 @@ const BaubleBarDemo = () => {
         if (!contexts.find(c => c.id === contextId)) {
           contexts.push({ id: contextId, title: `PO ${msg.po}`, type: 'po', po: msg.po, mto: '' });
         }
-      } else if (msg.month) {
-        const contextId = `month-${msg.month}`;
-        if (!contexts.find(c => c.id === contextId)) {
-          contexts.push({ id: contextId, title: `${msg.month} 2025`, type: 'month', month: msg.month, po: '', mto: '' });
-        }
-      } else if (msg.day) {
-        const contextId = `day-${msg.day}`;
-        if (!contexts.find(c => c.id === contextId)) {
-          contexts.push({ id: contextId, title: `${msg.day}`, type: 'day', day: msg.day, po: '', mto: '' });
-        }
       }
       return contexts;
     }, []);
-
-    // Add shipping chat contexts
-    shippingData.forEach(shipment => {
-      const contextId = `shipping-${shipment.awb}`;
-      if (!chatContexts.find(c => c.id === contextId)) {
-        chatContexts.push({ 
-          id: contextId, 
-          title: `${shipment.awb} - ${shipment.po} Line ${shipment.lineId}`, 
-          type: 'shipping', 
-          awb: shipment.awb, 
-          po: shipment.po, 
-          lineId: shipment.lineId 
-        });
-      }
-    });
 
     // Add new contexts to tabs if they don't exist
     chatContexts.forEach(context => {
@@ -4315,13 +4115,24 @@ const BaubleBarDemo = () => {
       if (currentChatTarget.type === 'general') return true;
       if (currentChatTarget.type === 'po') return msg.po === currentChatTarget.po;
       if (currentChatTarget.type === 'mto') return msg.po === currentChatTarget.po && msg.mto === currentChatTarget.mto;
-      if (currentChatTarget.type === 'shipping') return msg.awb === currentChatTarget.awb;
-      if (currentChatTarget.type === 'month') return msg.month === currentChatTarget.month;
-      if (currentChatTarget.type === 'day') return msg.day === currentChatTarget.day;
       return true;
     });
 
-
+    const addNewChat = (type, po, mto) => {
+      let newTab;
+      if (type === 'mto') {
+        newTab = { id: `${po}-${mto}`, title: `${po} Line ${mto}`, type, po, mto };
+      } else if (type === 'po') {
+        newTab = { id: `po-${po}`, title: `PO ${po}`, type, po, mto: '' };
+      } else {
+        newTab = { id: 'general', title: 'General', type: 'general', po: '', mto: '' };
+      }
+      
+      if (!chatTabs.find(tab => tab.id === newTab.id)) {
+        setChatTabs(prev => [...prev, newTab]);
+      }
+      setActiveChatTab(newTab.id);
+    };
 
     const removeTab = (tabId) => {
       if (chatTabs.length > 1) {

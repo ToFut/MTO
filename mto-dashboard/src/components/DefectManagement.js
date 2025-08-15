@@ -12,8 +12,6 @@ const DefectManagement = ({ mtoData = [], onOpenChat }) => {
     severity: 'medium',
     images: []
   });
-  const [uploadedImages, setUploadedImages] = useState([]);
-  const [imagePreview, setImagePreview] = useState(null);
   const [chatMessage, setChatMessage] = useState('');
   const [filterSeverity, setFilterSeverity] = useState('all');
   const [scanningStep, setScanningStep] = useState('setup'); // 'setup', 'scan', 'complete'
@@ -26,9 +24,7 @@ const DefectManagement = ({ mtoData = [], onOpenChat }) => {
       { type: 'defect_bag', category: 'Bag Production Defect', icon: AlertTriangle, severity: 'critical' },
       { type: 'defect_embroidery', category: 'Embroidery Defect', icon: AlertCircle, severity: 'medium' },
       { type: 'quality', category: 'Quality Issue', icon: Eye, severity: 'medium' },
-      { type: 'damage', category: 'Shipping Damage', icon: Truck, severity: 'high' },
-      { type: 'lost_transit', category: 'Lost in Transit', icon: Truck, severity: 'high' },
-      { type: 'order_swap', category: 'Order Swap', icon: RefreshCw, severity: 'medium' }
+      { type: 'damage', category: 'Shipping Damage', icon: Truck, severity: 'high' }
     ];
 
     // Generate more defects with various statuses
@@ -83,9 +79,7 @@ const DefectManagement = ({ mtoData = [], onOpenChat }) => {
       defect_bag: 'Structural defect in bag construction - seam failure or material flaw',
       defect_embroidery: 'Embroidery misalignment, thread breaks, or color inconsistency',
       quality: 'Does not meet quality standards for customer delivery',
-      damage: 'Product damaged during packaging or shipping process',
-      lost_transit: 'Package lost during shipping or delivery process',
-      order_swap: 'Order items swapped or mixed up during processing'
+      damage: 'Product damaged during packaging or shipping process'
     };
     return descriptions[type] || 'Quality issue detected';
   }
@@ -96,9 +90,7 @@ const DefectManagement = ({ mtoData = [], onOpenChat }) => {
       defect_bag: ['Equipment malfunction', 'Material quality issue', 'Training requirement'],
       defect_embroidery: ['Machine calibration', 'Thread quality', 'Design complexity'],
       quality: ['Process deviation', 'Inspection gap', 'Standard clarification'],
-      damage: ['Packaging inadequacy', 'Handling procedure', 'Shipping method'],
-      lost_transit: ['Carrier tracking failure', 'Address verification issue', 'Delivery coordination'],
-      order_swap: ['Order processing error', 'Labeling mistake', 'Quality control oversight']
+      damage: ['Packaging inadequacy', 'Handling procedure', 'Shipping method']
     };
     return painPoints[type] || ['Process improvement needed'];
   }
@@ -235,37 +227,11 @@ const DefectManagement = ({ mtoData = [], onOpenChat }) => {
     }, 2000);
   };
 
-  const handleImageUpload = (event) => {
-    const files = Array.from(event.target.files);
-    const newImages = files.map(file => ({
-      id: Date.now() + Math.random(),
-      file: file,
-      url: URL.createObjectURL(file),
-      name: file.name,
-      size: file.size
-    }));
-    
-    setUploadedImages(prev => [...prev, ...newImages]);
-    setDefectReport(prev => ({
-      ...prev,
-      images: [...prev.images, ...newImages]
-    }));
-  };
-
-  const removeImage = (imageId) => {
-    setUploadedImages(prev => prev.filter(img => img.id !== imageId));
-    setDefectReport(prev => ({
-      ...prev,
-      images: prev.images.filter(img => img.id !== imageId)
-    }));
-  };
-
   const handleDefectSubmit = () => {
     // Process the defect report
     console.log('Submitting defect report:', {
       barcode: scannedBarcode,
-      ...defectReport,
-      images: uploadedImages
+      ...defectReport
     });
     
     setScannerActive(false);
@@ -276,7 +242,6 @@ const DefectManagement = ({ mtoData = [], onOpenChat }) => {
       severity: 'medium',
       images: []
     });
-    setUploadedImages([]);
   };
 
   const handleReproduction = (defectId) => {
@@ -742,8 +707,6 @@ const DefectManagement = ({ mtoData = [], onOpenChat }) => {
                       <option value="defect_embroidery">Embroidery Defect</option>
                       <option value="quality">Quality Issue</option>
                       <option value="damage">Shipping Damage</option>
-                      <option value="lost_transit">Lost in Transit</option>
-                      <option value="order_swap">Order Swap</option>
                     </select>
                   </div>
                   
@@ -776,57 +739,6 @@ const DefectManagement = ({ mtoData = [], onOpenChat }) => {
                       rows="3"
                       placeholder="Additional details about the defect..."
                     />
-                  </div>
-
-                  {/* Image Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Add Pictures (Optional)
-                    </label>
-                    <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                        id="image-upload"
-                      />
-                      <label htmlFor="image-upload" className="cursor-pointer">
-                        <Camera className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-                        <p className="text-sm text-slate-600">
-                          Click to upload images or drag and drop
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">
-                          Supports JPG, PNG, GIF (max 5MB each)
-                        </p>
-                      </label>
-                    </div>
-                    
-                    {/* Image Previews */}
-                    {uploadedImages.length > 0 && (
-                      <div className="mt-3 space-y-2">
-                        <p className="text-sm font-medium text-slate-700">Uploaded Images:</p>
-                        <div className="grid grid-cols-2 gap-2">
-                          {uploadedImages.map((image) => (
-                            <div key={image.id} className="relative group">
-                              <img
-                                src={image.url}
-                                alt={image.name}
-                                className="w-full h-20 object-cover rounded-lg border border-slate-200"
-                              />
-                              <button
-                                onClick={() => removeImage(image.id)}
-                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                              <p className="text-xs text-slate-500 truncate mt-1">{image.name}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
                   </div>
                   
                   {/* Camera Access Button */}
@@ -878,26 +790,6 @@ const DefectManagement = ({ mtoData = [], onOpenChat }) => {
                       <p><strong>Reason:</strong> {defectReport.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
                       <p><strong>Urgency:</strong> {defectReport.severity.charAt(0).toUpperCase() + defectReport.severity.slice(1)}</p>
                       {defectReport.description && <p><strong>Notes:</strong> {defectReport.description}</p>}
-                      {uploadedImages.length > 0 && (
-                        <div className="mt-3">
-                          <p><strong>Images:</strong> {uploadedImages.length} uploaded</p>
-                          <div className="grid grid-cols-3 gap-2 mt-2">
-                            {uploadedImages.slice(0, 3).map((image) => (
-                              <img
-                                key={image.id}
-                                src={image.url}
-                                alt={image.name}
-                                className="w-full h-16 object-cover rounded border border-green-200"
-                              />
-                            ))}
-                            {uploadedImages.length > 3 && (
-                              <div className="w-full h-16 bg-green-100 rounded border border-green-200 flex items-center justify-center text-xs text-green-600">
-                                +{uploadedImages.length - 3} more
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                   

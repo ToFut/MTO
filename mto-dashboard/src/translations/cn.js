@@ -228,6 +228,7 @@ const translations = {
     active: "活跃",
     byStation: "按工作站",
     timeline: "时间线",
+    active: "活跃",
     allPriorities: "所有优先级",
     materialPrepStation: "材料准备站",
     customizationStation: "定制化工作站",
@@ -295,6 +296,7 @@ const translations = {
     defectResolutionRate: "缺陷解决率",
     avgResponseTime: "平均响应时间",
     reproductionSuccess: "复现成功率",
+    qualityScore: "质量评分",
     last30Days: "过去30天",
     defectsResolved: "已解决缺陷",
     pendingReview: "待审核",
@@ -363,21 +365,7 @@ const translations = {
     destination: "目的地",
     origin: "起点",
     packageWeight: "包裹重量",
-    dimensions: "尺寸",
-    chat: "运输聊天",
-    selectShipment: "选择运输",
-    chooseShipment: "选择运输...",
-    po: "采购订单",
-    awb: "空运单",
-    carton: "纸箱",
-    eta: "预计到达时间",
-    line: "行号",
-    status: "状态",
-    quickActions: "快速操作",
-    noMessages: "暂无消息。开始对话！",
-    typeMessage: "输入您的消息...",
-    selectChat: "请先选择聊天标签...",
-    send: "发送"
+    dimensions: "尺寸"
   },
 
   // Analytics & Reports
