@@ -2540,13 +2540,18 @@ const BaubleBarDemo = () => {
                                                   <button
                                                     onClick={(e) => {
                                                       e.stopPropagation();
-                                                      setShowChat(true);
-                                                      setChatContext({
-                                                        type: 'mto',
-                                                        id: uniqueMtoId,
-                                                        title: `MTO ${uniqueMtoId}`,
-                                                        cartonId: mto.masterCarton
-                                                      });
+                                                      // Find the PO for this MTO
+                                                      const po = brandPOs.find(po => po.mtos.includes(mto));
+                                                      if (po) {
+                                                        addNewChat('mto', po.po, mto.lineId || mto.poLineId);
+                                                        setShowChat(true);
+                                                      }
+                                                    }}
+                                                    className="text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50 transition-colors"
+                                                    title={`Chat about ${uniqueMtoId}`}
+                                                  >
+                                                    <MessageCircle className="h-3 w-3" />
+                                                  </button>
                                                     }}
                                                     className="p-1.5 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
                                                     title={`Chat about MTO ${uniqueMtoId}`}
@@ -2817,7 +2822,7 @@ const BaubleBarDemo = () => {
                                 addNewChat('shipping', shipment.po, '', shipment.awb, shipment.lineId);
                                 setShowChat(true);
                               }}
-                              className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center gap-1"
+                              className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center gap-1 px-2 py-1 rounded border border-purple-200 hover:bg-purple-50"
                             >
                               <MessageCircle className="h-3 w-3" />
                               Chat
