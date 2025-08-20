@@ -1,0 +1,124 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.optionalAuth = exports.authorizeCompanyType = exports.authorize = exports.authenticate = void 0;
+const database_1 = require("../config/database");
+const auth_service_1 = require("../services/auth.service");
+const logger_1 = require("../config/logger");
+const authenticate = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        if (!token) {
+            res.status(401).json({ error: 'Authentication required' });
+            return;
+        }
+        // Verify JWT token
+        const decoded = auth_service_1.authService.verifyToken(token);
+        if (!decoded) {
+            res.status(401).json({ error: 'Invalid authentication token' });
+            return;
+        }
+        // Get user from database
+        const user = await auth_service_1.authService.getUserById(decoded.userId);
+        if (!user) {
+            res.status(401).json({ error: 'User not found' });
+            return;
+        }
+        if (!user.active) {
+            res.status(403).json({ error: 'Account is deactivated' });
+            return;
+        }
+        // Get company information
+        const { data: company } = await database_1.db
+            .from('companies')
+            .select('type')
+            .eq('id', user.company_id || '')
+            .single();
+        // Attach user to request
+        req.user = {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+            companyId: user.company_id || '',
+            companyType: company?.type,
+        };
+        next();
+    }
+    catch (error) {
+        logger_1.logger.error('Authentication error:', error);
+        res.status(401).json({ error: 'Invalid authentication token' });
+    }
+};
+exports.authenticate = authenticate;
+const authorize = (roles) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            res.status(401).json({ error: 'Authentication required' });
+            return;
+        }
+        if (!roles.includes(req.user.role)) {
+            res.status(403).json({
+                error: 'Insufficient permissions',
+                required: roles,
+                current: req.user.role,
+            });
+            return;
+        }
+        next();
+    };
+};
+exports.authorize = authorize;
+const authorizeCompanyType = (types) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            res.status(401).json({ error: 'Authentication required' });
+            return;
+        }
+        if (!req.user.companyType || !types.includes(req.user.companyType)) {
+            res.status(403).json({
+                error: 'Invalid company type',
+                required: types,
+                current: req.user.companyType,
+            });
+            return;
+        }
+        next();
+    };
+};
+exports.authorizeCompanyType = authorizeCompanyType;
+const optionalAuth = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        if (!token) {
+            next();
+            return;
+        }
+        // Verify JWT token
+        const decoded = auth_service_1.authService.verifyToken(token);
+        if (decoded) {
+            // Get user from database
+            const user = await auth_service_1.authService.getUserById(decoded.userId);
+            if (user && user.active) {
+                // Get company information
+                const { data: company } = await database_1.db
+                    .from('companies')
+                    .select('type')
+                    .eq('id', user.company_id || '')
+                    .single();
+                req.user = {
+                    id: user.id,
+                    email: user.email,
+                    role: user.role,
+                    companyId: user.company_id || '',
+                    companyType: company?.type,
+                };
+            }
+        }
+        next();
+    }
+    catch (error) {
+        // Continue without authentication
+        next();
+    }
+};
+exports.optionalAuth = optionalAuth;
+//# sourceMappingURL=auth.middleware.js.map

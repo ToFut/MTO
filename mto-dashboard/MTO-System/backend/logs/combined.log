@@ -1,0 +1,130 @@
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-19 20:33:22"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-19 20:33:22"}
+{"level":"info","message":"🚀 Server is running on port 4567","timestamp":"2025-08-19 20:33:22"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-19 20:33:22"}
+{"level":"info","message":"🔗 API URL: http://localhost:4567/api","timestamp":"2025-08-19 20:33:22"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-19 20:33:22"}
+{"level":"info","message":"Shutting down server...","timestamp":"2025-08-19 23:11:07"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-19 23:11:18"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-19 23:11:18"}
+{"level":"info","message":"🚀 Server is running on port 4567","timestamp":"2025-08-19 23:11:18"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-19 23:11:18"}
+{"level":"info","message":"🔗 API URL: http://localhost:4567/api","timestamp":"2025-08-19 23:11:18"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-19 23:11:18"}
+{"level":"http","message":{"ip":"::ffff:192.168.86.104","method":"GET","url":"/login","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"},"timestamp":"2025-08-19 23:13:05"}
+{"level":"info","message":"::ffff:192.168.86.104 - - [20/Aug/2025:03:13:05 +0000] \"GET /login HTTP/1.1\" 404 90 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15\"","timestamp":"2025-08-19 23:13:05"}
+{"level":"http","message":{"duration":"30ms","method":"GET","status":404,"url":"/"},"timestamp":"2025-08-19 23:13:05"}
+{"level":"http","message":{"ip":"::ffff:192.168.86.104","method":"GET","url":"/","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"},"timestamp":"2025-08-19 23:13:09"}
+{"level":"info","message":"::ffff:192.168.86.104 - - [20/Aug/2025:03:13:09 +0000] \"GET / HTTP/1.1\" 404 85 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15\"","timestamp":"2025-08-19 23:13:09"}
+{"level":"http","message":{"duration":"5ms","method":"GET","status":404,"url":"/"},"timestamp":"2025-08-19 23:13:09"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-19 23:15:05"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-19 23:15:05"}
+{"level":"info","message":"🚀 Server is running on port 4567","timestamp":"2025-08-19 23:15:05"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-19 23:15:05"}
+{"level":"info","message":"🔗 API URL: http://localhost:4567/api","timestamp":"2025-08-19 23:15:05"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-19 23:15:05"}
+{"level":"http","message":{"ip":"::1","method":"GET","url":"/api","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"},"timestamp":"2025-08-19 23:30:37"}
+{"level":"info","message":"::1 - - [20/Aug/2025:03:30:37 +0000] \"GET /api HTTP/1.1\" 200 322 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15\"","timestamp":"2025-08-19 23:30:37"}
+{"level":"http","message":{"duration":"101ms","method":"GET","status":200,"url":"/api"},"timestamp":"2025-08-19 23:30:37"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-19 23:38:12"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-19 23:38:12"}
+{"level":"info","message":"🚀 Server is running on port 4567","timestamp":"2025-08-19 23:38:12"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-19 23:38:12"}
+{"level":"info","message":"🔗 API URL: http://localhost:4567/api","timestamp":"2025-08-19 23:38:12"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-19 23:38:12"}
+{"level":"http","message":{"ip":"::1","method":"GET","url":"/","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"},"timestamp":"2025-08-19 23:38:32"}
+{"level":"info","message":"::1 - - [20/Aug/2025:03:38:32 +0000] \"GET / HTTP/1.1\" 404 85 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15\"","timestamp":"2025-08-19 23:38:32"}
+{"level":"http","message":{"duration":"13ms","method":"GET","status":404,"url":"/"},"timestamp":"2025-08-19 23:38:32"}
+{"level":"http","message":{"ip":"::1","method":"GET","url":"/","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"},"timestamp":"2025-08-19 23:44:55"}
+{"level":"info","message":"::1 - - [20/Aug/2025:03:44:55 +0000] \"GET / HTTP/1.1\" 404 85 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\"","timestamp":"2025-08-19 23:44:55"}
+{"level":"http","message":{"duration":"29ms","method":"GET","status":404,"url":"/"},"timestamp":"2025-08-19 23:44:55"}
+{"level":"http","message":{"ip":"::1","method":"GET","url":"/favicon.ico","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"},"timestamp":"2025-08-19 23:44:55"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 09:37:06"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 09:37:06"}
+{"level":"info","message":"🚀 Server is running on port 4567","timestamp":"2025-08-20 09:37:06"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 09:37:06"}
+{"level":"info","message":"🔗 API URL: http://localhost:4567/api","timestamp":"2025-08-20 09:37:06"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 09:37:06"}
+{"level":"http","message":{"ip":"::ffff:127.0.0.1","method":"GET","url":"/health","userAgent":"curl/8.1.2"},"timestamp":"2025-08-20 09:37:09"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Aug/2025:13:37:09 +0000] \"GET /health HTTP/1.1\" 200 108 \"-\" \"curl/8.1.2\"","timestamp":"2025-08-20 09:37:09"}
+{"level":"http","message":{"duration":"5ms","method":"GET","status":200,"url":"/health"},"timestamp":"2025-08-20 09:37:09"}
+{"level":"http","message":{"ip":"::1","method":"GET","url":"/dashboard","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"},"timestamp":"2025-08-20 10:39:08"}
+{"level":"info","message":"::1 - - [20/Aug/2025:14:39:08 +0000] \"GET /dashboard HTTP/1.1\" 404 94 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15\"","timestamp":"2025-08-20 10:39:08"}
+{"level":"http","message":{"duration":"29ms","method":"GET","status":404,"url":"/"},"timestamp":"2025-08-20 10:39:08"}
+{"level":"http","message":{"ip":"::1","method":"GET","url":"/","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"},"timestamp":"2025-08-20 10:39:10"}
+{"level":"info","message":"::1 - - [20/Aug/2025:14:39:10 +0000] \"GET / HTTP/1.1\" 404 85 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15\"","timestamp":"2025-08-20 10:39:10"}
+{"level":"http","message":{"duration":"28ms","method":"GET","status":404,"url":"/"},"timestamp":"2025-08-20 10:39:10"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 10:42:56"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 10:42:56"}
+{"level":"info","message":"🚀 Server is running on port 4567","timestamp":"2025-08-20 10:42:56"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 10:42:56"}
+{"level":"info","message":"🔗 API URL: http://localhost:4567/api","timestamp":"2025-08-20 10:42:56"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 10:42:56"}
+{"level":"http","message":{"ip":"::1","method":"GET","url":"/","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"},"timestamp":"2025-08-20 10:43:09"}
+{"level":"info","message":"::1 - - [20/Aug/2025:14:43:09 +0000] \"GET / HTTP/1.1\" 404 85 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\"","timestamp":"2025-08-20 10:43:09"}
+{"level":"http","message":{"duration":"17ms","method":"GET","status":404,"url":"/"},"timestamp":"2025-08-20 10:43:09"}
+{"level":"http","message":{"ip":"::1","method":"GET","url":"/favicon.ico","userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36"},"timestamp":"2025-08-20 10:43:10"}
+{"level":"info","message":"::1 - - [20/Aug/2025:14:43:10 +0000] \"GET /favicon.ico HTTP/1.1\" 404 96 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\"","timestamp":"2025-08-20 10:43:10"}
+{"level":"http","message":{"duration":"6ms","method":"GET","status":404,"url":"/"},"timestamp":"2025-08-20 10:43:10"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 11:33:23"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 11:33:23"}
+{"level":"info","message":"🚀 Server is running on port 4566","timestamp":"2025-08-20 11:33:23"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 11:33:23"}
+{"level":"info","message":"🔗 API URL: http://localhost:4566/api","timestamp":"2025-08-20 11:33:23"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 11:33:23"}
+{"level":"http","message":{"ip":"::ffff:127.0.0.1","method":"GET","url":"/","userAgent":"curl/8.1.2"},"timestamp":"2025-08-20 11:37:13"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Aug/2025:15:37:13 +0000] \"GET / HTTP/1.1\" 404 85 \"-\" \"curl/8.1.2\"","timestamp":"2025-08-20 11:37:13"}
+{"level":"http","message":{"duration":"22ms","method":"GET","status":404,"url":"/"},"timestamp":"2025-08-20 11:37:13"}
+{"level":"info","message":"Shutting down server...","timestamp":"2025-08-20 12:13:19"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 15:38:40"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 15:38:40"}
+{"level":"info","message":"🚀 Server is running on port 5002","timestamp":"2025-08-20 15:38:40"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 15:38:40"}
+{"level":"info","message":"🔗 API URL: http://localhost:5002/api","timestamp":"2025-08-20 15:38:40"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 15:38:40"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Aug/2025:19:41:09 +0000] \"GET /health HTTP/1.1\" 200 110 \"-\" \"curl/8.1.2\"","timestamp":"2025-08-20 15:41:09"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Aug/2025:19:44:37 +0000] \"GET /api HTTP/1.1\" 200 322 \"-\" \"curl/8.1.2\"","timestamp":"2025-08-20 15:44:37"}
+{"isOperational":true,"level":"error","message":"Login error: Invalid credentials","stack":"Error: Invalid credentials\n    at AuthService.login (/Users/segevbin/Desktop/Customization/mto-dashboard/MTO-System/backend/src/services/auth.service.ts:118:15)\n    at processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async /Users/segevbin/Desktop/Customization/mto-dashboard/MTO-System/backend/src/controllers/auth.controller.ts:69:22","statusCode":401,"timestamp":"2025-08-20 15:51:16"}
+{"level":"info","message":"::ffff:127.0.0.1 - - [20/Aug/2025:19:51:16 +0000] \"POST /api/auth/login HTTP/1.1\" 401 47 \"-\" \"curl/8.1.2\"","timestamp":"2025-08-20 15:51:16"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 15:55:32"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 15:55:32"}
+{"level":"info","message":"🚀 Server is running on port 5002","timestamp":"2025-08-20 15:55:32"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 15:55:32"}
+{"level":"info","message":"🔗 API URL: http://localhost:5002/api","timestamp":"2025-08-20 15:55:32"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 15:55:32"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 15:55:58"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 15:55:58"}
+{"level":"info","message":"🚀 Server is running on port 5002","timestamp":"2025-08-20 15:55:58"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 15:55:58"}
+{"level":"info","message":"🔗 API URL: http://localhost:5002/api","timestamp":"2025-08-20 15:55:58"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 15:55:58"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 15:56:12"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 15:56:12"}
+{"level":"info","message":"🚀 Server is running on port 5002","timestamp":"2025-08-20 15:56:12"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 15:56:12"}
+{"level":"info","message":"🔗 API URL: http://localhost:5002/api","timestamp":"2025-08-20 15:56:12"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 15:56:12"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 15:56:21"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 15:56:21"}
+{"level":"info","message":"🚀 Server is running on port 5002","timestamp":"2025-08-20 15:56:21"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 15:56:21"}
+{"level":"info","message":"🔗 API URL: http://localhost:5002/api","timestamp":"2025-08-20 15:56:21"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 15:56:21"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 15:56:31"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 15:56:31"}
+{"level":"info","message":"🚀 Server is running on port 5002","timestamp":"2025-08-20 15:56:31"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 15:56:31"}
+{"level":"info","message":"🔗 API URL: http://localhost:5002/api","timestamp":"2025-08-20 15:56:31"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 15:56:31"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 16:22:28"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 16:22:28"}
+{"level":"info","message":"🚀 Server is running on port 5002","timestamp":"2025-08-20 16:22:28"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 16:22:28"}
+{"level":"info","message":"🔗 API URL: http://localhost:5002/api","timestamp":"2025-08-20 16:22:28"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 16:22:28"}
+{"level":"info","message":"✅ Socket.IO configured successfully","timestamp":"2025-08-20 16:22:48"}
+{"level":"info","message":"✅ Successfully connected to Supabase","timestamp":"2025-08-20 16:22:48"}
+{"level":"info","message":"🚀 Server is running on port 5002","timestamp":"2025-08-20 16:22:48"}
+{"level":"info","message":"📊 Environment: development","timestamp":"2025-08-20 16:22:48"}
+{"level":"info","message":"🔗 API URL: http://localhost:5002/api","timestamp":"2025-08-20 16:22:48"}
+{"level":"info","message":"🔌 WebSocket enabled on same port","timestamp":"2025-08-20 16:22:48"}
