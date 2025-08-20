@@ -79,9 +79,9 @@ const BrandFactoryAssignments: React.FC = () => {
     try {
       setLoading(true);
       const [assignmentsRes, brandsRes, factoriesRes] = await Promise.all([
-        apiClient.get('/assignments'),
-        apiClient.get('/companies?type=brand'),
-        apiClient.get('/companies?type=factory')
+        apiClient.get<{success: boolean, data: any[]}>('/assignments'),
+        apiClient.get<{success: boolean, data: any[]}>('/companies?type=brand'),
+        apiClient.get<{success: boolean, data: any[]}>('/companies?type=factory')
       ]);
 
       setAssignments(assignmentsRes.data.data || []);
