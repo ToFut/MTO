@@ -1,0 +1,1 @@
+{"version":3,"file":"shipment.routes.js","sourceRoot":"","sources":["../../src/routes/shipment.routes.ts"],"names":[],"mappings":";;AAAA,qCAAiC;AACjC,mEAA6D;AAE7D,MAAM,MAAM,GAAG,IAAA,gBAAM,GAAE,CAAC;AAExB,MAAM,CAAC,GAAG,CAAC,GAAG,EAAE,8BAAY,EAAE,CAAC,GAAG,EAAE,GAAG,EAAE,EAAE;IACzC,GAAG,CAAC,IAAI,CAAC,EAAE,OAAO,EAAE,mBAAmB,EAAE,CAAC,CAAC;AAC7C,CAAC,CAAC,CAAC;AAEH,kBAAe,MAAM,CAAC"}

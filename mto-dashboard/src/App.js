@@ -3464,14 +3464,8 @@ const BaubleBarDemo = () => {
                         </button>
                         <button 
                           onClick={() => {
+                            addNewChat('shipping', shipment.po, '', shipment.trackingNumber, shipment.lineId);
                             setShowChat(true);
-                            setChatContext({
-                              type: 'shipping',
-                              id: `${shipment.po}-${shipment.lineId}`,
-                              title: `Shipping Chat - ${shipment.po} Line ${shipment.lineId}`,
-                              awb: shipment.trackingNumber,
-                              lineId: shipment.lineId
-                            });
                           }}
                           className="text-purple-600 hover:text-purple-800"
                           title="Chat about this shipment"
@@ -3507,9 +3501,21 @@ const BaubleBarDemo = () => {
                       </button>
                     </td>
                     <td className="px-6 py-4">
-                      <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
-                        Ship
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">
+                          Ship
+                        </button>
+                        <button 
+                          onClick={() => {
+                            addNewChat('mto', mto.po, mto.lineId, '', '');
+                            setShowChat(true);
+                          }}
+                          className="text-purple-600 hover:text-purple-800"
+                          title="Chat about this MTO"
+                        >
+                          <MessageCircle className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -4118,12 +4124,18 @@ const BaubleBarDemo = () => {
       return true;
     });
 
-    const addNewChat = (type, po, mto) => {
+    const addNewChat = (type, po, mto, awb, lineId) => {
       let newTab;
       if (type === 'mto') {
         newTab = { id: `${po}-${mto}`, title: `${po} Line ${mto}`, type, po, mto };
       } else if (type === 'po') {
         newTab = { id: `po-${po}`, title: `PO ${po}`, type, po, mto: '' };
+      } else if (type === 'shipping') {
+        newTab = { id: `shipping-${awb}`, title: `${awb} - ${po} Line ${lineId}`, type, awb, po, lineId };
+      } else if (type === 'month') {
+        newTab = { id: `month-${po}`, title: `${po} 2025`, type, month: po, po: '', mto: '' };
+      } else if (type === 'day') {
+        newTab = { id: `day-${po}`, title: `${po}`, type, day: po, po: '', mto: '' };
       } else {
         newTab = { id: 'general', title: 'General', type: 'general', po: '', mto: '' };
       }
