@@ -7253,3 +7253,27 @@
 {"level":"info","message":"Chat opened: MTO_SP_MTO-1 by user: brand@brand.com","timestamp":"2025-08-25 18:01:54"}
 {"level":"info","message":"::1 - - [25/Aug/2025:22:01:54 +0000] \"POST /api/chat/open HTTP/1.1\" 200 721 \"http://localhost:3010/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15\"","timestamp":"2025-08-25 18:01:54"}
 {"level":"info","message":"::1 - - [25/Aug/2025:22:02:05 +0000] \"GET /api/mtos?brandId=a0560528-ac53-4dd7-ac9c-92d3e90addf0&limit=100&offset=0 HTTP/1.1\" 200 - \"http://localhost:3010/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15\"","timestamp":"2025-08-25 18:02:05"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:16:17 +0000] \"GET /api/companies HTTP/1.1\" 304 - \"http://localhost:3010/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\"","timestamp":"2025-08-25 18:16:17"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:16:18 +0000] \"GET /api/companies HTTP/1.1\" 304 - \"http://localhost:3010/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\"","timestamp":"2025-08-25 18:16:18"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:16:18 +0000] \"GET /api/users HTTP/1.1\" 200 - \"http://localhost:3010/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\"","timestamp":"2025-08-25 18:16:18"}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:16:18 +0000] \"GET /api/users HTTP/1.1\" 304 - \"http://localhost:3010/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36\"","timestamp":"2025-08-25 18:16:18"}
+{"level":"info","message":"File upload attempt - Name: MTO Order Tracker_Tote Bag_8.20_4.37pm.xlsx, MIME: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","timestamp":"2025-08-25 18:16:31"}
+{"level":"info","message":"🔍 PREVIEW ENDPOINT HIT - Starting deep dive debug","timestamp":"2025-08-25 18:16:31"}
+{"0":"Y","1":"E","2":"S","level":"info","message":"File received:","timestamp":"2025-08-25 18:16:31"}
+{"level":"info","message":"File details:","mimetype":"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","originalname":"MTO Order Tracker_Tote Bag_8.20_4.37pm.xlsx","size":2203040,"timestamp":"2025-08-25 18:16:31"}
+{"brandId":"a0560528-ac53-4dd7-ac9c-92d3e90addf0","level":"info","message":"Body params:","poNumber":"MTO-1756160191491","timestamp":"2025-08-25 18:16:31"}
+{"level":"info","message":"Parsed params:","poNumber":"MTO-1756160191491","timestamp":"2025-08-25 18:16:31"}
+{"brandId":"a0560528-ac53-4dd7-ac9c-92d3e90addf0","level":"info","message":"Final IDs:","timestamp":"2025-08-25 18:16:31"}
+{"level":"info","message":"File buffer size:","timestamp":"2025-08-25 18:16:31"}
+{"level":"info","message":"🚀 Calling previewMTOUpload with NextGen parser...","timestamp":"2025-08-25 18:16:31"}
+{"level":"info","message":"Starting MTO preview for PO: MTO-1756160191491 with Next-Gen parser","timestamp":"2025-08-25 18:16:31"}
+{"level":"info","message":"File type detection - PO score: 1, MTO score: 0","timestamp":"2025-08-25 18:16:33"}
+{"level":"info","message":"Detected file type: PO","timestamp":"2025-08-25 18:16:33"}
+{"level":"info","message":"Processing as Bauble Bar PO format...","timestamp":"2025-08-25 18:16:33"}
+{"level":"info","message":"Parsing Bauble Bar PO format...","timestamp":"2025-08-25 18:16:33"}
+{"level":"warn","message":"Could not find item headers in PO","timestamp":"2025-08-25 18:16:35"}
+{"level":"info","message":"Parsed PO undefined with 0 line items","timestamp":"2025-08-25 18:16:35"}
+{"level":"info","message":"Preview complete: 0 MTOs ready for upload","timestamp":"2025-08-25 18:16:35"}
+{"level":"info","message":"✅ MTO preview generated: 0 MTOs parsed for PO: MTO-1756160191491","timestamp":"2025-08-25 18:16:35"}
+{"level":"info","message":"Preview result structure:","mtoCount":0,"sampleMTO":"NO MTOs","timestamp":"2025-08-25 18:16:35","totalRows":0}
+{"level":"info","message":"::1 - - [25/Aug/2025:22:16:35 +0000] \"POST /api/mtos/preview HTTP/1.1\" 200 - \"http://localhost:3010/\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15\"","timestamp":"2025-08-25 18:16:35"}
