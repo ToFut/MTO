@@ -30,6 +30,9 @@ import syncRoutes from './routes/sync.routes';
 import analyticsRoutes from './routes/analytics.routes';
 import assignmentRoutes from './routes/assignment.routes';
 
+// Import controllers and services
+import chatController from './controllers/chat.controller';
+
 // Import middleware
 import { errorHandler } from './middleware/error.middleware';
 import { rateLimiter } from './middleware/rateLimit.middleware';
@@ -65,16 +68,39 @@ class Server {
     // CORS configuration
     this.app.use(cors({
       origin: (origin, callback) => {
-        const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3010'];
+        // In development, allow all localhost and local network origins
+        if (process.env.NODE_ENV === 'development') {
+          if (!origin || 
+              origin.includes('localhost') || 
+              origin.includes('127.0.0.1') ||
+              origin.match(/^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:\d+$/) || // Local network IPs
+              origin.match(/^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/) || // Local network IPs
+              origin.match(/^http:\/\/172\.(1[6-9]|2[0-9]|3[0-1])\.\d{1,3}\.\d{1,3}:\d+$/)) { // Local network IPs
+            callback(null, true);
+            return;
+          }
+        }
+        
+        // In production, use specific allowed origins
+        const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+          'http://localhost:3010',
+          'http://localhost:3000',
+          'http://localhost:5173', // Vite default port
+          'http://127.0.0.1:3010',
+          'http://127.0.0.1:3000',
+          'http://127.0.0.1:5173'
+        ];
+        
         if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
+          logger.warn(`CORS blocked origin: ${origin}`);
           callback(new Error('Not allowed by CORS'));
         }
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
     }));
 
     // Body parsing middleware
@@ -157,7 +183,11 @@ class Server {
   }
 
   private initializeSocketIO(): void {
+    // Configure socket events
     configureSocket(this.io);
+    
+    // Pass socket instance to chat controller for universal chat
+    chatController.setSocketIO(this.io);
   }
 
   public async start(): Promise<void> {

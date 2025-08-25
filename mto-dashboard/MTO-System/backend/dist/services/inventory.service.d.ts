@@ -10,9 +10,10 @@ export declare class InventoryService {
     updateStock(id: string, quantity: number, operation: string, userId: string): Promise<any>;
     deleteInventoryItem(id: string): Promise<boolean>;
     getShortageAlerts(filters: any): Promise<any[]>;
-    autoPopulateFromMTOs(poId: string): Promise<{
-        populated: number;
-    }>;
+    /**
+     * Smart auto-populate inventory from MTOs with intelligent analysis
+     */
+    autoPopulateFromMTOs(mtos: any[], brandId: string, factoryId: string): Promise<any>;
     allocateToMTO(inventoryId: string, mtoId: string, quantity: number, userId: string): Promise<{
         allocated: boolean;
     }>;
@@ -28,5 +29,17 @@ export declare class InventoryService {
     }>;
     exportInventoryToExcel(filters: any): Promise<any>;
     getReorderSuggestions(companyId: string): Promise<any[]>;
+    /**
+     * Analyze inventory item for intelligent categorization
+     */
+    private analyzeInventoryItem;
+    /**
+     * Calculate inventory priority based on MTO and spot characteristics
+     */
+    private calculateInventoryPriority;
+    /**
+     * Generate shortage alerts for high-priority items
+     */
+    private generateShortageAlerts;
 }
 //# sourceMappingURL=inventory.service.d.ts.map

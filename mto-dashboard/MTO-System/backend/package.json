@@ -9,7 +9,10 @@
     "start": "node dist/server.js",
     "test": "jest",
     "lint": "eslint src/**/*.ts",
-    "format": "prettier --write src/**/*.ts"
+    "format": "prettier --write src/**/*.ts",
+    "setup:demo": "ts-node scripts/setup-demo-login.ts",
+    "seed:demo": "ts-node scripts/create-demo-user-only.ts",
+    "verify:db": "ts-node scripts/verify-setup.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.55.0",
@@ -44,6 +47,7 @@
     "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
+    "axios": "^1.11.0",
     "eslint": "^8.56.0",
     "jest": "^29.7.0",
     "nodemon": "^3.0.2",

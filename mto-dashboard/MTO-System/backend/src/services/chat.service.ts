@@ -4,6 +4,15 @@ import { AppError } from '../middleware/error.middleware';
 
 export class ChatService {
   private supabase = getSupabase();
+  private io: any; // Socket.io instance
+
+  constructor(io?: any) {
+    this.io = io;
+  }
+
+  setSocketIO(io: any) {
+    this.io = io;
+  }
 
   async getChatRooms(userId: string, companyId: string, filters: any) {
     try {
@@ -51,6 +60,22 @@ export class ChatService {
 
   async sendMessage(messageData: any) {
     const { data } = await this.supabase.from('chat_messages').insert(messageData).select().single();
+    
+    // Emit real-time message if socket.io is available
+    if (this.io && data) {
+      this.io.to(`room_${messageData.room_id}`).emit('new_message', {
+        id: data.id,
+        message: data.message,
+        user_id: data.user_id,
+        room_id: data.room_id,
+        message_type: data.message_type,
+        created_at: data.created_at,
+        attachments: data.attachments
+      });
+      
+      logger.info(`Real-time message sent to room ${messageData.room_id}`);
+    }
+    
     return data;
   }
 

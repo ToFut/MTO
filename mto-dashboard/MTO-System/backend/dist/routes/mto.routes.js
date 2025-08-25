@@ -10,6 +10,7 @@ const rateLimit_middleware_1 = require("../middleware/rateLimit.middleware");
 const express_validator_1 = require("express-validator");
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
+const logger_1 = require("../config/logger");
 const router = (0, express_1.Router)();
 // Configure multer for file uploads
 const storage = multer_1.default.diskStorage({
@@ -30,11 +31,17 @@ const upload = (0, multer_1.default)({
         const allowedTypes = [
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'application/vnd.ms-excel',
+            'application/octet-stream', // Sometimes Excel files are detected as binary
         ];
-        if (allowedTypes.includes(file.mimetype)) {
+        logger_1.logger.info(`File upload attempt - Name: ${file.originalname}, MIME: ${file.mimetype}`);
+        // Check both MIME type and file extension
+        const isExcelExtension = file.originalname.toLowerCase().endsWith('.xlsx') ||
+            file.originalname.toLowerCase().endsWith('.xls');
+        if (allowedTypes.includes(file.mimetype) || isExcelExtension) {
             cb(null, true);
         }
         else {
+            logger_1.logger.error(`File rejected - Name: ${file.originalname}, MIME: ${file.mimetype}`);
             cb(new Error('Invalid file type. Only Excel files are allowed.'));
         }
     },
@@ -64,10 +71,31 @@ router.get('/', auth_middleware_1.authenticate, [
     (0, express_validator_1.query)('priority').optional().isIn(['urgent', 'high', 'normal', 'low']),
 ], mto_controller_1.default.getMTOs);
 router.get('/statistics', auth_middleware_1.authenticate, mto_controller_1.default.getMTOStatistics);
+router.get('/upload-history', auth_middleware_1.authenticate, [
+    (0, express_validator_1.query)('limit').optional().isInt({ min: 1, max: 100 }),
+    (0, express_validator_1.query)('offset').optional().isInt({ min: 0 }),
+    (0, express_validator_1.query)('startDate').optional().isISO8601(),
+    (0, express_validator_1.query)('endDate').optional().isISO8601(),
+], mto_controller_1.default.getUploadHistory);
 router.get('/export', auth_middleware_1.authenticate, mto_controller_1.default.exportMTOs);
 router.get('/:id', auth_middleware_1.authenticate, [(0, express_validator_1.param)('id').isUUID()], mto_controller_1.default.getMTO);
 router.get('/:id/timeline', auth_middleware_1.authenticate, [(0, express_validator_1.param)('id').isUUID()], mto_controller_1.default.getMTOTimeline);
 router.post('/', auth_middleware_1.authenticate, (0, auth_middleware_1.authorize)(['admin', 'brand_manager']), createMTOValidation, mto_controller_1.default.createMTO);
+// Preview MTOs before upload
+router.post('/preview', auth_middleware_1.authenticate, (0, auth_middleware_1.authorize)(['admin', 'brand_manager', 'brand_user']), upload.single('file'), [
+    (0, express_validator_1.body)('poNumber').notEmpty().withMessage('PO number is required'),
+    (0, express_validator_1.body)('factoryId').optional().isUUID().withMessage('Valid factory ID required'),
+    (0, express_validator_1.body)('brandId').optional().isUUID().withMessage('Valid brand ID required'),
+], mto_controller_1.default.previewMTOs);
+// Smart MTO upload with intelligence
+router.post('/smart-upload', auth_middleware_1.authenticate, (0, auth_middleware_1.authorize)(['admin', 'brand_manager', 'brand_user']), rateLimit_middleware_1.uploadRateLimiter, upload.single('file'), [
+    (0, express_validator_1.body)('poNumber').notEmpty().withMessage('PO number is required'),
+    (0, express_validator_1.body)('factoryId').optional().isUUID().withMessage('Valid factory ID required'),
+    (0, express_validator_1.body)('brandId').optional().isUUID().withMessage('Valid brand ID required'),
+], mto_controller_1.default.smartUploadMTOs);
+// Direct MTO upload (no PO required) - Legacy route used by frontend
+router.post('/upload', auth_middleware_1.authenticate, (0, auth_middleware_1.authorize)(['admin', 'brand_manager', 'brand_user']), rateLimit_middleware_1.uploadRateLimiter, upload.single('file'), mto_controller_1.default.uploadMTOs);
+// Legacy bulk upload
 router.post('/bulk-upload', auth_middleware_1.authenticate, (0, auth_middleware_1.authorize)(['admin', 'brand_manager']), rateLimit_middleware_1.uploadRateLimiter, upload.single('file'), [(0, express_validator_1.body)('poId').isUUID().withMessage('Valid PO ID is required')], mto_controller_1.default.bulkUploadMTOs);
 router.put('/:id', auth_middleware_1.authenticate, [(0, express_validator_1.param)('id').isUUID()], updateMTOValidation, mto_controller_1.default.updateMTO);
 router.patch('/:id/status', auth_middleware_1.authenticate, [

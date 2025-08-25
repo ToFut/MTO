@@ -17,30 +17,56 @@ const authenticate = async (req, res, next) => {
             res.status(401).json({ error: 'Invalid authentication token' });
             return;
         }
-        // Get user from database
-        const user = await auth_service_1.authService.getUserById(decoded.userId);
-        if (!user) {
-            res.status(401).json({ error: 'User not found' });
-            return;
+        // Handle demo users (they don't exist in database)
+        if (decoded.userId === 'demo-brand-user-id' || decoded.userId === 'f47ac10b-58cc-4372-a567-0e02b2c3d479') {
+            // Demo users
+            let demoUser;
+            if (decoded.userId === 'demo-brand-user-id') {
+                demoUser = {
+                    id: 'demo-brand-user-id',
+                    email: 'brand@brand.com',
+                    role: 'brand_manager',
+                    companyId: 'a0560528-ac53-4dd7-ac9c-92d3e90addf0',
+                    companyType: 'brand'
+                };
+            }
+            else {
+                demoUser = {
+                    id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+                    email: 'factory@factory.com',
+                    role: 'factory_operator',
+                    companyId: 'b1234567-89ab-cdef-0123-456789abcdef',
+                    companyType: 'factory'
+                };
+            }
+            req.user = demoUser;
         }
-        if (!user.active) {
-            res.status(403).json({ error: 'Account is deactivated' });
-            return;
+        else {
+            // Get user from database for real users
+            const user = await auth_service_1.authService.getUserById(decoded.userId);
+            if (!user) {
+                res.status(401).json({ error: 'User not found' });
+                return;
+            }
+            if (!user.active) {
+                res.status(403).json({ error: 'Account is deactivated' });
+                return;
+            }
+            // Get company information
+            const { data: company } = await database_1.db
+                .from('companies')
+                .select('type')
+                .eq('id', user.company_id || '')
+                .single();
+            // Attach user to request
+            req.user = {
+                id: user.id,
+                email: user.email,
+                role: user.role,
+                companyId: user.company_id || '',
+                companyType: company?.type,
+            };
         }
-        // Get company information
-        const { data: company } = await database_1.db
-            .from('companies')
-            .select('type')
-            .eq('id', user.company_id || '')
-            .single();
-        // Attach user to request
-        req.user = {
-            id: user.id,
-            email: user.email,
-            role: user.role,
-            companyId: user.company_id || '',
-            companyType: company?.type,
-        };
         next();
     }
     catch (error) {
@@ -95,22 +121,47 @@ const optionalAuth = async (req, res, next) => {
         // Verify JWT token
         const decoded = auth_service_1.authService.verifyToken(token);
         if (decoded) {
-            // Get user from database
-            const user = await auth_service_1.authService.getUserById(decoded.userId);
-            if (user && user.active) {
-                // Get company information
-                const { data: company } = await database_1.db
-                    .from('companies')
-                    .select('type')
-                    .eq('id', user.company_id || '')
-                    .single();
-                req.user = {
-                    id: user.id,
-                    email: user.email,
-                    role: user.role,
-                    companyId: user.company_id || '',
-                    companyType: company?.type,
-                };
+            // Handle demo users
+            if (decoded.userId === 'demo-brand-user-id' || decoded.userId === 'f47ac10b-58cc-4372-a567-0e02b2c3d479') {
+                let demoUser;
+                if (decoded.userId === 'demo-brand-user-id') {
+                    demoUser = {
+                        id: 'demo-brand-user-id',
+                        email: 'brand@brand.com',
+                        role: 'brand_manager',
+                        companyId: 'a0560528-ac53-4dd7-ac9c-92d3e90addf0',
+                        companyType: 'brand'
+                    };
+                }
+                else {
+                    demoUser = {
+                        id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+                        email: 'factory@factory.com',
+                        role: 'factory_operator',
+                        companyId: 'b1234567-89ab-cdef-0123-456789abcdef',
+                        companyType: 'factory'
+                    };
+                }
+                req.user = demoUser;
+            }
+            else {
+                // Get user from database
+                const user = await auth_service_1.authService.getUserById(decoded.userId);
+                if (user && user.active) {
+                    // Get company information
+                    const { data: company } = await database_1.db
+                        .from('companies')
+                        .select('type')
+                        .eq('id', user.company_id || '')
+                        .single();
+                    req.user = {
+                        id: user.id,
+                        email: user.email,
+                        role: user.role,
+                        companyId: user.company_id || '',
+                        companyType: company?.type,
+                    };
+                }
             }
         }
         next();

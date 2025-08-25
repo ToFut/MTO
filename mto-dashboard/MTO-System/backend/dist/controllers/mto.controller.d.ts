@@ -9,10 +9,14 @@ export declare class MTOController {
     updateMTOStatus: (req: Request, res: Response, next: import("express").NextFunction) => void;
     updateProductionStage: (req: Request, res: Response, next: import("express").NextFunction) => void;
     deleteMTO: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    uploadMTOs: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    previewMTOs: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    smartUploadMTOs: (req: Request, res: Response, next: import("express").NextFunction) => void;
     bulkUploadMTOs: (req: Request, res: Response, next: import("express").NextFunction) => void;
     getMTOStatistics: (req: Request, res: Response, next: import("express").NextFunction) => void;
     getMTOTimeline: (req: Request, res: Response, next: import("express").NextFunction) => void;
     exportMTOs: (req: Request, res: Response, next: import("express").NextFunction) => void;
+    getUploadHistory: (req: Request, res: Response, next: import("express").NextFunction) => void;
 }
 declare const _default: MTOController;
 export default _default;

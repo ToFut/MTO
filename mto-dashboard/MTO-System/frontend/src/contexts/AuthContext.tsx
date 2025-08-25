@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { authService } from '../services/auth.service'
+import socketService from '../services/socket.service'
 import { User } from '../types/user.types'
 
 interface AuthContextType {
@@ -46,6 +47,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (token) {
         const userData = await authService.verifyToken(token)
         setUser(userData)
+        
+        // Reconnect socket on page refresh
+        socketService.connect(token)
+        if (userData.companyId) {
+          socketService.joinCompanyRoom(userData.companyId)
+        }
       }
     } catch (err) {
       console.error('Auth check failed:', err)
@@ -57,16 +64,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('AuthContext: Starting login...')
       setError(null)
       setLoading(true)
       
       // Use real authentication service
+      console.log('AuthContext: Calling authService.login')
       const { user: userData, token } = await authService.login(email, password)
+      console.log('AuthContext: Login service returned:', { user: userData, hasToken: !!token })
       
       // Store token and user data
       localStorage.setItem('authToken', token)
       setUser(userData)
+      
+      // Connect to Socket.IO server
+      socketService.connect(token)
+      if (userData.companyId) {
+        socketService.joinCompanyRoom(userData.companyId)
+      }
+      
+      console.log('AuthContext: User set successfully and socket connected')
     } catch (err: any) {
+      console.error('AuthContext: Login error:', err)
       setError(err.message || 'Login failed')
       throw err
     } finally {
@@ -76,9 +95,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = async () => {
     try {
+      // Disconnect socket
+      socketService.disconnect()
+      
       await authService.logout()
       localStorage.removeItem('authToken')
+      localStorage.clear() // Clear all local storage
       setUser(null)
+      setError(null)
     } catch (err) {
       console.error('Logout error:', err)
     }

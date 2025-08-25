@@ -1,170 +1,194 @@
-import { apiClient } from '../utils/api-client';
+import { apiClient } from '../utils/api-client'
 
-export interface Company {
-  id: string;
-  name: string;
-  code: string;
-  type: 'brand' | 'factory';
-  email?: string;
-  contact_person?: string;
-  active: boolean;
+export interface Assignment {
+  id: string
+  mto_id: string
+  factory_id: string
+  brand_id: string
+  assigned_by: string
+  assigned_at: string
+  status: 'pending' | 'accepted' | 'rejected' | 'in_production' | 'completed'
+  priority: 'low' | 'normal' | 'high' | 'urgent'
+  due_date?: string
+  accepted_at?: string
+  rejected_at?: string
+  rejection_reason?: string
+  completed_at?: string
+  notes?: string
+  production_capacity?: number
+  estimated_completion?: string
+  created_at: string
+  updated_at: string
 }
 
-export interface BrandFactoryAssignment {
-  id: string;
-  brand_id: string;
-  factory_id: string;
-  status: 'active' | 'inactive' | 'suspended';
-  capabilities: string[];
-  production_capacity: number;
-  quality_rating: number;
-  preferred_for_categories: string[];
-  notes?: string;
-  assigned_at: string;
-  updated_at: string;
-  brand?: Company;
-  factory?: Company;
-  assigned_by_user?: {
-    id: string;
-    full_name: string;
-    email: string;
-  };
+export interface AssignmentFilter {
+  status?: string
+  priority?: string
+  brandId?: string
+  factoryId?: string
+  assignedBy?: string
+  startDate?: string
+  endDate?: string
+  overdue?: boolean
+  limit?: number
+  offset?: number
 }
 
-export interface CreateAssignmentData {
-  brand_id: string;
-  factory_id: string;
-  capabilities?: string[];
-  production_capacity?: number;
-  quality_rating?: number;
-  preferred_for_categories?: string[];
-  notes?: string;
-}
-
-export interface UpdateAssignmentData extends Partial<CreateAssignmentData> {
-  status?: 'active' | 'inactive' | 'suspended';
-}
-
-export interface AssignmentFilters {
-  brand_id?: string;
-  factory_id?: string;
-  status?: string;
-  limit?: number;
-  offset?: number;
+export interface ProductionUpdate {
+  assignment_id: string
+  progress_percentage: number
+  completed_quantity: number
+  notes?: string
+  issues?: string[]
 }
 
 class AssignmentService {
-  private basePath = '/assignments';
+  private readonly BASE_PATH = '/assignments'
 
-  /**
-   * Get all assignments with optional filters
-   */
-  async getAssignments(filters?: AssignmentFilters) {
-    const params = new URLSearchParams();
-    
-    if (filters) {
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          params.append(key, value.toString());
-        }
-      });
-    }
-
-    const queryString = params.toString();
-    const url = queryString ? `${this.basePath}?${queryString}` : this.basePath;
-    
+  async getAssignments(filter?: AssignmentFilter): Promise<{
+    data: Assignment[]
+    total: number
+  }> {
     const response = await apiClient.get<{
-      success: boolean;
-      data: BrandFactoryAssignment[];
-      filters: AssignmentFilters;
-    }>(url);
-    
-    return response.data;
+      data: Assignment[]
+      total: number
+    }>(this.BASE_PATH, {
+      params: filter
+    })
+    return response.data
   }
 
-  /**
-   * Get assignment by ID
-   */
-  async getAssignmentById(id: string) {
-    const response = await apiClient.get<{
-      success: boolean;
-      data: BrandFactoryAssignment;
-    }>(`${this.basePath}/${id}`);
-    
-    return response.data;
+  async getAssignment(id: string): Promise<Assignment> {
+    const response = await apiClient.get<{ data: Assignment }>(`${this.BASE_PATH}/${id}`)
+    return response.data.data
   }
 
-  /**
-   * Create new assignment
-   */
-  async createAssignment(data: CreateAssignmentData) {
-    const response = await apiClient.post<{
-      success: boolean;
-      data: BrandFactoryAssignment;
-    }>(this.basePath, data);
-    
-    return response.data;
+  async createAssignment(assignment: {
+    mto_id: string
+    factory_id: string
+    priority: string
+    due_date?: string
+    notes?: string
+  }): Promise<Assignment> {
+    const response = await apiClient.post<{ data: Assignment }>(this.BASE_PATH, assignment)
+    return response.data.data
   }
 
-  /**
-   * Update assignment
-   */
-  async updateAssignment(id: string, data: UpdateAssignmentData) {
-    const response = await apiClient.put<{
-      success: boolean;
-      data: BrandFactoryAssignment;
-    }>(`${this.basePath}/${id}`, data);
-    
-    return response.data;
+  async updateAssignment(id: string, updates: Partial<Assignment>): Promise<Assignment> {
+    const response = await apiClient.patch<{ data: Assignment }>(`${this.BASE_PATH}/${id}`, updates)
+    return response.data.data
   }
 
-  /**
-   * Delete assignment
-   */
-  async deleteAssignment(id: string) {
-    const response = await apiClient.delete<{
-      success: boolean;
-      message: string;
-    }>(`${this.basePath}/${id}`);
-    
-    return response.data;
+  async acceptAssignment(id: string, production_capacity?: number): Promise<Assignment> {
+    const response = await apiClient.post<{ data: Assignment }>(`${this.BASE_PATH}/${id}/accept`, {
+      production_capacity
+    })
+    return response.data.data
   }
 
-  /**
-   * Get available factories for a brand (Admin only)
-   */
-  async getAvailableFactoriesForBrand(brandId: string) {
-    const response = await apiClient.get<{
-      success: boolean;
-      data: Company[];
-    }>(`${this.basePath}/brands/${brandId}/available-factories`);
-    
-    return response.data;
+  async rejectAssignment(id: string, reason: string): Promise<Assignment> {
+    const response = await apiClient.post<{ data: Assignment }>(`${this.BASE_PATH}/${id}/reject`, {
+      reason
+    })
+    return response.data.data
   }
 
-  /**
-   * Get assigned factories for a brand
-   */
-  async getAssignedFactoriesForBrand(brandId: string) {
-    const response = await apiClient.get<{
-      success: boolean;
-      data: BrandFactoryAssignment[];
-    }>(`${this.basePath}/brands/${brandId}/factories`);
-    
-    return response.data;
+  async updateProgress(id: string, update: ProductionUpdate): Promise<Assignment> {
+    const response = await apiClient.post<{ data: Assignment }>(`${this.BASE_PATH}/${id}/progress`, update)
+    return response.data.data
   }
 
-  /**
-   * Get brands assigned to a factory
-   */
-  async getBrandsForFactory(factoryId: string) {
-    const response = await apiClient.get<{
-      success: boolean;
-      data: BrandFactoryAssignment[];
-    }>(`${this.basePath}/factories/${factoryId}/brands`);
-    
-    return response.data;
+  async completeAssignment(id: string): Promise<Assignment> {
+    const response = await apiClient.post<{ data: Assignment }>(`${this.BASE_PATH}/${id}/complete`)
+    return response.data.data
+  }
+
+  async getFactoryCapacity(factoryId: string): Promise<{
+    total_capacity: number
+    current_load: number
+    available_capacity: number
+    assignments_in_progress: number
+    estimated_availability: string
+  }> {
+    const response = await apiClient.get<{ data: {
+      total_capacity: number
+      current_load: number
+      available_capacity: number
+      assignments_in_progress: number
+      estimated_availability: string
+    }}>(`${this.BASE_PATH}/factory/${factoryId}/capacity`)
+    return response.data.data
+  }
+
+  async bulkAssign(assignments: Array<{
+    mto_id: string
+    factory_id: string
+    priority: string
+  }>): Promise<Assignment[]> {
+    const response = await apiClient.post<{ data: Assignment[] }>(`${this.BASE_PATH}/bulk`, {
+      assignments
+    })
+    return response.data.data
+  }
+
+  async reassignAssignment(id: string, newFactoryId: string, reason: string): Promise<Assignment> {
+    const response = await apiClient.post<{ data: Assignment }>(`${this.BASE_PATH}/${id}/reassign`, {
+      factory_id: newFactoryId,
+      reason
+    })
+    return response.data.data
+  }
+
+  async getStatistics(filter?: {
+    brandId?: string
+    factoryId?: string
+    startDate?: string
+    endDate?: string
+  }): Promise<{
+    total: number
+    byStatus: Record<string, number>
+    byPriority: Record<string, number>
+    averageCompletionTime: number
+    onTimeCompletionRate: number
+    rejectionRate: number
+  }> {
+    const response = await apiClient.get<{ data: {
+      total: number
+      byStatus: Record<string, number>
+      byPriority: Record<string, number>
+      averageCompletionTime: number
+      onTimeCompletionRate: number
+      rejectionRate: number
+    }}>(`${this.BASE_PATH}/statistics`, {
+      params: filter
+    })
+    return response.data.data
+  }
+
+  async getOverdueAssignments(filter?: {
+    brandId?: string
+    factoryId?: string
+  }): Promise<Assignment[]> {
+    const response = await apiClient.get<{ data: Assignment[] }>(`${this.BASE_PATH}/overdue`, {
+      params: filter
+    })
+    return response.data.data
+  }
+
+  async getTimeline(assignmentId: string): Promise<Array<{
+    timestamp: string
+    event: string
+    description: string
+    user?: string
+  }>> {
+    const response = await apiClient.get<{ data: Array<{
+      timestamp: string
+      event: string
+      description: string
+      user?: string
+    }>}>(`${this.BASE_PATH}/${assignmentId}/timeline`)
+    return response.data.data
   }
 }
 
-export const assignmentService = new AssignmentService();
+export const assignmentService = new AssignmentService()

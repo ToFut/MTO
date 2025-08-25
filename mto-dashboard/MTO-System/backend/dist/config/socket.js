@@ -56,15 +56,16 @@ const configureSocket = (io) => {
             socket.leave(`po:${poId}`);
             logger_1.logger.debug(`Socket ${socket.id} left PO room: ${poId}`);
         });
-        // Chat Events
-        socket.on('chat:join', (roomId) => {
-            socket.join(`chat:${roomId}`);
-            logger_1.logger.debug(`Socket ${socket.id} joined chat room: ${roomId}`);
+        // Universal Chat Events
+        socket.on('chat:join', (chatId) => {
+            socket.join(`chat:${chatId}`);
+            logger_1.logger.debug(`Socket ${socket.id} joined chat room: ${chatId}`);
         });
-        socket.on('chat:leave', (roomId) => {
-            socket.leave(`chat:${roomId}`);
-            logger_1.logger.debug(`Socket ${socket.id} left chat room: ${roomId}`);
+        socket.on('chat:leave', (chatId) => {
+            socket.leave(`chat:${chatId}`);
+            logger_1.logger.debug(`Socket ${socket.id} left chat room: ${chatId}`);
         });
+        // Legacy chat message (for backward compatibility)
         socket.on('chat:message', (data) => {
             io.to(`chat:${data.roomId}`).emit('chat:newMessage', {
                 ...data,
@@ -73,11 +74,24 @@ const configureSocket = (io) => {
             });
             logger_1.logger.debug(`Chat message sent in room: ${data.roomId}`);
         });
+        // Universal chat typing indicator
         socket.on('chat:typing', (data) => {
-            socket.to(`chat:${data.roomId}`).emit('chat:userTyping', {
+            const chatId = data.chatId || data.roomId; // Support both formats
+            socket.to(`chat:${chatId}`).emit('chat:typing', {
                 userId: socket.user?.id,
                 userName: socket.user?.email,
-                roomId: data.roomId,
+                chatId: chatId,
+                isTyping: data.isTyping || true,
+            });
+            logger_1.logger.debug(`Typing indicator for chat: ${chatId}`);
+        });
+        // Chat participant events
+        socket.on('chat:participant', (data) => {
+            socket.to(`chat:${data.chatId}`).emit('chat:participant', {
+                userId: socket.user?.id,
+                userName: socket.user?.email,
+                chatId: data.chatId,
+                action: data.action, // 'joined' or 'left'
             });
         });
         // Defect Events

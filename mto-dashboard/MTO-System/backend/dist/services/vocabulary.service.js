@@ -46,6 +46,99 @@ class VocabularyService {
     constructor() {
         this.supabase = (0, supabase_1.getSupabase)();
     }
+    /**
+     * Smart vocabulary mapping - finds or creates mapping for SKU with intelligent analysis
+     */
+    async findOrCreateMapping(sku, brandId, factoryId, patchRef) {
+        try {
+            // First, try to find existing mapping
+            let { data: existingMapping } = await this.supabase
+                .from('vocabulary_mappings')
+                .select('*')
+                .eq('brand_sku', sku)
+                .eq('brand_id', brandId)
+                .single();
+            if (existingMapping) {
+                return existingMapping;
+            }
+            // If no exact match, try fuzzy matching
+            const { data: fuzzyMatches } = await this.supabase
+                .from('vocabulary_mappings')
+                .select('*')
+                .or(`brand_sku.ilike.%${sku}%,factory_patch_id.ilike.%${sku}%`)
+                .eq('brand_id', brandId)
+                .limit(5);
+            if (fuzzyMatches && fuzzyMatches.length > 0) {
+                // Return best match based on similarity score
+                const bestMatch = this.findBestSimilarityMatch(sku, patchRef, fuzzyMatches);
+                if (bestMatch.score > 0.8) {
+                    return bestMatch.mapping;
+                }
+            }
+            // Create new mapping with intelligent analysis
+            const newMapping = await this.createSmartMapping(sku, brandId, factoryId, patchRef);
+            return newMapping;
+        }
+        catch (error) {
+            logger_1.logger.error(`Error in findOrCreateMapping for SKU ${sku}:`, error);
+            return null;
+        }
+    }
+    /**
+     * Create vocabulary mappings from MTOs with smart analysis
+     */
+    async createMappingsFromMTOs(mtos, brandId, factoryId) {
+        try {
+            logger_1.logger.info('Creating vocabulary mappings from MTOs...');
+            const mappingsToCreate = [];
+            const skusProcessed = new Set();
+            // Extract all unique SKUs from MTOs
+            for (const mto of mtos) {
+                if (mto.spots_data) {
+                    for (const spot of mto.spots_data) {
+                        if (spot.sku && !skusProcessed.has(spot.sku)) {
+                            skusProcessed.add(spot.sku);
+                            // Check if mapping already exists
+                            const { data: existing } = await this.supabase
+                                .from('vocabulary_mappings')
+                                .select('id')
+                                .eq('brand_sku', spot.sku)
+                                .eq('brand_id', brandId)
+                                .single();
+                            if (!existing) {
+                                const mapping = this.generateSmartMappingData(spot.sku, brandId, factoryId, spot.patch_ref, spot.description);
+                                mappingsToCreate.push(mapping);
+                            }
+                        }
+                    }
+                }
+            }
+            // Bulk create mappings
+            let createdCount = 0;
+            if (mappingsToCreate.length > 0) {
+                const { data: created, error } = await this.supabase
+                    .from('vocabulary_mappings')
+                    .insert(mappingsToCreate)
+                    .select();
+                if (error) {
+                    logger_1.logger.error('Error creating vocabulary mappings:', error);
+                }
+                else {
+                    createdCount = created?.length || 0;
+                }
+            }
+            logger_1.logger.info(`Created ${createdCount} new vocabulary mappings from ${mtos.length} MTOs`);
+            return {
+                created: createdCount,
+                processed: skusProcessed.size,
+                mappings: mappingsToCreate
+            };
+        }
+        catch (error) {
+            logger_1.logger.error('Error creating mappings from MTOs:', error);
+            throw error;
+        }
+    }
     async getMappings(filters) {
         try {
             let query = this.supabase
@@ -409,6 +502,230 @@ class VocabularyService {
             logger_1.logger.error('Error exporting vocabulary to Excel:', error);
             throw error;
         }
+    }
+    // Smart Vocabulary Helper Methods
+    /**
+     * Create smart mapping with intelligent analysis of patch reference
+     */
+    async createSmartMapping(sku, brandId, factoryId, patchRef) {
+        try {
+            const mappingData = this.generateSmartMappingData(sku, brandId, factoryId, patchRef);
+            const { data, error } = await this.supabase
+                .from('vocabulary_mappings')
+                .insert(mappingData)
+                .select()
+                .single();
+            if (error) {
+                logger_1.logger.error('Error creating smart mapping:', error);
+                return null;
+            }
+            logger_1.logger.info(`Created smart mapping for SKU ${sku}`);
+            return data;
+        }
+        catch (error) {
+            logger_1.logger.error('Error in createSmartMapping:', error);
+            return null;
+        }
+    }
+    /**
+     * Generate smart mapping data with intelligent analysis
+     */
+    generateSmartMappingData(sku, brandId, factoryId, patchRef, description) {
+        // Analyze patch reference for intelligent categorization
+        const analysis = this.analyzePatchReference(patchRef);
+        return {
+            brand_id: brandId,
+            factory_id: factoryId,
+            brand_sku: sku,
+            brand_description: description || patchRef || `Product ${sku}`,
+            brand_category: analysis.category,
+            factory_patch_id: sku,
+            factory_patch_ref: patchRef || `Patch ${sku}`,
+            factory_description: analysis.factoryDescription,
+            factory_material_code: analysis.materialCode,
+            patch_type: analysis.patchType,
+            patch_size: analysis.size,
+            patch_position: analysis.visualLocation,
+            complexity_level: analysis.complexityLevel,
+            production_time_minutes: analysis.productionTime,
+            thread_colors: analysis.threadColors,
+            stitch_count: analysis.estimatedStitchCount,
+            is_active: true,
+            version: 1,
+            tags: analysis.tags
+        };
+    }
+    /**
+     * Intelligent patch reference analysis
+     */
+    analyzePatchReference(patchRef) {
+        if (!patchRef) {
+            return this.getDefaultAnalysis();
+        }
+        const ref = patchRef.toLowerCase().trim();
+        const analysis = {
+            category: 'custom',
+            patchType: 'embroidery',
+            complexityLevel: 'medium',
+            productionTime: 15,
+            threadColors: ['black'],
+            estimatedStitchCount: 1500,
+            tags: [],
+            visualLocation: 'center',
+            factoryDescription: patchRef,
+            materialCode: null,
+            size: 'medium'
+        };
+        // Icon patterns
+        if (ref.includes('icon')) {
+            analysis.category = 'icon';
+            analysis.patchType = 'embroidery';
+            analysis.complexityLevel = 'simple';
+            analysis.productionTime = 10;
+            analysis.estimatedStitchCount = 800;
+            analysis.tags.push('icon', 'simple');
+            // Specific icon types
+            if (ref.includes('camera')) {
+                analysis.threadColors = ['black', 'gray'];
+                analysis.factoryDescription = 'Camera Icon - Simple line design';
+            }
+            else if (ref.includes('music')) {
+                analysis.threadColors = ['black'];
+                analysis.factoryDescription = 'Music Notes Icon - Musical symbol';
+            }
+            else if (ref.includes('airplane')) {
+                analysis.threadColors = ['navy', 'silver'];
+                analysis.factoryDescription = 'Airplane Icon - Travel theme';
+            }
+        }
+        // Letter patterns
+        else if (ref.includes('letter') || ref.match(/\b[A-Z]\s*-\s*classic/i)) {
+            analysis.category = 'letter';
+            analysis.patchType = 'embroidery';
+            analysis.complexityLevel = 'simple';
+            analysis.productionTime = 12;
+            analysis.estimatedStitchCount = 600;
+            analysis.tags.push('letter', 'monogram');
+            analysis.threadColors = ['gold', 'black'];
+            analysis.factoryDescription = `Letter embroidery - ${ref}`;
+        }
+        // Food/drink patterns
+        else if (ref.includes('margarita') || ref.includes('drink') || ref.includes('cocktail')) {
+            analysis.category = 'food_drink';
+            analysis.patchType = 'embroidery';
+            analysis.complexityLevel = 'medium';
+            analysis.productionTime = 18;
+            analysis.estimatedStitchCount = 2000;
+            analysis.tags.push('drink', 'lifestyle');
+            analysis.threadColors = ['lime', 'yellow', 'white'];
+            analysis.factoryDescription = 'Cocktail design - Food & drink theme';
+        }
+        // Text-based designs
+        else if (ref.split(' ').length > 2) {
+            analysis.category = 'text';
+            analysis.patchType = 'embroidery';
+            analysis.complexityLevel = 'complex';
+            analysis.productionTime = 25;
+            analysis.estimatedStitchCount = 3000;
+            analysis.tags.push('text', 'custom');
+            analysis.threadColors = ['black', 'white'];
+            analysis.factoryDescription = `Custom text design - ${ref}`;
+        }
+        // Number-based SKUs (product codes)
+        else if (/^\d+$/.test(patchRef)) {
+            analysis.category = 'product';
+            analysis.materialCode = patchRef;
+            analysis.factoryDescription = `Product code ${patchRef}`;
+            analysis.tags.push('product-code');
+        }
+        // Size inference
+        if (ref.includes('small') || analysis.estimatedStitchCount < 1000) {
+            analysis.size = 'small';
+        }
+        else if (ref.includes('large') || analysis.estimatedStitchCount > 2500) {
+            analysis.size = 'large';
+        }
+        // Location inference based on common patterns
+        if (ref.includes('front'))
+            analysis.visualLocation = 'front_center';
+        else if (ref.includes('back'))
+            analysis.visualLocation = 'back_center';
+        else if (ref.includes('side'))
+            analysis.visualLocation = 'side_left';
+        else if (ref.includes('handle'))
+            analysis.visualLocation = 'handle';
+        return analysis;
+    }
+    /**
+     * Default analysis for unknown patches
+     */
+    getDefaultAnalysis() {
+        return {
+            category: 'unknown',
+            patchType: 'embroidery',
+            complexityLevel: 'medium',
+            productionTime: 15,
+            threadColors: ['black'],
+            estimatedStitchCount: 1500,
+            tags: ['unknown'],
+            visualLocation: 'center',
+            factoryDescription: 'Unknown patch design',
+            materialCode: null,
+            size: 'medium'
+        };
+    }
+    /**
+     * Find best similarity match for fuzzy matching
+     */
+    findBestSimilarityMatch(sku, patchRef = '', mappings) {
+        let bestMatch = { mapping: null, score: 0 };
+        for (const mapping of mappings) {
+            let score = 0;
+            // SKU similarity
+            const skuSimilarity = this.calculateSimilarity(sku, mapping.brand_sku || '');
+            score += skuSimilarity * 0.6;
+            // Patch reference similarity
+            if (patchRef && mapping.factory_patch_ref) {
+                const refSimilarity = this.calculateSimilarity(patchRef, mapping.factory_patch_ref);
+                score += refSimilarity * 0.4;
+            }
+            if (score > bestMatch.score) {
+                bestMatch = { mapping, score };
+            }
+        }
+        return bestMatch;
+    }
+    /**
+     * Calculate string similarity using Levenshtein distance
+     */
+    calculateSimilarity(str1, str2) {
+        const longer = str1.length > str2.length ? str1 : str2;
+        const shorter = str1.length > str2.length ? str2 : str1;
+        if (longer.length === 0)
+            return 1.0;
+        const editDistance = this.levenshteinDistance(longer, shorter);
+        return (longer.length - editDistance) / longer.length;
+    }
+    /**
+     * Calculate Levenshtein distance between two strings
+     */
+    levenshteinDistance(str1, str2) {
+        const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+        for (let i = 0; i <= str1.length; i += 1) {
+            matrix[0][i] = i;
+        }
+        for (let j = 0; j <= str2.length; j += 1) {
+            matrix[j][0] = j;
+        }
+        for (let j = 1; j <= str2.length; j += 1) {
+            for (let i = 1; i <= str1.length; i += 1) {
+                const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                matrix[j][i] = Math.min(matrix[j][i - 1] + 1, // deletion
+                matrix[j - 1][i] + 1, // insertion
+                matrix[j - 1][i - 1] + indicator);
+            }
+        }
+        return matrix[str2.length][str1.length];
     }
 }
 exports.VocabularyService = VocabularyService;

@@ -34,13 +34,18 @@ class AuthService {
   private readonly BASE_PATH = '/auth'
 
   async login(email: string, password: string): Promise<LoginResponse> {
+    console.log('AuthService: Making login request to', `${this.BASE_PATH}/login`)
     const response = await apiClient.post<{success: boolean, data: {user: BackendUser, token: string}}>(`${this.BASE_PATH}/login`, {
       email,
       password
     })
     
+    console.log('AuthService: Raw response:', response.data)
+    
     // Map backend user format to frontend format
     const backendUser = response.data.data.user
+    console.log('AuthService: Backend user:', backendUser)
+    
     const frontendUser: User = {
       id: backendUser.id,
       email: backendUser.email,
@@ -62,10 +67,16 @@ class AuthService {
       updatedAt: new Date(backendUser.updated_at)
     }
     
-    return {
+    console.log('AuthService: Mapped frontend user:', frontendUser)
+    
+    const result = {
       user: frontendUser,
       token: response.data.data.token
     }
+    
+    console.log('AuthService: Returning result:', { ...result, token: result.token ? 'present' : 'missing' })
+    
+    return result
   }
 
   async logout(): Promise<void> {

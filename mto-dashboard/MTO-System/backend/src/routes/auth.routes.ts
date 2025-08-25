@@ -11,7 +11,7 @@ const registerValidation = [
   body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
   body('full_name').notEmpty().withMessage('Full name is required'),
-  body('company_id').isUUID().withMessage('Valid company ID is required'),
+  body('company_id').optional().isUUID().withMessage('Valid company ID is required'),
   body('role').optional().isIn(['viewer', 'brand_manager', 'factory_manager', 'production', 'qc', 'shipping', 'admin']),
 ];
 

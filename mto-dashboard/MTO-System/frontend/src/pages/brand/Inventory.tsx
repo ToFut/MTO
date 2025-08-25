@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
   Package, Warehouse, BarChart3, TrendingUp, AlertTriangle,
   Search, Filter, RefreshCw, Download, Eye, MessageCircle, QrCode,
-  Truck, CheckCircle2, Clock, Hash
+  Truck, CheckCircle2, Clock, Hash, Loader2
 } from 'lucide-react'
+import { inventoryService } from '../../services/inventory.service'
+import { mtoService } from '../../services/mto.service'
+import { useAuth } from '../../contexts/AuthContext'
 // import InventoryCartonSplit from '../../components/InventoryCartonSplit'
 
 interface InventoryStats {
@@ -16,18 +19,62 @@ interface InventoryStats {
 }
 
 const Inventory: React.FC = () => {
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<'overview' | 'cartons' | 'tracking'>('overview')
   const [showChat, setShowChat] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [inventoryItems, setInventoryItems] = useState<any[]>([])
+  const [mtoStats, setMtoStats] = useState<any>(null)
+  const [inventoryStats, setInventoryStats] = useState<InventoryStats>({
+    totalMTOs: 0,
+    completedMTOs: 0,
+    inProgressMTOs: 0,
+    totalCartons: 0,
+    readyToShip: 0,
+    defectiveItems: 0
+  })
 
-  // Sample inventory data - would come from API in real implementation
-  const inventoryStats: InventoryStats = {
-    totalMTOs: 1247,
-    completedMTOs: 823,
-    inProgressMTOs: 424,
-    totalCartons: 52,
-    readyToShip: 18,
-    defectiveItems: 12
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      
+      // Fetch inventory items
+      const invResponse = await inventoryService.getItems({
+        brandId: user?.companyId,
+        limit: 100,
+        offset: 0
+      })
+      setInventoryItems(invResponse.data || [])
+      
+      // Fetch MTO statistics
+      const statsResponse = await mtoService.getStatistics({
+        brandId: user?.companyId
+      })
+      setMtoStats(statsResponse)
+      
+      // Calculate inventory stats from real data
+      setInventoryStats({
+        totalMTOs: statsResponse?.total || 0,
+        completedMTOs: statsResponse?.byStatus?.shipped || 0,
+        inProgressMTOs: (statsResponse?.byStatus?.proceed || 0) + (statsResponse?.byStatus?.qc || 0),
+        totalCartons: Math.ceil((statsResponse?.total || 0) / 24), // Estimate cartons
+        readyToShip: statsResponse?.byStatus?.shipping || 0,
+        defectiveItems: 0 // Would come from defects API
+      })
+    } catch (error) {
+      console.error('Failed to fetch inventory data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRefresh = () => {
+    fetchData()
   }
 
   const sampleMTOData = [
@@ -126,14 +173,23 @@ const Inventory: React.FC = () => {
             <Download size={16} />
             Export Report
           </button>
-          <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
-            <RefreshCw size={16} />
-            Refresh Data
+          <button 
+            onClick={handleRefresh}
+            disabled={loading}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2 disabled:opacity-50"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'Loading...' : 'Refresh Data'}
           </button>
         </div>
       </div>
 
       {/* Stats Overview */}
+      {loading ? (
+        <div className="flex justify-center items-center h-32">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <div className="bg-white p-4 rounded-lg shadow-sm border">
           <div className="flex items-center justify-between">
@@ -207,6 +263,7 @@ const Inventory: React.FC = () => {
           </div>
         </div>
       </div>
+      )}
 
       {/* Tab Navigation */}
       <div className="bg-white rounded-lg shadow-sm border">

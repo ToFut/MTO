@@ -9,6 +9,14 @@ interface VocabularyFilters {
 }
 export declare class VocabularyService {
     private supabase;
+    /**
+     * Smart vocabulary mapping - finds or creates mapping for SKU with intelligent analysis
+     */
+    findOrCreateMapping(sku: string, brandId: string, factoryId: string, patchRef?: string): Promise<any>;
+    /**
+     * Create vocabulary mappings from MTOs with smart analysis
+     */
+    createMappingsFromMTOs(mtos: any[], brandId: string, factoryId: string): Promise<any>;
     getMappings(filters: VocabularyFilters): Promise<{
         data: any[];
         total: number;
@@ -35,6 +43,34 @@ export declare class VocabularyService {
         withoutImages: number;
     }>;
     exportVocabularyToExcel(filters: any): Promise<any>;
+    /**
+     * Create smart mapping with intelligent analysis of patch reference
+     */
+    private createSmartMapping;
+    /**
+     * Generate smart mapping data with intelligent analysis
+     */
+    private generateSmartMappingData;
+    /**
+     * Intelligent patch reference analysis
+     */
+    private analyzePatchReference;
+    /**
+     * Default analysis for unknown patches
+     */
+    private getDefaultAnalysis;
+    /**
+     * Find best similarity match for fuzzy matching
+     */
+    private findBestSimilarityMatch;
+    /**
+     * Calculate string similarity using Levenshtein distance
+     */
+    private calculateSimilarity;
+    /**
+     * Calculate Levenshtein distance between two strings
+     */
+    private levenshteinDistance;
 }
 export default VocabularyService;
 //# sourceMappingURL=vocabulary.service.d.ts.map

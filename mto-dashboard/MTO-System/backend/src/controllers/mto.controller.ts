@@ -235,7 +235,250 @@ export class MTOController {
     });
   });
 
-  // Bulk upload MTOs from Excel
+  // Direct MTO upload - no PO required (legacy frontend route)
+  uploadMTOs = asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        error: 'Excel file is required',
+      });
+      return;
+    }
+
+    try {
+      // Get user's company info
+      const brandId = req.user?.companyType === 'brand' ? req.user.companyId : null;
+      let factoryId = req.user?.companyType === 'factory' ? req.user.companyId : null;
+
+      if (!brandId && req.user?.role !== 'admin') {
+        res.status(400).json({
+          success: false,
+          error: 'Brand user required for MTO upload',
+        });
+        return;
+      }
+
+      // If no factory specified, get the default or first available factory
+      if (!factoryId) {
+        const { getSupabase } = require('../config/supabase');
+        const supabase = getSupabase();
+        const { data: factories } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('type', 'factory')
+          .limit(1);
+        
+        factoryId = factories?.[0]?.id || null;
+      }
+
+      if (!factoryId) {
+        res.status(400).json({
+          success: false,
+          error: 'No factory available. Please contact admin to set up a factory.',
+        });
+        return;
+      }
+
+      // Read file buffer
+      const fileBuffer = req.file.buffer || require('fs').readFileSync(req.file.path);
+
+      // Use direct MTO upload method that auto-creates PO
+      const result = await this.mtoService.directMTOUpload(
+        fileBuffer,
+        brandId || '',
+        factoryId,
+        req.user?.id!
+      );
+
+      // Clean up file if it was saved temporarily
+      if (req.file.path) {
+        require('fs').unlinkSync(req.file.path);
+      }
+
+      logger.info(`Direct MTO upload completed: ${result.created} MTOs processed by user: ${req.user?.email}`);
+
+      res.json({
+        success: true,
+        message: `Successfully uploaded ${result.created} MTOs`,
+        data: result.mtos,
+        summary: {
+          mtosCreated: result.created,
+          poCreated: result.po,
+          workspaceCreated: result.workspace,
+          inventoryItemsCreated: result.autoPopulation?.inventory?.created || 0,
+          barcodesGenerated: result.autoPopulation?.barcodes?.created || 0
+        }
+      });
+
+    } catch (error) {
+      logger.error(`Direct MTO upload failed for user ${req.user?.email}:`, error);
+      
+      // Clean up file on error
+      if (req.file?.path) {
+        try {
+          require('fs').unlinkSync(req.file.path);
+        } catch (e) {}
+      }
+
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Upload failed',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
+    }
+  });
+
+  // Preview MTOs before upload - parse without saving
+  previewMTOs = asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        error: 'Excel file is required',
+      });
+      return;
+    }
+
+    const { poNumber, factoryId } = req.body;
+    
+    if (!poNumber) {
+      res.status(400).json({
+        success: false,
+        error: 'Purchase Order number is required',
+      });
+      return;
+    }
+
+    // Determine brand and factory IDs
+    const brandId = req.user?.companyType === 'brand' ? req.user.companyId : req.body.brandId;
+    const finalFactoryId = req.user?.companyType === 'factory' ? req.user.companyId : factoryId;
+
+    try {
+      // Read file buffer
+      const fileBuffer = req.file.buffer || require('fs').readFileSync(req.file.path);
+
+      // Parse and analyze without saving
+      const previewResult = await this.mtoService.previewMTOUpload(
+        fileBuffer,
+        poNumber,
+        brandId || '',
+        finalFactoryId || ''
+      );
+
+      // Clean up file if it was saved temporarily
+      if (req.file.path) {
+        require('fs').unlinkSync(req.file.path);
+      }
+
+      logger.info(`MTO preview generated: ${previewResult.mtoCount} MTOs parsed for PO: ${poNumber}`);
+
+      res.json({
+        success: true,
+        preview: true,
+        data: previewResult,
+      });
+    } catch (error: any) {
+      logger.error('MTO preview failed:', error);
+      
+      // Clean up file on error
+      if (req.file?.path) {
+        try {
+          require('fs').unlinkSync(req.file.path);
+        } catch (e) {}
+      }
+
+      res.status(400).json({
+        success: false,
+        error: error.message || 'Failed to preview MTOs',
+      });
+    }
+  });
+
+  // Smart MTO upload with intelligent analysis and auto-population
+  smartUploadMTOs = asyncHandler(async (req: AuthRequest, res: Response) => {
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        error: 'Excel file is required',
+      });
+      return;
+    }
+
+    const { poNumber, factoryId } = req.body;
+    
+    if (!poNumber) {
+      res.status(400).json({
+        success: false,
+        error: 'Purchase Order number is required',
+      });
+      return;
+    }
+
+    if (!factoryId && req.user?.companyType === 'brand') {
+      res.status(400).json({
+        success: false,
+        error: 'Factory ID is required for brand users',
+      });
+      return;
+    }
+
+    // Determine brand and factory IDs based on user type
+    const brandId = req.user?.companyType === 'brand' ? req.user.companyId : req.body.brandId;
+    const finalFactoryId = req.user?.companyType === 'factory' ? req.user.companyId : factoryId;
+
+    if (!brandId || !finalFactoryId) {
+      res.status(400).json({
+        success: false,
+        error: 'Both brand and factory must be specified',
+      });
+      return;
+    }
+
+    try {
+      // Read file buffer
+      const fileBuffer = req.file.buffer || require('fs').readFileSync(req.file.path);
+
+      // Execute smart upload with full analysis
+      const result = await this.mtoService.smartUploadMTOs(
+        fileBuffer,
+        poNumber,
+        brandId,
+        finalFactoryId,
+        req.user?.id!
+      );
+
+      // Clean up file if it was saved temporarily
+      if (req.file.path) {
+        require('fs').unlinkSync(req.file.path);
+      }
+
+      logger.info(`Smart MTO upload completed: ${result.created} MTOs processed by user: ${req.user?.email}`);
+
+      res.json({
+        success: true,
+        message: `Successfully processed ${result.created} MTOs with smart analysis`,
+        data: result,
+        summary: {
+          mtosCreated: result.created,
+          spotsDetected: result.excelAnalysis.detectedSpots,
+          qualityScore: result.excelAnalysis.qualityScore,
+          inventoryItemsCreated: result.autoPopulation.inventory.created,
+          vocabularyMappingsCreated: result.autoPopulation.vocabulary.created,
+          barcodesGenerated: result.autoPopulation.barcodes.created
+        }
+      });
+
+    } catch (error) {
+      logger.error(`Smart MTO upload failed for user ${req.user?.email}:`, error);
+      
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Smart upload failed',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      });
+    }
+  });
+
+  // Legacy bulk upload (keep for backward compatibility)
   bulkUploadMTOs = asyncHandler(async (req: AuthRequest, res: Response) => {
     if (!req.file) {
       res.status(400).json({
@@ -329,6 +572,35 @@ export class MTOController {
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename=mtos-export-${Date.now()}.xlsx`);
     res.send(buffer);
+  });
+
+  // Get upload history (workspaces)
+  getUploadHistory = asyncHandler(async (req: AuthRequest, res: Response) => {
+    const filters = {
+      brandId: req.query.brandId as string,
+      factoryId: req.query.factoryId as string,
+      startDate: req.query.startDate as string,
+      endDate: req.query.endDate as string,
+      limit: parseInt(req.query.limit as string) || 20,
+      offset: parseInt(req.query.offset as string) || 0,
+    };
+
+    // Apply company filter based on user role
+    if (req.user?.companyType === 'brand') {
+      filters.brandId = req.user.companyId;
+    } else if (req.user?.companyType === 'factory') {
+      filters.factoryId = req.user.companyId;
+    }
+
+    const result = await this.mtoService.getUploadHistory(filters);
+    
+    res.json({
+      success: true,
+      data: result.data,
+      total: result.total,
+      limit: filters.limit,
+      offset: filters.offset,
+    });
   });
 }
 

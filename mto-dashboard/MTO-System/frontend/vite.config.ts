@@ -8,6 +8,7 @@ export default defineConfig({
     global: 'globalThis',
   },
   optimizeDeps: {
+    include: ['xlsx'],
     esbuildOptions: {
       loader: {
         '.js': 'jsx',

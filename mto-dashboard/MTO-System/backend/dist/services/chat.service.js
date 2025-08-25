@@ -5,8 +5,12 @@ const supabase_1 = require("../config/supabase");
 const logger_1 = require("../config/logger");
 const error_middleware_1 = require("../middleware/error.middleware");
 class ChatService {
-    constructor() {
+    constructor(io) {
         this.supabase = (0, supabase_1.getSupabase)();
+        this.io = io;
+    }
+    setSocketIO(io) {
+        this.io = io;
     }
     async getChatRooms(userId, companyId, filters) {
         try {
@@ -49,6 +53,19 @@ class ChatService {
     }
     async sendMessage(messageData) {
         const { data } = await this.supabase.from('chat_messages').insert(messageData).select().single();
+        // Emit real-time message if socket.io is available
+        if (this.io && data) {
+            this.io.to(`room_${messageData.room_id}`).emit('new_message', {
+                id: data.id,
+                message: data.message,
+                user_id: data.user_id,
+                room_id: data.room_id,
+                message_type: data.message_type,
+                created_at: data.created_at,
+                attachments: data.attachments
+            });
+            logger_1.logger.info(`Real-time message sent to room ${messageData.room_id}`);
+        }
         return data;
     }
     async editMessage(messageId, message, userId) {

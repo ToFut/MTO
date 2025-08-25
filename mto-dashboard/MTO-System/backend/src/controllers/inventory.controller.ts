@@ -4,6 +4,7 @@ import { InventoryService } from '../services/inventory.service';
 import { asyncHandler } from '../middleware/error.middleware';
 import { logger } from '../config/logger';
 import { validationResult } from 'express-validator';
+import { getSupabase } from '../config/supabase';
 
 export class InventoryController {
   private inventoryService: InventoryService;
@@ -173,7 +174,7 @@ export class InventoryController {
 
   // Auto-populate inventory from MTOs
   autoPopulateFromMTOs = asyncHandler(async (req: AuthRequest, res: Response) => {
-    const { poId } = req.body;
+    const { poId, brandId, factoryId } = req.body;
 
     if (!poId) {
       res.status(400).json({
@@ -183,7 +184,29 @@ export class InventoryController {
       return;
     }
 
-    const result = await this.inventoryService.autoPopulateFromMTOs(poId);
+    if (!brandId || !factoryId) {
+      res.status(400).json({
+        success: false,
+        error: 'Brand ID and Factory ID are required',
+      });
+      return;
+    }
+
+    // Get MTOs for the PO first
+    const { data: mtos } = await getSupabase()
+      .from('mtos')
+      .select('*')
+      .eq('po_id', poId);
+
+    if (!mtos || mtos.length === 0) {
+      res.status(404).json({
+        success: false,
+        error: 'No MTOs found for the specified PO',
+      });
+      return;
+    }
+
+    const result = await this.inventoryService.autoPopulateFromMTOs(mtos, brandId, factoryId);
     
     logger.info(`Inventory auto-populated from PO ${poId} by user: ${req.user?.email}`);
     

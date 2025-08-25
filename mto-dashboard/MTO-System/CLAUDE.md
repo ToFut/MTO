@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build & Test Commands
 
 ### Backend (Express + TypeScript)
-- Development: `cd backend && npm run dev` (starts with nodemon + ts-node on port 4567)
+- Development: `cd backend && npm run dev` (starts with nodemon + ts-node on port 5010)
 - Build: `cd backend && npm run build` (compiles TypeScript to dist/)
 - Production: `cd backend && npm start` (runs compiled JS from dist/)
 - Test: `cd backend && npm test` (Jest)
@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Format: `cd backend && npm run format` (Prettier)
 
 ### Frontend (React + TypeScript + Vite)
-- Development: `cd frontend && npm run dev` (Vite dev server on port 3001)
+- Development: `cd frontend && npm run dev` (Vite dev server on port 3010)
 - Build: `cd frontend && npm run build` (TypeScript compilation + Vite build)
 - Preview: `cd frontend && npm run preview` (preview production build)
 - Lint: `cd frontend && npm run lint` (ESLint for TS/TSX)
@@ -21,7 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Development Workflow
 - Start backend: `cd backend && npm run dev`
 - Start frontend: `cd frontend && npm run dev`
-- Frontend automatically proxies `/api` requests to backend (localhost:5000 → 4567)
+- Frontend automatically proxies `/api` requests to backend (localhost:3010 → localhost:5010)
 
 ## Architecture Overview
 
@@ -37,8 +37,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Layered Structure**: 
   - Routes (API endpoints)
   - Controllers (request/response handling)
-  - Services (business logic - **needs implementation**)
-  - Models (data layer - **needs creation**)
+  - Services (business logic)
   - Middleware (auth, error handling, logging, rate limiting)
 - **Configuration**: Modular config for Supabase, Socket.io, logger
 - **File Uploads**: Multer for Excel/image handling in `/uploads`
@@ -55,7 +54,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Users**: Role-based (brand_user, factory_user, admin)
 - **Companies**: Brand and factory organizations  
 - **Purchase Orders (POs)**: Excel upload and management
-- **MTOs**: Core entity with 6 spots/cartons tracking
+- **MTOs**: Core entity with flexible spots/cartons tracking (3, 6, or 20+ spots)
 - **Inventory**: Stock tracking with auto-population from MTOs
 - **Defects**: QC defect reporting and management
 - **Shipments**: Shipping coordination and tracking
@@ -67,6 +66,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Timestamps (created_at, updated_at) on all entities
 - Foreign key relationships maintain data integrity
 - Indexes on frequently queried columns
+- JSONB columns for flexible data storage (spots_data, excel_data)
 
 ## Code Conventions
 
@@ -97,47 +97,87 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **Uploads**: File storage in backend/uploads/
 - **Logs**: Winston logging to backend/logs/
 
-## Development Status
+## Critical Implementation Details
 
-### ✅ Completed
-- Backend API structure (controllers, routes, middleware)
-- Frontend component architecture and routing
-- Authentication system with JWT
-- Database schema and Supabase configuration
-- Multi-language support (EN, CN, TH, VN, KH)
-- Real-time chat infrastructure
+### Excel Upload Processing
+- **Multi-sheet support**: Processes all sheets in Excel file
+- **Flexible header detection**: Finds headers even if not in first row
+- **Smart column mapping**: Detects various column name variations
+- **Duplicate handling**: Generates unique IDs for duplicates
+- **Fallback values**: Uses SKU/reference for missing display names
+- **Validation**: Skips empty rows, validates required fields
+- **JSONB storage**: Preserves original Excel data for reference
 
-### ⚠️ In Progress  
-- **Business Logic**: Backend services need implementation (10 service files)
-- **Data Models**: Database models and query builders needed
-- **API Integration**: Frontend-backend data flow connections
-- **Component Migration**: Converting remaining JS components to TypeScript
+### MTO Service Key Methods
+- `parseExcelData()`: Handles flexible Excel structures with multi-sheet support
+- `createHeaderMap()`: Maps column variations to standard fields
+- `directMTOUpload()`: Creates PO + Workspace + MTOs atomically
+- `detectFileType()`: Distinguishes between PO and MTO formats
+- `performAutoPopulation()`: Populates inventory from MTO spots
 
-### ❌ Pending
-- Comprehensive testing (unit, integration, e2e)
-- Production deployment configuration
-- Performance optimization and caching
-- Advanced analytics and reporting features
-
-## Important Notes
-
-### Environment Configuration
-- Backend requires Supabase URL and service key
-- Frontend uses Vite proxy for API calls in development
-- Socket.io CORS configured for frontend origin
-- File uploads limited to 10MB
-
-### Database Connection
-- Uses Supabase client with service key for backend operations
-- Row-level security policies must be configured in Supabase
-- Connection pooling handled by Supabase
+### Authentication Flow
+- Login: `POST /api/auth/login` → JWT token
+- Middleware: `authenticate()` validates JWT on every request
+- Role-based: Controllers check user role for authorization
+- Token expiry: 7 days (configurable in JWT_EXPIRES_IN)
 
 ### Real-time Features
 - Socket.io server integrated with Express
-- Chat functionality per MTO with room-based messaging
-- Live updates for inventory and production status changes
+- Room-based messaging: `company:${id}`, `mto:${id}`, `chat:${id}`
+- JWT authentication on WebSocket connections
+- Events: MTO updates, chat messages, production status changes
 
-### Error Handling
-- Centralized error middleware captures all unhandled errors
-- Winston logging with file rotation (combined.log, error.log)
-- Structured error responses with consistent format
+## Environment Configuration
+
+### Backend (.env)
+- **PORT**: 5010 (development)
+- **SUPABASE_URL**: Supabase project URL
+- **SUPABASE_SERVICE_KEY**: Service role key for backend operations
+- **JWT_SECRET**: Secret for JWT signing
+- **FRONTEND_URL**: http://localhost:3010 (for CORS)
+
+### Frontend (vite.config.ts)
+- **Dev server**: Port 3010
+- **API proxy**: /api → http://localhost:5010
+- **Path aliases**: Configured for clean imports
+
+## Common Development Tasks
+
+### Adding a New API Endpoint
+1. Create route in `backend/src/routes/[feature].routes.ts`
+2. Add controller method in `backend/src/controllers/[feature].controller.ts`
+3. Implement business logic in `backend/src/services/[feature].service.ts`
+4. Add validation middleware if needed
+5. Update frontend service in `frontend/src/services/[feature].service.ts`
+
+### Database Changes
+1. Update schema in Supabase dashboard
+2. Update TypeScript types in backend
+3. Update service methods to handle new fields
+4. Test with existing data migration if needed
+
+### Debugging Upload Issues
+- Check logs in `backend/logs/combined.log`
+- Verify Excel column mapping in `parseExcelData()` method
+- Check `createHeaderMap()` for column detection logic
+- Review validation errors in response
+
+## Important Notes
+
+### Current Status
+- Backend services are implemented but may need refinement
+- Frontend-backend integration is functional
+- Multi-language support is active (EN, CN, TH, VN, KH)
+- File upload supports flexible Excel formats
+
+### Known Issues & Solutions
+- **Upload failures**: Usually due to column mapping - check header detection
+- **Duplicate IDs**: System auto-generates unique IDs when duplicates detected
+- **Empty MTOs**: Fallback values ensure MTOs have identifiable data
+- **Port conflicts**: Backend uses 5010, frontend uses 3010
+
+### Performance Considerations
+- Lazy loading reduces initial bundle size
+- JSONB columns allow flexible data without schema changes
+- Indexes on foreign keys improve query performance
+- Socket.io rooms limit broadcast scope

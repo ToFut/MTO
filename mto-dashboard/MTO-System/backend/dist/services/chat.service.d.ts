@@ -1,5 +1,8 @@
 export declare class ChatService {
     private supabase;
+    private io;
+    constructor(io?: any);
+    setSocketIO(io: any): void;
     getChatRooms(userId: string, companyId: string, filters: any): Promise<{
         data: any[];
         total: number;

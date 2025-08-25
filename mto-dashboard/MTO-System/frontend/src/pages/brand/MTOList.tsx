@@ -1,10 +1,16 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { 
-  Search, Filter, Eye, MessageCircle, Download, ChevronDown, ChevronRight,
-  Package, Truck, CheckCircle2, AlertTriangle, Clock, RefreshCw,
-  Upload, FileText, QrCode, Calendar, User, Hash, MapPin, Star,
-  Camera, Music, Coffee, Heart, Sun, Crown, Gift, X
+  Search, Eye, MessageCircle, Download, ChevronDown, ChevronRight, ChevronLeft,
+  Package, CheckCircle2, AlertTriangle, Clock, RefreshCw,
+  Upload, QrCode, Calendar, Star,
+  Camera, Music, Coffee, Heart, Sun, Crown, Gift, X, Loader2,
+  BarChart3, TrendingUp, Settings,
+  Activity, Sparkles, ArrowUpRight, Zap, Shield, Globe, Layers,
+  Target, Building2, MoreVertical, Folder, Archive
 } from 'lucide-react'
+import { mtoService } from '../../services/mto.service'
+import { useAuth } from '../../contexts/AuthContext'
+import { useChat } from '../../contexts/ChatContext'
 
 interface MTO {
   lineId: number
@@ -61,16 +67,129 @@ interface PO {
 }
 
 const MTOList: React.FC = () => {
+  const { user } = useAuth()
+  const { openChat, buildMTOChatId } = useChat()
   const [expandedPOs, setExpandedPOs] = useState<Set<string>>(new Set())
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
   const [filterFactory, setFilterFactory] = useState('all')
-  const [viewMode, setViewMode] = useState<'po' | 'mto'>('po')
+  const [viewMode, setViewMode] = useState<'po' | 'temporal' | 'analytics'>('temporal')
   const [selectedMTO, setSelectedMTO] = useState<MTO | null>(null)
   const [showAdvancedFilter, setShowAdvancedFilter] = useState(false)
+  const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set(['2025-01']))
+  const [expandedDays, setExpandedDays] = useState<Set<string>>(new Set())
+  const [expandedMTOs, setExpandedMTOs] = useState<Set<string>>(new Set())
+  const [selectedProductType, setSelectedProductType] = useState<string>('all')
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [loading, setLoading] = useState(true)
+  const [mtos, setMtos] = useState<any[]>([])
+  const [brandPOs, setBrandPOs] = useState<PO[]>([])
 
-  // Sample data based on original system
-  const brandPOs: PO[] = [
+  useEffect(() => {
+    fetchMTOs()
+  }, [filterStatus, filterFactory])
+
+  const fetchMTOs = async () => {
+    try {
+      setLoading(true)
+      const response = await mtoService.findAll({
+        brandId: user?.companyId,
+        status: filterStatus !== 'all' ? filterStatus as any : undefined,
+        limit: 100,
+        offset: 0
+      })
+      
+      // Transform real MTOs to component format
+      const realMtos = response.data || []
+      setMtos(realMtos)
+      
+      // Group MTOs by PO
+      const poMap = new Map<string, PO>()
+      
+      realMtos.forEach((mto: any) => {
+        const poNumber = mto.purchase_orders?.po_number || 'Unknown PO'
+        
+        if (!poMap.has(poNumber)) {
+          poMap.set(poNumber, {
+            po: poNumber,
+            totalUnits: 0,
+            completed: 0,
+            percent: 0,
+            eta: mto.expected_ship_date || 'TBD',
+            status: mto.status === 'shipped' ? 'Shipped' : mto.status === 'shipping' ? 'Ready to Ship' : 'In Production',
+            uploadDate: new Date(mto.created_at).toLocaleDateString(),
+            factory: 'GZ Factory',
+            urgent: mto.priority === 'urgent',
+            mtos: []
+          })
+        }
+        
+        const po = poMap.get(poNumber)!
+        po.totalUnits += mto.quantity || 1
+        if (mto.status === 'shipped') po.completed += mto.quantity || 1
+        
+        // Transform MTO to component format
+        const transformedMTO: MTO = {
+          id: mto.id,
+          lineId: po.mtos.length + 1,
+          qty: mto.quantity || 1,
+          customization: `${mto.spots_data?.length || 0} spots`,
+          status: mto.status,
+          eta: mto.expected_ship_date || 'TBD',
+          progress: mto.status === 'shipped' ? 100 : mto.status === 'shipping' ? 90 : mto.status === 'qc' ? 75 : mto.status === 'proceed' ? 50 : 25,
+          style: mto.style_number || mto.product_name || 'Custom Tote',
+          internalId: mto.internal_id,
+          poLineId: mto.po_line_id,
+          expectedShipDate: mto.expected_ship_date || '',
+          actualShipDate: mto.actual_ship_date || '',
+          poLineTrackingNumber: mto.po_line_tracking || '',
+          awb: mto.awb || '',
+          masterCarton: mto.master_carton || '',
+          vendorPoStatus: mto.vendor_po_status || mto.status,
+          orderSubmitDate: mto.order_submit_date || '',
+          soDate: mto.so_date || '',
+          shopifyOrderDateTime: mto.shopify_order_date || '',
+          salesOrderNumber: mto.sales_order_number || '',
+          cpsd: mto.cpsd || '',
+          displayName: mto.display_name || mto.sku || '',
+          referenceNumber: mto.reference_number || mto.sku || '',
+          quantity: mto.quantity || 1,
+          po: poNumber,
+          spot1: mto.spots_data?.[0]?.sku || '',
+          spot2: mto.spots_data?.[1]?.sku || '',
+          spot3: mto.spots_data?.[2]?.sku || '',
+          spot4: mto.spots_data?.[3]?.sku || '',
+          spot5: mto.spots_data?.[4]?.sku || '',
+          spot6: mto.spots_data?.[5]?.sku || '',
+          bagBasePid: mto.bag_base_pid || '',
+          spot1PatchRef: mto.spots_data?.[0]?.patch_ref || '',
+          spot2PatchRef: mto.spots_data?.[1]?.patch_ref || '',
+          spot3PatchRef: mto.spots_data?.[2]?.patch_ref || '',
+          spot4PatchRef: mto.spots_data?.[3]?.patch_ref || '',
+          spot5PatchRef: mto.spots_data?.[4]?.patch_ref || '',
+          spot6PatchRef: mto.spots_data?.[5]?.patch_ref || '',
+          xfDate: mto.xf_date || '',
+          productType: mto.production_category === 'daily' ? 'Rush Order' : 'Initial Tote'
+        }
+        
+        po.mtos.push(transformedMTO)
+      })
+      
+      // Calculate percentages
+      poMap.forEach(po => {
+        po.percent = po.totalUnits > 0 ? Math.round((po.completed / po.totalUnits) * 100) : 0
+      })
+      
+      setBrandPOs(Array.from(poMap.values()))
+    } catch (error) {
+      console.error('Failed to fetch MTOs:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Keep sample data as fallback
+  const samplePOs: PO[] = [
     {
       po: 'PO123',
       totalUnits: 500,
@@ -264,11 +383,13 @@ const MTOList: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'shipped': return 'bg-green-100 text-green-800'
-      case 'qc': return 'bg-blue-100 text-blue-800'
-      case 'in production': return 'bg-yellow-100 text-yellow-800'
-      case 'pending': return 'bg-gray-100 text-gray-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'shipped': return 'bg-emerald-50 text-emerald-600 border-emerald-200'
+      case 'shipping': return 'bg-blue-50 text-blue-600 border-blue-200'
+      case 'qc': return 'bg-violet-50 text-violet-600 border-violet-200'
+      case 'proceed': return 'bg-amber-50 text-amber-600 border-amber-200'
+      case 'in production': return 'bg-amber-50 text-amber-600 border-amber-200'
+      case 'pending': return 'bg-gray-50 text-gray-600 border-gray-200'
+      default: return 'bg-gray-50 text-gray-600 border-gray-200'
     }
   }
 
@@ -284,85 +405,954 @@ const MTOList: React.FC = () => {
     return Package
   }
 
-  const handleChatClick = (mto: MTO, po: string) => {
-    // Chat functionality would be implemented here
-    console.log('Open chat for MTO:', mto.lineId, 'in PO:', po)
+  const handleChatClick = (mto: MTO, context: string) => {
+    try {
+      let chatId: string;
+      
+      // Determine chat type based on context
+      if (context.startsWith('month-')) {
+        // Month-level chat: extract month from context
+        const monthKey = context.replace('month-', '');
+        const [year, month] = monthKey.split('-');
+        chatId = buildMTOChatId({
+          level: 'MO',
+          month: `${year}-${month.padStart(2, '0')}`
+        });
+      } else if (context.startsWith('day-')) {
+        // Day-level chat: extract date from context
+        const dayKey = context.replace('day-', '');
+        const [year, month, day] = dayKey.split('-');
+        chatId = buildMTOChatId({
+          level: 'DY',
+          date: `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+        });
+      } else if (context.startsWith('mto-')) {
+        // Specific MTO chat
+        const mtoId = context.replace('mto-', '');
+        chatId = buildMTOChatId({
+          level: 'SP',
+          mtoId: mtoId || mto.internalId || mto.lineId.toString()
+        });
+      } else {
+        // Fallback to specific MTO
+        chatId = buildMTOChatId({
+          level: 'SP',
+          mtoId: mto.internalId || mto.lineId.toString()
+        });
+      }
+      
+      openChat(chatId);
+    } catch (error) {
+      console.error('Failed to open chat:', error);
+    }
+  }
+
+  // Temporal grouping functions
+  const groupMTOsByMonth = (mtos: any[]) => {
+    const monthGroups = new Map<string, any[]>()
+    
+    mtos.forEach(mto => {
+      const date = new Date(mto.created_at || mto.expected_ship_date || Date.now())
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      
+      if (!monthGroups.has(monthKey)) {
+        monthGroups.set(monthKey, [])
+      }
+      monthGroups.get(monthKey)!.push(mto)
+    })
+    
+    return Array.from(monthGroups.entries()).map(([monthKey, mtos]) => ({
+      monthKey,
+      monthName: new Date(monthKey + '-01').toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+      mtos,
+      totalMTOs: mtos.length,
+      productTypes: {
+        'Initial Tote': mtos.filter(m => (m.productType || 'Initial Tote') === 'Initial Tote').length,
+        'Icon Tote': mtos.filter(m => (m.productType || 'Initial Tote') === 'Icon Tote').length,
+        'Rush Order': mtos.filter(m => (m.productType || 'Initial Tote') === 'Rush Order').length,
+        'Classic Tote': mtos.filter(m => (m.productType || 'Initial Tote') === 'Classic Tote').length
+      }
+    })).sort((a, b) => b.monthKey.localeCompare(a.monthKey))
+  }
+
+  const groupMTOsByDay = (monthMTOs: any[]) => {
+    const dayGroups = new Map<string, any[]>()
+    
+    monthMTOs.forEach(mto => {
+      const date = new Date(mto.created_at || mto.expected_ship_date || Date.now())
+      const dayKey = date.toISOString().split('T')[0]
+      
+      if (!dayGroups.has(dayKey)) {
+        dayGroups.set(dayKey, [])
+      }
+      dayGroups.get(dayKey)!.push(mto)
+    })
+    
+    return Array.from(dayGroups.entries()).map(([dayKey, mtos]) => ({
+      dayKey,
+      dayName: new Date(dayKey).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+      mtos,
+      totalMTOs: mtos.length,
+      statusBreakdown: {
+        completed: mtos.filter(m => m.status === 'shipped').length,
+        inProgress: mtos.filter(m => ['proceed', 'qc', 'shipping'].includes(m.status)).length,
+        pending: mtos.filter(m => m.status === 'pending').length
+      }
+    })).sort((a, b) => b.dayKey.localeCompare(a.dayKey))
+  }
+
+  const toggleMonthExpansion = (monthKey: string) => {
+    const newExpanded = new Set(expandedMonths)
+    if (newExpanded.has(monthKey)) {
+      newExpanded.delete(monthKey)
+    } else {
+      newExpanded.add(monthKey)
+    }
+    setExpandedMonths(newExpanded)
+  }
+
+  const toggleDayExpansion = (dayKey: string) => {
+    const newExpanded = new Set(expandedDays)
+    if (newExpanded.has(dayKey)) {
+      newExpanded.delete(dayKey)
+    } else {
+      newExpanded.add(dayKey)
+    }
+    setExpandedDays(newExpanded)
+  }
+
+  const toggleMTOExpansion = (mtoId: string) => {
+    const newExpanded = new Set(expandedMTOs)
+    if (newExpanded.has(mtoId)) {
+      newExpanded.delete(mtoId)
+    } else {
+      newExpanded.add(mtoId)
+    }
+    setExpandedMTOs(newExpanded)
+  }
+
+  const handleViewDetails = (mto: any) => {
+    setSelectedMTO(mto)
+  }
+
+  const navigateMonth = (direction: 'prev' | 'next' | 'current') => {
+    if (direction === 'current') {
+      setCurrentDate(new Date())
+    } else if (direction === 'prev') {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
+    } else {
+      setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
+    }
+  }
+
+  // Get temporal data
+  const temporalData = useMemo(() => {
+    const allMTOsFlat = brandPOs.flatMap(po => 
+      po.mtos.map(mto => ({ ...mto, po: po.po, factory: po.factory }))
+    )
+    
+    // Filter by product type
+    const filteredMTOs = selectedProductType === 'all' 
+      ? allMTOsFlat 
+      : allMTOsFlat.filter(mto => (mto.productType || 'Initial Tote') === selectedProductType)
+    
+    return groupMTOsByMonth(filteredMTOs)
+  }, [brandPOs, selectedProductType, currentDate])
+
+  const productTypes = ['all', 'Initial Tote', 'Icon Tote', 'Rush Order', 'Classic Tote']
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">MTO Management</h1>
-          <p className="text-gray-600">Track and manage all your made-to-order items</p>
-        </div>
-        <div className="flex gap-2">
-          <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
-            <Upload size={16} />
-            Upload PO
-          </button>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm border p-4">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex-1 min-w-64">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-              <input
-                type="text"
-                placeholder="Search PO, factory, product..."
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      <div className="space-y-6 p-4 lg:p-8 max-w-8xl mx-auto">
+        {/* Enhanced Premium Header */}
+        <div className="relative overflow-hidden bg-white rounded-3xl shadow-sm border border-gray-100">
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/5 via-purple-600/5 to-blue-600/5"></div>
+          <div className="relative">
+            {/* Status Bar */}
+            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-6">
+                  <div className="flex items-center space-x-2">
+                    <Activity className="w-4 h-4 text-white animate-pulse" />
+                    <span className="text-xs font-medium text-white/90">System Active</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Globe className="w-4 h-4 text-white/80" />
+                    <span className="text-xs text-white/80">3 Factories Connected</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Shield className="w-4 h-4 text-white/80" />
+                    <span className="text-xs text-white/80">Secure</span>
+                  </div>
+                </div>
+                <div className="text-xs text-white/80">
+                  {new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                </div>
+              </div>
+            </div>
+            
+            {/* Main Header Content */}
+            <div className="px-8 py-10">
+              <div className="flex items-start justify-between">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-3 bg-gradient-to-br from-indigo-600 to-blue-600 rounded-2xl shadow-lg">
+                      <Layers className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+                        MTO Command Center
+                        <Sparkles className="w-6 h-6 text-yellow-500" />
+                      </h1>
+                      <p className="text-sm text-gray-500 mt-1">Production Intelligence & Order Management</p>
+                    </div>
+                  </div>
+                  
+                  {/* Quick Stats */}
+                  <div className="flex items-center space-x-8">
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 bg-emerald-100 rounded-lg">
+                        <TrendingUp className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Active MTOs</p>
+                        <p className="text-lg font-bold text-gray-900">{mtos.length}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Building2 className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Factories</p>
+                        <p className="text-lg font-bold text-gray-900">3</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <Zap className="w-4 h-4 text-purple-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">Avg Progress</p>
+                        <p className="text-lg font-bold text-gray-900">
+                          {Math.round(mtos.reduce((sum, mto) => sum + (mto.progress || 0), 0) / Math.max(mtos.length, 1))}%
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="p-2 bg-amber-100 rounded-lg">
+                        <Target className="w-4 h-4 text-amber-600" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">On Track</p>
+                        <p className="text-lg font-bold text-gray-900">
+                          {Math.round((mtos.filter(m => m.status === 'shipped' || m.status === 'shipping').length / Math.max(mtos.length, 1)) * 100)}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="flex items-center space-x-3">
+                  <button className="group relative px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 rounded-2xl hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-300 flex items-center gap-2 font-medium shadow-sm hover:shadow-md">
+                    <Download className="w-4 h-4 group-hover:text-indigo-600 transition-colors" />
+                    Export
+                  </button>
+                  <button className="group relative px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-300 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <Upload className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                    Upload PO
+                    <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-          
-          <select
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-          >
-            <option value="all">All Status</option>
-            <option value="In Production">In Production</option>
-            <option value="QC">QC</option>
-            <option value="Shipped">Shipped</option>
-          </select>
+        </div>
 
-          <select
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={filterFactory}
-            onChange={(e) => setFilterFactory(e.target.value)}
-          >
-            <option value="all">All Factories</option>
-            <option value="GZ Totes">GZ Totes</option>
-            <option value="GZ Factory">GZ Factory</option>
-            <option value="Shanghai Bags">Shanghai Bags</option>
-          </select>
+        {/* Elegant Control Panel */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6">
+            {/* Search and Filters Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              {/* Search Input */}
+              <div className="lg:col-span-4">
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-600 transition-colors" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search MTOs, POs, SKUs..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 hover:bg-white"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+                    </button>
+                  )}
+                </div>
+              </div>
+              
+              {/* Status Filter */}
+              <div className="lg:col-span-3">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 hover:bg-white appearance-none cursor-pointer"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="proceed">In Production</option>
+                  <option value="qc">Quality Check</option>
+                  <option value="shipping">Ready to Ship</option>
+                  <option value="shipped">Shipped</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
 
-          <div className="flex border border-gray-300 rounded-lg">
-            <button
-              className={`px-4 py-2 rounded-l-lg ${viewMode === 'po' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}`}
-              onClick={() => setViewMode('po')}
-            >
-              PO View
-            </button>
-            <button
-              className={`px-4 py-2 rounded-r-lg ${viewMode === 'mto' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-700'}`}
-              onClick={() => setViewMode('mto')}
-            >
-              MTO View
-            </button>
+              {/* Factory Filter */}
+              <div className="lg:col-span-3">
+                <select
+                  value={filterFactory}
+                  onChange={(e) => setFilterFactory(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 hover:bg-white appearance-none cursor-pointer"
+                >
+                  <option value="all">All Factories</option>
+                  <option value="GZ Totes">GZ Totes</option>
+                  <option value="GZ Factory">GZ Factory</option>
+                  <option value="Shanghai Bags">Shanghai Bags</option>
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+
+              {/* Refresh Button */}
+              <div className="lg:col-span-2">
+                <button
+                  onClick={() => fetchMTOs()}
+                  disabled={loading}
+                  className="w-full px-4 py-3 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white rounded-xl font-medium transition-all duration-200 flex items-center justify-center group disabled:cursor-not-allowed"
+                >
+                  <RefreshCw className={`w-4 h-4 mr-2 transition-transform duration-500 ${loading ? 'animate-spin' : 'group-hover:rotate-180'}`} />
+                  {loading ? 'Loading...' : 'Refresh'}
+                </button>
+              </div>
+            </div>
+
+            {/* View Mode Tabs */}
+            <div className="mt-6 border-t border-gray-100 pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1 bg-gray-100 p-1 rounded-xl">
+                  <button
+                    onClick={() => setViewMode('temporal')}
+                    className={`relative px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                      viewMode === 'temporal'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Calendar className="w-4 h-4 inline mr-2" />
+                    Timeline
+                  </button>
+                  <button
+                    onClick={() => setViewMode('analytics')}
+                    className={`relative px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                      viewMode === 'analytics'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <BarChart3 className="w-4 h-4 inline mr-2" />
+                    Analytics
+                  </button>
+                  <button
+                    onClick={() => setViewMode('po')}
+                    className={`relative px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 ${
+                      viewMode === 'po'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Package className="w-4 h-4 inline mr-2" />
+                    PO View
+                  </button>
+                </div>
+                
+                {/* View-specific controls */}
+                {viewMode === 'temporal' && (
+                  <div className="flex items-center space-x-3">
+                    <select
+                      className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      value={selectedProductType}
+                      onChange={(e) => setSelectedProductType(e.target.value)}
+                    >
+                      {productTypes.map(type => (
+                        <option key={type} value={type}>
+                          {type === 'all' ? 'All Types' : type}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="flex items-center space-x-1 bg-gray-100 p-1 rounded-lg">
+                      <button
+                        onClick={() => navigateMonth('prev')}
+                        className="p-1.5 hover:bg-white rounded transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={() => navigateMonth('current')}
+                        className="px-3 py-1.5 text-xs font-medium hover:bg-white rounded transition-colors"
+                      >
+                        Today
+                      </button>
+                      <button
+                        onClick={() => navigateMonth('next')}
+                        className="p-1.5 hover:bg-white rounded transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4 text-gray-600" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="bg-white rounded-lg shadow-sm border">
-        {viewMode === 'po' ? (
+        {/* Main Content Area */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
+          {brandPOs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="p-4 bg-gray-100 rounded-full mb-4">
+                <Package className="h-12 w-12 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No MTOs Available</h3>
+              <p className="text-gray-500 mb-6 max-w-md text-center">
+                Start managing your production orders by uploading your first MTO file.
+              </p>
+              <a
+                href="/brand/upload"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <Upload className="mr-2 h-5 w-5" />
+                Upload Your First MTO
+              </a>
+            </div>
+          ) : viewMode === 'temporal' ? (
+            /* Enhanced Temporal View */
+            <div className="p-6">
+              <div className="space-y-3">
+                {temporalData.map((monthData) => (
+                  <div key={monthData.monthKey} className="group bg-white border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-lg transition-all duration-300">
+                    {/* Monthly Header */}
+                    <div
+                      className="p-4 cursor-pointer bg-gradient-to-r from-white to-gray-50 hover:from-gray-50 hover:to-white transition-all duration-200 rounded-t-xl"
+                      onClick={() => toggleMonthExpansion(monthData.monthKey)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="p-2 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition-colors">
+                            <Calendar className="h-5 w-5 text-indigo-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">{monthData.monthName}</h3>
+                            <div className="flex items-center space-x-4 mt-1">
+                              <span className="text-sm text-gray-500">{monthData.totalMTOs} MTOs</span>
+                              <div className="flex items-center space-x-2">
+                                {Object.entries(monthData.productTypes).slice(0, 3).map(([type, count], idx) => (
+                                  count > 0 && (
+                                    <span key={idx} className="text-xs px-2 py-1 bg-gray-100 rounded-full text-gray-600">
+                                      {count} {type}
+                                    </span>
+                                  )
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2">
+                          <div className={`p-1.5 transition-transform duration-200 ${expandedMonths.has(monthData.monthKey) ? 'rotate-90' : ''}`}>
+                            <ChevronRight className="h-5 w-5 text-gray-400" />
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleChatClick(monthData.mtos[0], `month-${monthData.monthKey}`)
+                              }}
+                              className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                              title="Month Chat"
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                            </button>
+                            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all">
+                              <Folder className="h-4 w-4" />
+                            </button>
+                            <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all">
+                              <MoreVertical className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Monthly Content */}
+                    {expandedMonths.has(monthData.monthKey) && (
+                      <div className="border-t border-gray-100 bg-gray-50/50 p-4">
+                        <div className="space-y-3">
+                          {/* Daily Groups */}
+                          {groupMTOsByDay(monthData.mtos).map((dayData) => (
+                            <div key={dayData.dayKey} className="bg-white rounded-xl border border-gray-200 hover:border-indigo-200 transition-all duration-200 overflow-hidden">
+                              {/* Daily Header */}
+                              <div
+                                className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-all duration-200"
+                                onClick={() => toggleDayExpansion(dayData.dayKey)}
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <div className={`transition-transform duration-200 ${expandedDays.has(dayData.dayKey) ? 'rotate-90' : ''}`}>
+                                      <ChevronRight className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                    <div>
+                                      <h4 className="font-medium text-gray-900">{dayData.dayName}</h4>
+                                      <div className="flex items-center space-x-3 mt-1">
+                                        <span className="text-sm text-gray-500">{dayData.totalMTOs} MTOs</span>
+                                        <div className="flex items-center space-x-2">
+                                          <span className="flex items-center text-xs text-emerald-600">
+                                            <CheckCircle2 className="w-3 h-3 mr-1" />
+                                            {dayData.statusBreakdown.completed}
+                                          </span>
+                                          <span className="flex items-center text-xs text-amber-600">
+                                            <Clock className="w-3 h-3 mr-1" />
+                                            {dayData.statusBreakdown.inProgress}
+                                          </span>
+                                          {dayData.statusBreakdown.pending > 0 && (
+                                            <span className="flex items-center text-xs text-gray-500">
+                                              <AlertTriangle className="w-3 h-3 mr-1" />
+                                              {dayData.statusBreakdown.pending}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex items-center space-x-1">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleChatClick(dayData.mtos[0], `day-${dayData.dayKey}`)
+                                      }}
+                                      className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                                      title="Day Chat"
+                                    >
+                                      <MessageCircle className="h-4 w-4" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Daily MTOs */}
+                              {expandedDays.has(dayData.dayKey) && (
+                                <div className="border-t border-gray-100 bg-gray-50/30 p-3">
+                                  <div className="space-y-2">
+                                    {dayData.mtos.map((mto) => {
+                                      const isExpanded = expandedMTOs.has(mto.id || mto.lineId)
+                                      
+                                      return (
+                                        <div key={mto.id || mto.lineId} className="bg-white rounded-lg border border-gray-200 hover:border-indigo-200 hover:shadow-md transition-all duration-200 overflow-hidden">
+                                          {/* MTO Row */}
+                                          <div
+                                            className="px-4 py-3 cursor-pointer hover:bg-gray-50 transition-all duration-200"
+                                            onClick={() => toggleMTOExpansion(mto.id || mto.lineId)}
+                                          >
+                                          <div className="flex items-center justify-between">
+                                            {/* Left: Essential Info */}
+                                            <div className="flex items-center space-x-3 flex-1">
+                                              {/* Expand/Collapse Icon */}
+                                              <div className="flex items-center space-x-1">
+                                                {isExpanded ? (
+                                                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                                                ) : (
+                                                  <ChevronRight className="h-4 w-4 text-gray-500" />
+                                                )}
+                                                {/* Priority Indicator */}
+                                                {mto.urgent && (
+                                                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                                                )}
+                                              </div>
+                                              
+                                              {/* Line Number */}
+                                              <div className="min-w-[30px] text-center">
+                                                <span className="text-xs text-gray-400">{mto.lineId}</span>
+                                              </div>
+                                              
+                                              {/* SKU/Product Name */}
+                                              <div className="min-w-[180px]">
+                                                <div className="text-sm text-gray-800">
+                                                  {mto.style || 'Custom Tote'}
+                                                </div>
+                                                <div className="text-xs text-gray-400">
+                                                  {mto.displayName || mto.referenceNumber || 'SKU'}
+                                                </div>
+                                              </div>
+                                              
+                                              {/* Quantity */}
+                                              <div className="min-w-[50px] text-center">
+                                                <span className="text-sm font-medium text-gray-700">{mto.quantity || mto.qty}</span>
+                                                <span className="text-xs text-gray-400 ml-0.5">pc</span>
+                                              </div>
+                                              
+                                              {/* Customization Spots Visual */}
+                                              <div className="min-w-[100px]">
+                                                <div className="flex space-x-0.5">
+                                                  {[1,2,3,4,5,6].map(n => {
+                                                    const hasSpot = mto[`spot${n}`] && mto[`spot${n}`] !== ''
+                                                    return (
+                                                      <div 
+                                                        key={n} 
+                                                        className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${
+                                                          hasSpot ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-50 text-gray-300'
+                                                        }`}
+                                                      >
+                                                        {n}
+                                                      </div>
+                                                    )
+                                                  })}
+                                                </div>
+                                              </div>
+                                              
+                                              {/* Expected Ship Date */}
+                                              <div className="min-w-[70px] text-center">
+                                                {mto.expectedShipDate || mto.eta ? (
+                                                  <div className="text-xs text-gray-600">
+                                                    {new Date(mto.expectedShipDate || mto.eta).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                                  </div>
+                                                ) : (
+                                                  <span className="text-xs text-gray-300">—</span>
+                                                )}
+                                              </div>
+                                              
+                                              {/* Progress Bar */}
+                                              <div className="flex items-center space-x-1.5 flex-1 max-w-[140px]">
+                                                <div className="flex-1 bg-gray-100 rounded-full h-1">
+                                                  <div
+                                                    className="bg-gradient-to-r from-indigo-400 to-indigo-500 h-1 rounded-full transition-all duration-500"
+                                                    style={{ width: `${mto.progress || 0}%` }}
+                                                  ></div>
+                                                </div>
+                                                <span className="text-xs text-gray-500 min-w-[32px] text-right">{mto.progress || 0}%</span>
+                                              </div>
+                                            </div>
+                                            
+                                            {/* Right: Status & Actions */}
+                                            <div className="flex items-center space-x-2">
+                                              {/* Tracking if shipped */}
+                                              {mto.poLineTrackingNumber && (
+                                                <div className="text-xs text-blue-500 font-mono opacity-70">
+                                                  {mto.poLineTrackingNumber.slice(0, 8)}...
+                                                </div>
+                                              )}
+                                              
+                                              {/* Status Badge */}
+                                              <span className={`px-2 py-0.5 rounded-md text-[11px] font-medium border ${getStatusColor(mto.status)}`}>
+                                                {mto.status}
+                                              </span>
+                                              
+                                              {/* Quick Actions */}
+                                              <div className="flex items-center">
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleChatClick(mto, `mto-${mto.id || mto.lineId}`)
+                                                  }}
+                                                  className="p-1 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-all duration-200"
+                                                  title="Chat"
+                                                >
+                                                  <MessageCircle className="h-3 w-3" />
+                                                </button>
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    handleViewDetails(mto)
+                                                  }}
+                                                  className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded transition-all duration-200"
+                                                  title="Details"
+                                                >
+                                                  <Eye className="h-3 w-3" />
+                                                </button>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        
+                                        {/* Expanded Detailed View */}
+                                        {isExpanded && (
+                                          <div className="border-t border-gray-200 p-5 bg-gradient-to-br from-gray-50 to-indigo-50/20">
+                                            {/* Complete Details Grid - Like App.js */}
+                                            <div className="grid grid-cols-4 gap-4 text-sm">
+                                              {/* Column 1 - IDs & References */}
+                                              <div className="space-y-2">
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">Internal ID</div>
+                                                  <div className="font-mono text-gray-900 font-bold">{mto.internalId}</div>
+                                                </div>
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">PO Line ID</div>
+                                                  <div className="font-mono text-gray-900">{mto.poLineId}</div>
+                                                </div>
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">Sales Order</div>
+                                                  <div className="font-mono text-gray-900">{mto.salesOrderNumber}</div>
+                                                </div>
+                                              </div>
+                                              
+                                              {/* Column 2 - PO Details */}
+                                              <div className="space-y-2">
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">PO Number</div>
+                                                  <div className="font-bold text-gray-900">{mto.po}</div>
+                                                </div>
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">PO Line ID</div>
+                                                  <div className="font-bold text-gray-900">Line #{mto.lineId} ({mto.poLineId})</div>
+                                                </div>
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">Quantity</div>
+                                                  <div className="font-bold text-gray-900">{mto.quantity || mto.qty} units</div>
+                                                </div>
+                                              </div>
+                                              
+                                              {/* Column 3 - Dates */}
+                                              <div className="space-y-2">
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">Order Submit</div>
+                                                  <div className="font-semibold text-gray-900">{mto.orderSubmitDate}</div>
+                                                </div>
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">Expected Ship</div>
+                                                  <div className="font-semibold text-green-600">{mto.expectedShipDate || mto.eta}</div>
+                                                </div>
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">XF Date</div>
+                                                  <div className="font-semibold text-purple-600">{mto.xfDate || 'N/A'}</div>
+                                                </div>
+                                              </div>
+                                              
+                                              {/* Column 4 - Shipping & Tracking */}
+                                              <div className="space-y-2">
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">Tracking</div>
+                                                  <div className="font-mono text-blue-600 text-xs">{mto.poLineTrackingNumber || 'Pending'}</div>
+                                                </div>
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">AWB</div>
+                                                  <div className="font-mono text-gray-900">{mto.awb || 'N/A'}</div>
+                                                </div>
+                                                <div className="bg-white/80 rounded-lg p-2 border border-gray-200">
+                                                  <div className="text-xs text-gray-500 font-semibold uppercase">Master Carton</div>
+                                                  <div className="font-mono text-gray-900">{mto.masterCarton || 'TBD'}</div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                            
+                                            {/* Additional Details Row */}
+                                            <div className="grid grid-cols-3 gap-4 mt-4 text-sm">
+                                              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-2 border border-blue-200">
+                                                <div className="text-xs text-blue-600 font-semibold uppercase">Shopify Order</div>
+                                                <div className="font-semibold text-gray-900">{mto.shopifyOrderDateTime}</div>
+                                              </div>
+                                              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-2 border border-green-200">
+                                                <div className="text-xs text-green-600 font-semibold uppercase">SO Date</div>
+                                                <div className="font-semibold text-gray-900">{mto.soDate}</div>
+                                              </div>
+                                              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-2 border border-purple-200">
+                                                <div className="text-xs text-purple-600 font-semibold uppercase">CPSD</div>
+                                                <div className="font-semibold text-gray-900">{mto.cpsd}</div>
+                                              </div>
+                                            </div>
+                                            
+                                            {/* Customization Spots - Full Details */}
+                                            <div className="mt-4">
+                                              <div className="text-xs text-gray-500 font-semibold uppercase mb-2">Customization Details (All 6 Spots)</div>
+                                              <div className="grid grid-cols-6 gap-2">
+                                                {[1, 2, 3, 4, 5, 6].map((spotNum) => {
+                                                  const spotKey = `spot${spotNum}` as keyof typeof mto
+                                                  const patchRefKey = `spot${spotNum}PatchRef` as keyof typeof mto
+                                                  const spotValue = mto[spotKey]
+                                                  const patchRef = mto[patchRefKey]
+                                                  const hasValue = spotValue && spotValue !== ''
+                                                  
+                                                  return (
+                                                    <div key={spotNum} className={`rounded-lg p-2 text-center ${hasValue ? 'bg-gradient-to-b from-indigo-100 to-blue-100 border-2 border-indigo-300' : 'bg-gray-100 border border-gray-300'}`}>
+                                                      <div className="text-xs font-bold text-gray-600 mb-1">Spot {spotNum}</div>
+                                                      {hasValue ? (
+                                                        <>
+                                                          {patchRef && (() => {
+                                                            const IconComponent = getPatchIcon(patchRef as string)
+                                                            return (
+                                                              <div className="w-8 h-8 mx-auto bg-white rounded-full flex items-center justify-center mb-1">
+                                                                <IconComponent className="w-5 h-5 text-indigo-600" />
+                                                              </div>
+                                                            )
+                                                          })()}
+                                                          <div className="text-xs font-mono text-gray-700">{spotValue}</div>
+                                                          <div className="text-xs text-indigo-600 font-semibold mt-1">{patchRef}</div>
+                                                        </>
+                                                      ) : (
+                                                        <div className="text-xs text-gray-400 mt-3">Empty</div>
+                                                      )}
+                                                    </div>
+                                                  )
+                                                })}
+                                              </div>
+                                            </div>
+                                            
+                                            {/* Product Details Row */}
+                                            <div className="grid grid-cols-3 gap-4 mt-4">
+                                              <div className="bg-yellow-50 rounded-lg p-2 border border-yellow-200">
+                                                <div className="text-xs text-yellow-700 font-semibold uppercase">Product Type</div>
+                                                <div className="font-bold text-gray-900">{mto.productType}</div>
+                                              </div>
+                                              <div className="bg-orange-50 rounded-lg p-2 border border-orange-200">
+                                                <div className="text-xs text-orange-700 font-semibold uppercase">Bag Base PID</div>
+                                                <div className="font-mono text-gray-900">{mto.bagBasePid}</div>
+                                              </div>
+                                              <div className="bg-red-50 rounded-lg p-2 border border-red-200">
+                                                <div className="text-xs text-red-700 font-semibold uppercase">Vendor PO Status</div>
+                                                <div className="font-bold text-gray-900">{mto.vendorPoStatus}</div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    )
+                                  })}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          ) : viewMode === 'analytics' ? (
+          /* Analytics View */
+          <div className="p-6">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="text-center p-6 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="text-3xl font-bold text-blue-600">
+                    {brandPOs.reduce((sum, po) => sum + po.totalUnits, 0)}
+                  </div>
+                  <div className="text-gray-700 font-medium mt-2">Total MTOs</div>
+                  <div className="text-sm text-gray-500">Across all POs</div>
+                </div>
+                <div className="text-center p-6 bg-green-50 rounded-lg border border-green-200">
+                  <div className="text-3xl font-bold text-green-600">
+                    {brandPOs.reduce((sum, po) => sum + po.completed, 0)}
+                  </div>
+                  <div className="text-gray-700 font-medium mt-2">Completed</div>
+                  <div className="text-sm text-gray-500">Ready to ship</div>
+                </div>
+                <div className="text-center p-6 bg-yellow-50 rounded-lg border border-yellow-200">
+                  <div className="text-3xl font-bold text-yellow-600">
+                    {Math.round(
+                      (brandPOs.reduce((sum, po) => sum + po.completed, 0) /
+                        Math.max(brandPOs.reduce((sum, po) => sum + po.totalUnits, 0), 1)) * 100
+                    )}%
+                  </div>
+                  <div className="text-gray-700 font-medium mt-2">Completion Rate</div>
+                  <div className="text-sm text-gray-500">Overall progress</div>
+                </div>
+                <div className="text-center p-6 bg-purple-50 rounded-lg border border-purple-200">
+                  <div className="text-3xl font-bold text-purple-600">
+                    {brandPOs.filter(po => po.urgent).length}
+                  </div>
+                  <div className="text-gray-700 font-medium mt-2">Urgent POs</div>
+                  <div className="text-sm text-gray-500">Need attention</div>
+                </div>
+              </div>
+              
+              {/* Factory Performance */}
+              <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900">Factory Performance</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Factory</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Orders</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Completion Rate</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {Array.from(new Set(brandPOs.map(po => po.factory))).map((factory) => {
+                        const factoryPOs = brandPOs.filter(po => po.factory === factory)
+                        const totalUnits = factoryPOs.reduce((sum, po) => sum + po.totalUnits, 0)
+                        const completed = factoryPOs.reduce((sum, po) => sum + po.completed, 0)
+                        const rate = totalUnits > 0 ? Math.round((completed / totalUnits) * 100) : 0
+                        
+                        return (
+                          <tr key={factory}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {factory}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {totalUnits} MTOs
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                  <div
+                                    className="bg-indigo-600 h-2 rounded-full"
+                                    style={{ width: `${rate}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-sm text-gray-900">{rate}%</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                                rate >= 80 ? 'bg-green-100 text-green-800' : 
+                                rate >= 60 ? 'bg-yellow-100 text-yellow-800' : 
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {rate >= 80 ? 'Excellent' : rate >= 60 ? 'Good' : 'Needs Attention'}
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+          ) : viewMode === 'po' ? (
           <div className="divide-y divide-gray-200">
             {filteredPOs.map((po) => (
               <div key={po.po} className="p-6">
@@ -476,7 +1466,7 @@ const MTOList: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : (
+          ) : (
           // MTO View
           <div className="overflow-hidden">
             <table className="min-w-full divide-y divide-gray-200">
@@ -565,8 +1555,8 @@ const MTOList: React.FC = () => {
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+          )}
+        </div>
 
       {/* MTO Details Modal */}
       {selectedMTO && (

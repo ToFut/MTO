@@ -106,6 +106,90 @@ export class AuthService {
     try {
       const { email, password } = credentials;
 
+      // TEMPORARY: Demo user authentication (bypass database)
+      if (email === 'brand@brand.com' && password === 'brand123') {
+        const demoUser: Omit<User, 'password_hash'> = {
+          id: 'demo-brand-user-id',
+          email: 'brand@brand.com',
+          full_name: 'Brand Demo User',
+          role: 'brand_manager',
+          company_id: 'a0560528-ac53-4dd7-ac9c-92d3e90addf0', // Real company ID
+          language: 'en',
+          avatar_url: null,
+          phone: null,
+          preferences: {},
+          last_login: new Date().toISOString(),
+          active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        const token = this.generateToken(demoUser.id, demoUser.role);
+        
+        logger.info(`Demo user logged in: ${email}`);
+        
+        return {
+          user: demoUser,
+          token,
+        };
+      }
+
+      // TEMPORARY: Demo factory user authentication
+      if (email === 'factory@factory.com' && password === 'factory123') {
+        const demoUser: Omit<User, 'password_hash'> = {
+          id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+          email: 'factory@factory.com',
+          full_name: 'Factory Demo User',
+          role: 'factory_operator',
+          company_id: 'b1234567-89ab-cdef-0123-456789abcdef',
+          language: 'en',
+          avatar_url: null,
+          phone: null,
+          preferences: {},
+          last_login: new Date().toISOString(),
+          active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        const token = this.generateToken(demoUser.id, demoUser.role);
+        
+        logger.info(`Demo factory user logged in: ${email}`);
+        
+        return {
+          user: demoUser,
+          token,
+        };
+      }
+
+      // TEMPORARY: Demo admin user authentication
+      if (email === 'admin@admin.com' && password === 'admin123') {
+        const demoUser: Omit<User, 'password_hash'> = {
+          id: 'admin-demo-user-id-12345',
+          email: 'admin@admin.com',
+          full_name: 'Admin Demo User',
+          role: 'admin',
+          company_id: null,
+          language: 'en',
+          avatar_url: null,
+          phone: null,
+          preferences: {},
+          last_login: new Date().toISOString(),
+          active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        const token = this.generateToken(demoUser.id, demoUser.role);
+        
+        logger.info(`Demo admin user logged in: ${email}`);
+        
+        return {
+          user: demoUser,
+          token,
+        };
+      }
+
       // Find user with password hash
       const { data: user, error } = await db
         .from('users')

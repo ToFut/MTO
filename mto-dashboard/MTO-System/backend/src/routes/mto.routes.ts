@@ -5,6 +5,7 @@ import { uploadRateLimiter } from '../middleware/rateLimit.middleware';
 import { body, query, param } from 'express-validator';
 import multer from 'multer';
 import path from 'path';
+import { logger } from '../config/logger';
 
 const router = Router();
 
@@ -28,10 +29,19 @@ const upload = multer({
     const allowedTypes = [
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'application/vnd.ms-excel',
+      'application/octet-stream', // Sometimes Excel files are detected as binary
     ];
-    if (allowedTypes.includes(file.mimetype)) {
+    
+    logger.info(`File upload attempt - Name: ${file.originalname}, MIME: ${file.mimetype}`);
+    
+    // Check both MIME type and file extension
+    const isExcelExtension = file.originalname.toLowerCase().endsWith('.xlsx') || 
+                           file.originalname.toLowerCase().endsWith('.xls');
+    
+    if (allowedTypes.includes(file.mimetype) || isExcelExtension) {
       cb(null, true);
     } else {
+      logger.error(`File rejected - Name: ${file.originalname}, MIME: ${file.mimetype}`);
       cb(new Error('Invalid file type. Only Excel files are allowed.'));
     }
   },
@@ -76,6 +86,18 @@ router.get(
 );
 
 router.get(
+  '/upload-history',
+  authenticate,
+  [
+    query('limit').optional().isInt({ min: 1, max: 100 }),
+    query('offset').optional().isInt({ min: 0 }),
+    query('startDate').optional().isISO8601(),
+    query('endDate').optional().isISO8601(),
+  ],
+  mtoController.getUploadHistory
+);
+
+router.get(
   '/export',
   authenticate,
   mtoController.exportMTOs
@@ -103,6 +125,46 @@ router.post(
   mtoController.createMTO
 );
 
+// Preview MTOs before upload
+router.post(
+  '/preview',
+  authenticate,
+  authorize(['admin', 'brand_manager', 'brand_user']),
+  upload.single('file'),
+  [
+    body('poNumber').notEmpty().withMessage('PO number is required'),
+    body('factoryId').optional().isUUID().withMessage('Valid factory ID required'),
+    body('brandId').optional().isUUID().withMessage('Valid brand ID required'),
+  ],
+  mtoController.previewMTOs
+);
+
+// Smart MTO upload with intelligence
+router.post(
+  '/smart-upload',
+  authenticate,
+  authorize(['admin', 'brand_manager', 'brand_user']),
+  uploadRateLimiter,
+  upload.single('file'),
+  [
+    body('poNumber').notEmpty().withMessage('PO number is required'),
+    body('factoryId').optional().isUUID().withMessage('Valid factory ID required'),
+    body('brandId').optional().isUUID().withMessage('Valid brand ID required'),
+  ],
+  mtoController.smartUploadMTOs
+);
+
+// Direct MTO upload (no PO required) - Legacy route used by frontend
+router.post(
+  '/upload',
+  authenticate,
+  authorize(['admin', 'brand_manager', 'brand_user']),
+  uploadRateLimiter,
+  upload.single('file'),
+  mtoController.uploadMTOs
+);
+
+// Legacy bulk upload
 router.post(
   '/bulk-upload',
   authenticate,

@@ -12,15 +12,15 @@ export declare class AnalyticsService {
         };
     }>;
     getProductionAnalytics(filters: any): Promise<{
-        daily: any[];
-        monthly: any[];
+        daily: unknown[];
+        monthly: unknown[];
         efficiency: number;
     }>;
-    getTopProducts(filters: any): Promise<any[]>;
+    getTopProducts(filters: any): Promise<unknown[]>;
     getDefectAnalytics(filters: any): Promise<{
-        byType: {};
-        byStage: {};
-        trend: any[];
+        byType: any;
+        byStage: any;
+        trend: any;
     }>;
     getShippingAnalytics(filters: any): Promise<{
         onTime: number;
@@ -28,11 +28,24 @@ export declare class AnalyticsService {
         inTransit: number;
     }>;
     getInventoryAnalytics(filters: any): Promise<{
-        byCategory: {};
-        turnover: number;
-        shortage: any[];
+        byCategory: any;
+        turnover: any;
+        shortage: {
+            sku: any;
+            name: any;
+            available: any;
+            needed: any;
+        }[];
     }>;
-    getTimelineView(filters: any): Promise<any[]>;
+    getTimelineView(filters: any): Promise<{
+        id: any;
+        title: any;
+        date: any;
+        stage: any;
+        status: any;
+        dueDate: any;
+        type: string;
+    }[]>;
     getPerformanceMetrics(filters: any): Promise<{
         efficiency: number;
         quality: number;
@@ -40,8 +53,12 @@ export declare class AnalyticsService {
     }>;
     getEfficiencyReport(filters: any): Promise<{
         overall: number;
-        byStage: {};
-        bottlenecks: any[];
+        byStage: any;
+        bottlenecks: {
+            stage: any;
+            efficiency: any;
+            pending: number;
+        }[];
     }>;
     getQualityMetrics(filters: any): Promise<{
         defectRate: number;
@@ -53,13 +70,13 @@ export declare class AnalyticsService {
         heatmap: any[];
     }>;
     getTrendAnalysis(filters: any): Promise<{
-        trend: any[];
+        trend: unknown[];
         forecast: any[];
         change: number;
     }>;
     getForecast(filters: any): Promise<{
         forecast: any[];
-        confidence: any;
+        confidence: number;
     }>;
     generateCustomReport(options: any): Promise<any>;
     saveReportTemplate(templateData: any): Promise<any>;

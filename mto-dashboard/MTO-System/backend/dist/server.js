@@ -30,6 +30,9 @@ const shipment_routes_1 = __importDefault(require("./routes/shipment.routes"));
 const chat_routes_1 = __importDefault(require("./routes/chat.routes"));
 const sync_routes_1 = __importDefault(require("./routes/sync.routes"));
 const analytics_routes_1 = __importDefault(require("./routes/analytics.routes"));
+const assignment_routes_1 = __importDefault(require("./routes/assignment.routes"));
+// Import controllers and services
+const chat_controller_1 = __importDefault(require("./controllers/chat.controller"));
 // Import middleware
 const error_middleware_1 = require("./middleware/error.middleware");
 const rateLimit_middleware_1 = require("./middleware/rateLimit.middleware");
@@ -37,11 +40,11 @@ const logger_middleware_1 = require("./middleware/logger.middleware");
 class Server {
     constructor() {
         this.app = (0, express_1.default)();
-        this.port = parseInt(process.env.PORT || '4567', 10);
+        this.port = parseInt(process.env.PORT || '5010', 10);
         this.httpServer = (0, http_1.createServer)(this.app);
         this.io = new socket_io_1.Server(this.httpServer, {
             cors: {
-                origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:8081'],
+                origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3010'],
                 credentials: true,
             },
         });
@@ -56,17 +59,38 @@ class Server {
         // CORS configuration
         this.app.use((0, cors_1.default)({
             origin: (origin, callback) => {
-                const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:8081'];
+                // In development, allow all localhost and local network origins
+                if (process.env.NODE_ENV === 'development') {
+                    if (!origin ||
+                        origin.includes('localhost') ||
+                        origin.includes('127.0.0.1') ||
+                        origin.match(/^http:\/\/192\.168\.\d{1,3}\.\d{1,3}:\d+$/) || // Local network IPs
+                        origin.match(/^http:\/\/10\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/) || // Local network IPs
+                        origin.match(/^http:\/\/172\.(1[6-9]|2[0-9]|3[0-1])\.\d{1,3}\.\d{1,3}:\d+$/)) { // Local network IPs
+                        callback(null, true);
+                        return;
+                    }
+                }
+                // In production, use specific allowed origins
+                const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+                    'http://localhost:3010',
+                    'http://localhost:3000',
+                    'http://localhost:5173', // Vite default port
+                    'http://127.0.0.1:3010',
+                    'http://127.0.0.1:3000',
+                    'http://127.0.0.1:5173'
+                ];
                 if (!origin || allowedOrigins.includes(origin)) {
                     callback(null, true);
                 }
                 else {
+                    logger_1.logger.warn(`CORS blocked origin: ${origin}`);
                     callback(new Error('Not allowed by CORS'));
                 }
             },
             credentials: true,
             methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-            allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
         }));
         // Body parsing middleware
         this.app.use(express_1.default.json({ limit: '10mb' }));
@@ -108,6 +132,7 @@ class Server {
                     chat: '/api/chat',
                     sync: '/api/sync',
                     analytics: '/api/analytics',
+                    assignments: '/api/assignments',
                 },
             });
         });
@@ -123,6 +148,7 @@ class Server {
         this.app.use('/api/chat', chat_routes_1.default);
         this.app.use('/api/sync', sync_routes_1.default);
         this.app.use('/api/analytics', analytics_routes_1.default);
+        this.app.use('/api/assignments', assignment_routes_1.default);
         // 404 handler
         this.app.use('*', (req, res) => {
             res.status(404).json({
@@ -136,7 +162,10 @@ class Server {
         this.app.use(error_middleware_1.errorHandler);
     }
     initializeSocketIO() {
+        // Configure socket events
         (0, socket_1.configureSocket)(this.io);
+        // Pass socket instance to chat controller for universal chat
+        chat_controller_1.default.setSocketIO(this.io);
     }
     async start() {
         try {

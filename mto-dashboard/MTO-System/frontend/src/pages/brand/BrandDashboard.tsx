@@ -1,13 +1,79 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Package, Upload, Warehouse, Truck, AlertTriangle, BarChart3 } from 'lucide-react'
+import { Package, Upload, Warehouse, Truck, AlertTriangle, BarChart3, Loader2 } from 'lucide-react'
+import { mtoService } from '../../services/mto.service'
+import { useAuth } from '../../contexts/AuthContext'
 
 const BrandDashboard: React.FC = () => {
-  const stats = [
-    { name: 'Total MTOs', value: '1,234', change: '+12%', changeType: 'increase' as const },
-    { name: 'In Production', value: '456', change: '+8%', changeType: 'increase' as const },
-    { name: 'Ready to Ship', value: '89', change: '-2%', changeType: 'decrease' as const },
-    { name: 'Defects', value: '12', change: '+5%', changeType: 'increase' as const },
+  const { user } = useAuth()
+  const [loading, setLoading] = useState(true)
+  const [statistics, setStatistics] = useState<any>(null)
+  const [recentActivity, setRecentActivity] = useState<any[]>([])
+  
+  useEffect(() => {
+    fetchDashboardData()
+  }, [])
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true)
+      
+      // Fetch MTO statistics
+      const stats = await mtoService.getStatistics({
+        brandId: user?.companyId
+      })
+      setStatistics(stats)
+      
+      // Fetch recent upload history
+      const history = await mtoService.getUploadHistory({
+        brandId: user?.companyId,
+        limit: 5,
+        offset: 0
+      })
+      
+      // Transform history to activity format
+      const activities = history.data.map((item: any) => ({
+        id: item.id,
+        type: 'upload',
+        message: `${item.po?.po_number || 'PO'} uploaded - ${item.total_mtos || 0} MTOs`,
+        time: new Date(item.created_at).toLocaleTimeString(),
+        date: new Date(item.created_at).toLocaleDateString(),
+        color: 'bg-green-500'
+      }))
+      
+      setRecentActivity(activities)
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const stats = loading ? [] : [
+    { 
+      name: 'Total MTOs', 
+      value: statistics?.total?.toString() || '0', 
+      change: 'Overall', 
+      changeType: 'neutral' as 'increase' | 'decrease' | 'neutral'
+    },
+    { 
+      name: 'In Production', 
+      value: ((statistics?.byStatus?.proceed || 0) + (statistics?.byStatus?.qc || 0)).toString(), 
+      change: `${statistics?.urgentCount || 0} urgent`, 
+      changeType: (statistics?.urgentCount > 0 ? 'increase' : 'neutral') as 'increase' | 'decrease' | 'neutral'
+    },
+    { 
+      name: 'Ready to Ship', 
+      value: (statistics?.byStatus?.shipping || 0).toString(), 
+      change: `${statistics?.completionRate || 0}% complete`, 
+      changeType: 'neutral' as 'increase' | 'decrease' | 'neutral'
+    },
+    { 
+      name: 'Daily Production', 
+      value: (statistics?.dailyCount || 0).toString(), 
+      change: 'Need immediate attention', 
+      changeType: (statistics?.dailyCount > 0 ? 'increase' : 'neutral') as 'increase' | 'decrease' | 'neutral'
+    },
   ]
 
   const quickActions = [
@@ -28,19 +94,26 @@ const BrandDashboard: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <div key={stat.name} className="bg-white p-6 rounded-lg shadow-sm border">
-            <dt className="text-sm font-medium text-gray-500 truncate">{stat.name}</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">{stat.value}</dd>
-            <dd className={`mt-1 text-sm ${
-              stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {stat.change} from last month
-            </dd>
-          </div>
-        ))}
-      </div>
+      {loading ? (
+        <div className="flex justify-center items-center h-32">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {stats.map((stat) => (
+            <div key={stat.name} className="bg-white p-6 rounded-lg shadow-sm border">
+              <dt className="text-sm font-medium text-gray-500 truncate">{stat.name}</dt>
+              <dd className="mt-1 text-3xl font-semibold text-gray-900">{stat.value}</dd>
+              <dd className={`mt-1 text-sm ${
+                stat.changeType === 'increase' ? 'text-orange-600' : 
+                stat.changeType === 'decrease' ? 'text-red-600' : 'text-gray-600'
+              }`}>
+                {stat.change}
+              </dd>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div>
@@ -76,23 +149,31 @@ const BrandDashboard: React.FC = () => {
           <h2 className="text-lg font-medium text-gray-900">Recent Activity</h2>
         </div>
         <div className="p-6">
-          <div className="space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-900">PO-2024-001 uploaded successfully</span>
-              <span className="text-xs text-gray-500">2 hours ago</span>
+          {loading ? (
+            <div className="flex justify-center items-center h-20">
+              <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-900">MTO-001 moved to production</span>
-              <span className="text-xs text-gray-500">4 hours ago</span>
+          ) : recentActivity.length > 0 ? (
+            <div className="space-y-4">
+              {recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-center space-x-3">
+                  <div className={`w-2 h-2 ${activity.color} rounded-full`}></div>
+                  <span className="text-sm text-gray-900 flex-1">{activity.message}</span>
+                  <div className="text-right">
+                    <span className="text-xs text-gray-500 block">{activity.time}</span>
+                    <span className="text-xs text-gray-400">{activity.date}</span>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-              <span className="text-sm text-gray-900">Defect reported for MTO-045</span>
-              <span className="text-xs text-gray-500">6 hours ago</span>
+          ) : (
+            <div className="text-center text-gray-500 py-4">
+              <p className="text-sm">No recent activity</p>
+              <Link to="/brand/upload" className="text-indigo-600 hover:text-indigo-500 text-sm mt-2 inline-block">
+                Upload your first MTO →
+              </Link>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>

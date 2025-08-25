@@ -30,12 +30,7 @@ class AuthController {
                 res.status(201).json({
                     success: true,
                     data: {
-                        user: {
-                            id: result.user.id,
-                            email: result.user.email,
-                            full_name: result.user.full_name,
-                            role: result.user.role,
-                        },
+                        user: result.user,
                         token: result.token,
                     },
                 });
@@ -65,12 +60,7 @@ class AuthController {
                 res.json({
                     success: true,
                     data: {
-                        user: {
-                            id: result.user.id,
-                            email: result.user.email,
-                            full_name: result.user.full_name,
-                            role: result.user.role,
-                        },
+                        user: result.user,
                         token: result.token,
                     },
                 });
@@ -119,12 +109,7 @@ class AuthController {
             }
             res.json({
                 success: true,
-                data: {
-                    id: user.id,
-                    email: user.email,
-                    full_name: user.full_name,
-                    role: user.role,
-                },
+                data: user,
             });
         });
         // Update password

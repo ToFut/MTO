@@ -1,7 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatController = void 0;
 const chat_service_1 = require("../services/chat.service");
+const universal_chat_service_1 = __importDefault(require("../services/universal-chat.service"));
 const error_middleware_1 = require("../middleware/error.middleware");
 const logger_1 = require("../config/logger");
 const express_validator_1 = require("express-validator");
@@ -250,7 +254,216 @@ class ChatController {
                 message: 'Chat room archived successfully',
             });
         });
+        // ============ NEW UNIVERSAL CHAT METHODS ============
+        // Open or create universal chat with smart ID
+        this.openChat = (0, error_middleware_1.asyncHandler)(async (req, res) => {
+            const { chatId } = req.body;
+            if (!chatId) {
+                res.status(400).json({
+                    success: false,
+                    error: 'Chat ID is required',
+                });
+                return;
+            }
+            const room = await this.universalChat.getOrCreateChat(chatId, req.user?.id);
+            const messages = await this.universalChat.getMessages(chatId);
+            const participants = await this.universalChat.getParticipants(chatId);
+            const relatedChats = await this.universalChat.getRelatedChats(chatId);
+            logger_1.logger.info(`Chat opened: ${chatId} by user: ${req.user?.email}`);
+            res.json({
+                success: true,
+                data: {
+                    room,
+                    messages: messages.reverse(), // Oldest first for display
+                    participants,
+                    relatedChats,
+                    navigation: this.buildNavigation(chatId),
+                },
+            });
+        });
+        // Send message to universal chat
+        this.sendUniversalMessage = (0, error_middleware_1.asyncHandler)(async (req, res) => {
+            const { chatId } = req.params;
+            const { message, type = 'text' } = req.body;
+            const errors = (0, express_validator_1.validationResult)(req);
+            if (!errors.isEmpty()) {
+                res.status(400).json({
+                    success: false,
+                    errors: errors.array(),
+                });
+                return;
+            }
+            if (!message?.trim()) {
+                res.status(400).json({
+                    success: false,
+                    error: 'Message content is required',
+                });
+                return;
+            }
+            const chatMessage = await this.universalChat.sendMessage(chatId, req.user?.id, message, type);
+            logger_1.logger.info(`Message sent to ${chatId} by user: ${req.user?.email}`);
+            res.status(201).json({
+                success: true,
+                data: chatMessage,
+            });
+        });
+        // Get messages for universal chat
+        this.getUniversalMessages = (0, error_middleware_1.asyncHandler)(async (req, res) => {
+            const { chatId } = req.params;
+            const limit = parseInt(req.query.limit) || 50;
+            const offset = parseInt(req.query.offset) || 0;
+            const messages = await this.universalChat.getMessages(chatId, limit, offset);
+            res.json({
+                success: true,
+                data: messages.reverse(), // Oldest first for display
+            });
+        });
+        // Navigate between chat contexts
+        this.navigateChat = (0, error_middleware_1.asyncHandler)(async (req, res) => {
+            const { chatId, direction } = req.params;
+            if (!['up', 'down', 'related'].includes(direction)) {
+                res.status(400).json({
+                    success: false,
+                    error: 'Invalid direction. Must be: up, down, or related',
+                });
+                return;
+            }
+            const targets = await this.universalChat.navigateChat(chatId, direction);
+            res.json({
+                success: true,
+                data: {
+                    targets,
+                    direction,
+                    current: chatId,
+                },
+            });
+        });
+        // Mark messages as read
+        this.markUniversalMessagesAsRead = (0, error_middleware_1.asyncHandler)(async (req, res) => {
+            const { chatId } = req.params;
+            const { messageIds } = req.body;
+            await this.universalChat.markMessagesAsRead(chatId, req.user?.id, messageIds);
+            res.json({
+                success: true,
+                message: 'Messages marked as read',
+            });
+        });
+        // Get chat participants
+        this.getUniversalParticipants = (0, error_middleware_1.asyncHandler)(async (req, res) => {
+            const { chatId } = req.params;
+            const participants = await this.universalChat.getParticipants(chatId);
+            res.json({
+                success: true,
+                data: participants,
+            });
+        });
+        // Generate smart chat ID helper
+        this.generateChatId = (0, error_middleware_1.asyncHandler)(async (req, res) => {
+            const { type, level, ids } = req.body;
+            if (!type || !ids) {
+                res.status(400).json({
+                    success: false,
+                    error: 'Type and IDs are required',
+                });
+                return;
+            }
+            const chatId = this.universalChat.generateChatId({ type, level, ids });
+            res.json({
+                success: true,
+                data: { chatId, type, level, ids },
+            });
+        });
         this.chatService = new chat_service_1.ChatService();
+        this.universalChat = new universal_chat_service_1.default();
+    }
+    setSocketIO(io) {
+        this.universalChat.setSocketIO(io);
+    }
+    // Helper: Build navigation context
+    buildNavigation(chatId) {
+        const context = this.universalChat.parseChatId(chatId);
+        return {
+            current: {
+                id: chatId,
+                type: context.type,
+                level: context.level,
+                description: this.getContextDescription(context),
+            },
+            breadcrumb: this.buildBreadcrumb(context),
+            canGoUp: this.canNavigateUp(context),
+            canGoDown: this.canNavigateDown(context),
+        };
+    }
+    // Helper: Get context description
+    getContextDescription(context) {
+        switch (context.type) {
+            case 'MTO':
+                if (context.level === 'SP')
+                    return `MTO #${context.mtoId}`;
+                if (context.level === 'DY')
+                    return `MTOs for ${context.date}`;
+                if (context.level === 'MO')
+                    return `MTOs for ${context.month}`;
+                if (context.level === 'YR')
+                    return `MTOs for ${context.year}`;
+                break;
+            case 'INV':
+                return `Inventory: ${context.sku}`;
+            case 'DEF':
+                return `Defect: ${context.defectId}`;
+            case 'SHIP':
+                return `Shipment: ${context.carton}`;
+            case 'PO':
+                return `PO: ${context.poNumber}`;
+        }
+        return context.rawId;
+    }
+    // Helper: Build breadcrumb
+    buildBreadcrumb(context) {
+        const breadcrumb = [context.type];
+        switch (context.type) {
+            case 'MTO':
+                if (context.level === 'SP') {
+                    breadcrumb.push('Specific', `#${context.mtoId}`);
+                }
+                else if (context.level === 'DY') {
+                    breadcrumb.push('Daily', context.date);
+                }
+                else if (context.level === 'MO') {
+                    breadcrumb.push('Monthly', context.month);
+                }
+                else if (context.level === 'YR') {
+                    breadcrumb.push('Yearly', context.year);
+                }
+                break;
+            case 'INV':
+                breadcrumb.push('Item', context.sku);
+                break;
+            case 'DEF':
+                breadcrumb.push('Defect', context.defectId);
+                break;
+            case 'SHIP':
+                breadcrumb.push('Carton', context.carton);
+                break;
+            case 'PO':
+                breadcrumb.push('Order', context.poNumber);
+                break;
+        }
+        return breadcrumb;
+    }
+    // Helper: Check if can navigate up
+    canNavigateUp(context) {
+        return ((context.type === 'MTO' && context.level === 'SP') || // Specific → Day
+            (context.type === 'MTO' && context.level === 'DY') || // Day → Month
+            (context.type === 'MTO' && context.level === 'MO') // Month → Year
+        );
+    }
+    // Helper: Check if can navigate down
+    canNavigateDown(context) {
+        return ((context.type === 'MTO' && context.level === 'YR') || // Year → Month
+            (context.type === 'MTO' && context.level === 'MO') || // Month → Day
+            (context.type === 'MTO' && context.level === 'DY') // Day → Specific
+        );
     }
 }
 exports.ChatController = ChatController;

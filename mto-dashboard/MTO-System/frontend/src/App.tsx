@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { LanguageProvider } from './contexts/LanguageContext'
 import { ThemeProvider } from './contexts/ThemeContext'
+import { ChatProvider } from './contexts/ChatContext'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { Layout } from './layouts/Layout'
 
@@ -39,7 +40,8 @@ function App() {
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          <React.Suspense fallback={<LoadingScreen />}>
+          <ChatProvider>
+            <React.Suspense fallback={<LoadingScreen />}>
             <Routes>
               {/* Public routes */}
               <Route path="/login" element={<LoginPage />} />
@@ -84,7 +86,8 @@ function App() {
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </React.Suspense>
+            </React.Suspense>
+          </ChatProvider>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

@@ -16,49 +16,62 @@ const LoginPage: React.FC = () => {
     setError('')
 
     try {
+      console.log('Starting login process...', { email, password: '***' })
       await login(email, password)
-      // Navigation is handled by AuthContext
+      console.log('Login successful, navigating...')
+      
+      // Navigate to appropriate dashboard based on the demo user's role
+      if (email === 'brand@brand.com') {
+        console.log('Navigating to /brand')
+        navigate('/brand')
+      } else if (email === 'factory@factory.com') {
+        console.log('Navigating to /factory')
+        navigate('/factory')
+      } else {
+        // Default navigation for other users
+        console.log('Navigating to default /brand')
+        navigate('/brand')
+      }
     } catch (err: any) {
+      console.error('Login failed:', err)
       setError(err.message || 'Login failed')
     } finally {
       setLoading(false)
     }
   }
 
-  // Mock login for demo
-  const handleMockLogin = (role: 'brand_manager' | 'factory_operator' | 'admin') => {
-    setEmail(`demo@${role}.com`)
-    setPassword('password')
+  // Demo login with real credentials
+  const handleDemoLogin = async (role: 'brand' | 'factory' | 'admin') => {
+    setLoading(true)
+    setError('')
     
-    // Simulate login success
-    const mockUser = {
-      id: '1',
-      email: `demo@${role}.com`,
-      fullName: role === 'brand_manager' ? 'Brand Manager' : role === 'factory_operator' ? 'Factory Operator' : 'Admin User',
-      role,
-      companyId: '1',
-      language: 'en',
-      avatarUrl: null,
-      phone: null,
-      preferences: {
-        theme: 'light' as const,
-        language: 'en',
-        notifications: { email: true, push: true, sms: false },
-        dashboard: { defaultView: 'overview', widgets: [] }
-      },
-      lastLogin: new Date(),
-      active: true,
-      createdAt: new Date(),
-      updatedAt: new Date()
+    // Use the actual demo credentials
+    const credentials = {
+      brand: { email: 'brand@example.com', password: 'Test123!@#' },
+      factory: { email: 'factory@example.com', password: 'Test123!@#' },
+      admin: { email: 'admin@example.com', password: 'Test123!@#' }
     }
-
-    // Navigate based on role
-    if (role === 'admin') {
-      navigate('/admin')
-    } else if (role === 'brand_manager') {
-      navigate('/brand')
-    } else {
-      navigate('/factory')
+    
+    const { email, password } = credentials[role]
+    
+    try {
+      console.log(`Starting demo login for ${role}...`)
+      await login(email, password)
+      console.log('Demo login successful, navigating...')
+      
+      // Navigation will be handled by the auth context based on user role
+      if (role === 'admin') {
+        navigate('/admin')
+      } else if (role === 'brand') {
+        navigate('/brand')
+      } else {
+        navigate('/factory')
+      }
+    } catch (err: any) {
+      console.error('Demo login failed:', err)
+      setError(err.message || 'Demo login failed')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -79,22 +92,25 @@ const LoginPage: React.FC = () => {
           <h3 className="text-lg font-medium text-gray-900 text-center">Demo Login</h3>
           <div className="grid grid-cols-1 gap-3">
             <button
-              onClick={() => handleMockLogin('brand_manager')}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              onClick={() => handleDemoLogin('brand')}
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
             >
-              Login as Brand Manager
+              {loading ? 'Logging in...' : 'Login as Brand Manager'}
             </button>
             <button
-              onClick={() => handleMockLogin('factory_operator')}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              onClick={() => handleDemoLogin('factory')}
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
             >
-              Login as Factory Operator
+              {loading ? 'Logging in...' : 'Login as Factory Operator'}
             </button>
             <button
-              onClick={() => handleMockLogin('admin')}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              onClick={() => handleDemoLogin('admin')}
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
             >
-              Login as Admin
+              {loading ? 'Logging in...' : 'Login as Admin'}
             </button>
           </div>
         </div>

@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useLanguage } from '../contexts/LanguageContext'
+import { useChat } from '../contexts/ChatContext'
+import ChatPanel from '../components/chat/ChatPanel'
 import {
   Menu,
   X,
@@ -28,6 +30,7 @@ export const Layout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const { user, logout } = useAuth()
   const { t } = useLanguage()
+  const { chatState } = useChat()
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -182,6 +185,15 @@ export const Layout: React.FC = () => {
           <Outlet />
         </main>
       </div>
+
+      {/* Global Chat Panel */}
+      {chatState.isOpen && chatState.currentChat && (
+        <ChatPanel
+          chatId={chatState.currentChat}
+          isOpen={chatState.isOpen}
+          onClose={() => {}} // This will be handled by the chat context
+        />
+      )}
     </div>
   )
 }
