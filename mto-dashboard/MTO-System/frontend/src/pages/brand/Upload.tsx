@@ -1,13 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { 
   Upload as UploadIcon, FileSpreadsheet, CheckCircle, AlertTriangle, 
-  X, Eye, Package, AlertCircle, TrendingUp, Clock, Building2, Calendar,
-  Zap, RefreshCw, FileText, Loader2, Info, ChevronDown
+  Eye, Package, Clock, Zap, RefreshCw, FileText, Loader2, Info, ChevronDown
 } from 'lucide-react'
-import * as XLSX from 'xlsx'
 import { mtoService } from '../../services/mto.service'
 import { useAuth } from '../../contexts/AuthContext'
-import UploadResults from '../../components/upload/UploadResults'
 
 interface UploadType {
   id: string
@@ -114,13 +111,7 @@ const Upload: React.FC = () => {
   
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (activeTab === 'history') {
-      fetchUploadHistory()
-    }
-  }, [activeTab])
-
-  const fetchUploadHistory = async () => {
+  const fetchUploadHistory = useCallback(async () => {
     try {
       setHistoryLoading(true)
       const response = await mtoService.getUploadHistory({
@@ -134,190 +125,197 @@ const Upload: React.FC = () => {
     } finally {
       setHistoryLoading(false)
     }
-  }
+  }, [user?.companyId])
 
-  const parseExcelFile = async (file: File): Promise<any> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        try {
-          const data = new Uint8Array(e.target?.result as ArrayBuffer)
-          const workbook = XLSX.read(data, { type: 'array', cellDates: true })
-          const sheetName = workbook.SheetNames[0]
-          const worksheet = workbook.Sheets[sheetName]
-          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: false })
-          resolve(jsonData)
-        } catch (error) {
-          reject(error)
-        }
-      }
-      reader.onerror = reject
-      reader.readAsArrayBuffer(file)
-    })
-  }
+  useEffect(() => {
+    if (activeTab === 'history') {
+      fetchUploadHistory()
+    }
+  }, [activeTab, fetchUploadHistory])
+
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (file) {
-      if (file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' && 
-          file.type !== 'application/vnd.ms-excel') {
-        setUploadProgress({
-          progress: 0,
-          status: 'error',
-          message: 'Please select a valid Excel file (.xlsx or .xls)'
-        })
-        return
-      }
-      
+    if (!file) return
+    
+    if (file.type !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' && 
+        file.type !== 'application/vnd.ms-excel') {
       setUploadProgress({
-        file,
-        uploadType: selectedType.id,
         progress: 0,
-        status: 'parsing',
-        message: 'Reading Excel file...'
+        status: 'error',
+        message: 'Please select a valid Excel file (.xlsx or .xls)'
       })
+      return
+    }
+      
+    setUploadProgress({
+      file,
+      uploadType: selectedType.id,
+      progress: 0,
+      status: 'parsing',
+      message: 'Reading Excel file...'
+    })
 
-      try {
-        // For PO type, use smart preview
-        if (selectedType.id === 'po' && poNumber) {
-          const previewResult = await mtoService.previewUpload(
-            file,
-            poNumber,
-            factoryId || undefined,
-            user?.companyId || undefined
-          )
-          
+    try {
+      // For PO type, use smart preview
+      if (selectedType.id === 'po' && poNumber) {
+        const previewResult = await mtoService.previewUpload(
+          file,
+          poNumber,
+          factoryId || undefined,
+          user?.companyId || undefined
+        )
+        
+        // Debug: Log what we received from backend
+        console.log('Preview Result from Backend:', {
+          mtoCount: previewResult.mtoCount,
+          totalRows: previewResult.analysis?.totalRows,
+          detectedSpots: previewResult.analysis?.detectedSpots,
+          sampleMTO: previewResult.mtos?.[0],
+          fullResponse: previewResult
+        })
+
+        // Check if we got valid data for PO type
+        if (!previewResult || previewResult.mtoCount === 0) {
           setUploadProgress({
             file,
             uploadType: selectedType.id,
             progress: 0,
-            status: 'preview',
-            previewData: {
-              headers: [],
-              rows: previewResult.mtos.slice(0, 10).map((mto: any) => [
-                mto.internal_id,
-                mto.po_line_id,
-                mto.display_name,
-                mto.quantity,
-                mto.expected_ship_date,
-                mto.spot_count
-              ]),
-              validCount: previewResult.mtoCount,
-              errorCount: previewResult.warnings?.length || 0,
-              errors: previewResult.warnings?.map((w: string, i: number) => ({ 
-                row: i + 1, 
-                message: w 
-              })) || [],
-              spots: previewResult.analysis.detectedSpots,
-              summary: {
-                totalMTOs: previewResult.mtoCount,
-                uniqueProducts: previewResult.impact.inventoryItemsToCreate,
-                totalQuantity: previewResult.mtos.reduce((sum: number, m: any) => sum + m.quantity, 0),
-                dateRange: {
-                  earliest: previewResult.mtos[0]?.expected_ship_date || 'N/A',
-                  latest: previewResult.mtos[previewResult.mtos.length - 1]?.expected_ship_date || 'N/A'
-                },
-                urgentCount: previewResult.summary.urgentCount,
-                dailyCount: previewResult.summary.dailyCount,
-                monthlyCount: previewResult.summary.monthlyCount
-              }
-            }
+            status: 'error',
+            message: `No valid data found in the Excel file. Please check that the file contains valid MTO data with the expected columns.${previewResult?.warnings?.length ? ` Warnings: ${previewResult.warnings.join(', ')}` : ''}`
           })
-        } else {
-          // Parse Excel file for preview (standard MTO)
-        const data = await parseExcelFile(file)
-        
-        if (!data || data.length < 2) {
-          throw new Error('Excel file is empty or has no data rows')
+          return
         }
-
-        const headers = data[0] as string[]
-          const rows = data.slice(1, Math.min(11, data.length))
         
-        // Analyze the data
-        const errors: Array<{ row: number; message: string }> = []
-        let validCount = 0
-        let totalSpots = 0
-        const products = new Set<string>()
-        let totalQuantity = 0
-        const dates: string[] = []
-
-        for (let i = 1; i < data.length; i++) {
-          const row = data[i]
-          if (!row || row.length === 0) continue
-          
-            const displayNameIdx = headers.findIndex(h => 
-              h?.toLowerCase().includes('display') || 
-              h?.toLowerCase().includes('name') ||
-              h?.toLowerCase().includes('product')
-            )
-            const quantityIdx = headers.findIndex(h => 
-              h?.toLowerCase().includes('quantity') || 
-              h?.toLowerCase().includes('qty')
-            )
-            const dateIdx = headers.findIndex(h => 
-              h?.toLowerCase().includes('ship') && 
-              h?.toLowerCase().includes('date')
-            )
-            
-          if (displayNameIdx === -1 || !row[displayNameIdx]) {
-            errors.push({ row: i + 1, message: 'Missing display name' })
-          } else {
-            validCount++
-            products.add(row[displayNameIdx])
-          }
-          
-          // Count spots
-          headers.forEach((header, idx) => {
-            if (header?.toLowerCase().includes('spot') && row[idx]) {
-              totalSpots++
-            }
-          })
-          
-          if (quantityIdx !== -1 && row[quantityIdx]) {
-            totalQuantity += parseInt(row[quantityIdx]) || 1
-          }
-          
-          if (dateIdx !== -1 && row[dateIdx]) {
-            dates.push(row[dateIdx])
-          }
-        }
-
-        dates.sort()
-        
-        setUploadProgress({
-          file,
-            uploadType: selectedType.id,
-          progress: 0,
-          status: 'preview',
-          previewData: {
-            headers,
-            rows,
-            validCount,
-            errorCount: errors.length,
-              errors: errors.slice(0, 5),
-            spots: totalSpots,
-            summary: {
-              totalMTOs: data.length - 1,
-              uniqueProducts: products.size,
-              totalQuantity,
-              dateRange: {
-                earliest: dates[0] || 'N/A',
-                latest: dates[dates.length - 1] || 'N/A'
-              }
-            }
-          }
-        })
-        }
-      } catch (error: any) {
         setUploadProgress({
           file,
           uploadType: selectedType.id,
           progress: 0,
-          status: 'error',
-          message: `Failed to parse Excel file: ${error.message}`
+          status: 'preview',
+          previewData: {
+            headers: [
+              'Internal ID', 'PO Line ID', 'Display Name', 'Reference #', 
+              'Quantity', 'Expected Ship Date', 'Actual Ship Date', 'Spot Count',
+              'Bag Base PID', 'Sales Order #'
+            ],
+            rows: previewResult.mtos?.slice(0, 10).map((mto: any) => [
+              mto.internal_id,
+              mto.po_line_id,
+              mto.display_name,
+              mto.reference_number,
+              mto.quantity,
+              mto.expected_ship_date,
+              mto.actual_ship_date,
+              mto.spot_count,
+              mto.bag_base_pid,
+              mto.sales_order_number
+            ]) || [],
+            validCount: previewResult.mtoCount || 0,
+            errorCount: previewResult.warnings?.length || 0,
+            errors: previewResult.warnings?.map((w: string, i: number) => ({ 
+              row: i + 1, 
+              message: w 
+            })) || [],
+            spots: previewResult.analysis?.detectedSpots || 0,
+            summary: {
+              totalMTOs: previewResult.mtoCount || 0,
+              uniqueProducts: previewResult.impact?.inventoryItemsToCreate || 0,
+              totalQuantity: previewResult.mtos?.reduce((sum: number, m: any) => sum + (m.quantity || 0), 0) || 0,
+              dateRange: {
+                earliest: previewResult.mtos?.[0]?.expected_ship_date || 'N/A',
+                latest: previewResult.mtos?.[previewResult.mtos.length - 1]?.expected_ship_date || 'N/A'
+              },
+              urgentCount: previewResult.summary?.urgentCount || 0,
+              dailyCount: previewResult.summary?.dailyCount || 0,
+              monthlyCount: previewResult.summary?.monthlyCount || 0
+            }
+          }
+        })
+      } else {
+        // Use backend NextGen parser for ALL uploads (including standard MTO)
+        console.log('Using backend NextGen parser for standard MTO upload...');
+        
+        const previewResult = await mtoService.previewUpload(
+          file,
+          `MTO-${Date.now()}`, // Generate a temporary PO number for MTO uploads
+          factoryId || undefined,
+          user?.companyId || undefined
+        )
+        
+        // Debug: Log what we received from backend
+        console.log('Standard MTO Preview Result from Backend:', {
+          mtoCount: previewResult.mtoCount,
+          totalRows: previewResult.analysis?.totalRows,
+          detectedSpots: previewResult.analysis?.detectedSpots,
+          sampleMTO: previewResult.mtos?.[0],
+          fullResponse: previewResult
+        })
+
+        // Check if we got valid data for MTO type  
+        if (!previewResult || previewResult.mtoCount === 0) {
+          setUploadProgress({
+            file,
+            uploadType: selectedType.id,
+            progress: 0,
+            status: 'error',
+            message: `No valid data found in the Excel file. Please check that the file contains valid MTO data with the expected columns.${previewResult?.warnings?.length ? ` Warnings: ${previewResult.warnings.join(', ')}` : ''}`
+          })
+          return
+        }
+        
+        setUploadProgress({
+          file,
+          uploadType: selectedType.id,
+          progress: 0,
+          status: 'preview',
+          previewData: {
+            headers: [
+              'Internal ID', 'PO Line ID', 'Display Name', 'Reference #', 
+              'Quantity', 'Expected Ship Date', 'Actual Ship Date', 'Spot Count',
+              'Bag Base PID', 'Sales Order #'
+            ],
+            rows: previewResult.mtos?.slice(0, 10).map((mto: any) => [
+              mto.internal_id,
+              mto.po_line_id,
+              mto.display_name,
+              mto.reference_number,
+              mto.quantity,
+              mto.expected_ship_date,
+              mto.actual_ship_date,
+              mto.spot_count,
+              mto.bag_base_pid,
+              mto.sales_order_number
+            ]) || [],
+            validCount: previewResult.mtoCount || 0,
+            errorCount: previewResult.warnings?.length || 0,
+            errors: previewResult.warnings?.map((w: string, i: number) => ({ 
+              row: i + 1, 
+              message: w 
+            })) || [],
+            spots: previewResult.analysis?.detectedSpots || 0,
+            summary: {
+              totalMTOs: previewResult.mtoCount || 0,
+              uniqueProducts: previewResult.impact?.inventoryItemsToCreate || 0,
+              totalQuantity: previewResult.mtos?.reduce((sum: number, m: any) => sum + (m.quantity || 0), 0) || 0,
+              dateRange: {
+                earliest: previewResult.mtos?.[0]?.expected_ship_date || 'N/A',
+                latest: previewResult.mtos?.[previewResult.mtos.length - 1]?.expected_ship_date || 'N/A'
+              },
+              urgentCount: previewResult.summary?.urgentCount || 0,
+              dailyCount: previewResult.summary?.dailyCount || 0,
+              monthlyCount: previewResult.summary?.monthlyCount || 0
+            }
+          }
         })
       }
+    } catch (error: any) {
+      setUploadProgress({
+        file,
+        uploadType: selectedType.id,
+        progress: 0,
+        status: 'error',
+        message: `Failed to parse Excel file: ${error.message || 'Unknown error'}`
+      })
     }
   }
 
@@ -329,24 +327,17 @@ const Upload: React.FC = () => {
     try {
       let result: any
       
-      // Choose upload method based on type
-      if (selectedType.id === 'po' && poNumber) {
-        // Smart upload for PO
-        result = await mtoService.smartUpload(
-          uploadProgress.file,
-          poNumber,
-          factoryId || undefined,
-          user?.companyId || undefined,
-          (progress) => {
-            setUploadProgress(prev => ({ ...prev, progress: Math.min(90, progress) }))
-          }
-        )
-      } else {
-        // Standard upload for other types
-        result = await mtoService.uploadExcel(uploadProgress.file, (progress) => {
-        setUploadProgress(prev => ({ ...prev, progress: Math.min(90, progress) }))
-      })
-      }
+      // Use backend smart upload for ALL types (PO and MTO)
+      const tempPoNumber = poNumber || `MTO-${Date.now()}`;
+      result = await mtoService.smartUpload(
+        uploadProgress.file,
+        tempPoNumber,
+        factoryId || undefined,
+        user?.companyId || undefined,
+        (progress) => {
+          setUploadProgress(prev => ({ ...prev, progress: Math.min(90, progress) }))
+        }
+      )
 
       const successCount = result.created || (Array.isArray(result) ? result.length : 0)
       const errors = result.errors || []
@@ -360,9 +351,9 @@ const Upload: React.FC = () => {
         results: {
           totalRows: uploadProgress.previewData?.summary.totalMTOs || 0,
           successfulMTOs: successCount,
-          errors: errors.map((e: any) => typeof e === 'string' ? e : `Row ${e.row}: ${e.message || e.errors?.join(', ')}`),
-          poNumber: result.po?.po_number || poNumber,
-          workspaceName: result.workspace?.name,
+          errors: errors.map((e: any) => typeof e === 'string' ? e : `Row ${e.row || 'Unknown'}: ${e.message || e.errors?.join(', ') || 'Unknown error'}`),
+          poNumber: result.po?.po_number || poNumber || 'N/A',
+          workspaceName: result.workspace?.name || 'N/A',
           inventoryCreated: result.summary?.inventoryItemsCreated || result.autoPopulation?.inventory?.created || 0,
           barcodesGenerated: result.summary?.barcodesGenerated || result.autoPopulation?.barcodes?.created || 0,
           spotsDetected: result.summary?.spotsDetected || uploadProgress.previewData?.spots || 0
@@ -379,7 +370,7 @@ const Upload: React.FC = () => {
         uploadType: selectedType.id,
         progress: 0,
         status: 'error',
-        message: `Upload failed: ${error.message}`
+        message: `Upload failed: ${error.message || 'Unknown error'}`
       })
     }
   }
@@ -588,13 +579,18 @@ const Upload: React.FC = () => {
             {/* Preview Section */}
           {uploadProgress.status === 'preview' && uploadProgress.previewData && (
               <div className="space-y-6">
-                <div className="bg-blue-50 rounded-lg p-4">
+                <div className={`${uploadProgress.previewData.validCount === 0 ? 'bg-yellow-50' : 'bg-blue-50'} rounded-lg p-4`}>
                   <div className="flex items-start gap-3">
-                    <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <Info className={`h-5 w-5 ${uploadProgress.previewData.validCount === 0 ? 'text-yellow-600' : 'text-blue-600'} mt-0.5`} />
                     <div className="flex-1">
-                      <h3 className="font-medium text-blue-900">File Preview</h3>
-                      <p className="text-sm text-blue-700 mt-1">
-                        {uploadProgress.file?.name} • {uploadProgress.previewData.summary.totalMTOs} rows detected
+                      <h3 className={`font-medium ${uploadProgress.previewData.validCount === 0 ? 'text-yellow-900' : 'text-blue-900'}`}>
+                        {uploadProgress.previewData.validCount === 0 ? 'No Data Found' : 'File Preview'}
+                      </h3>
+                      <p className={`text-sm ${uploadProgress.previewData.validCount === 0 ? 'text-yellow-700' : 'text-blue-700'} mt-1`}>
+                        {uploadProgress.file?.name} • {uploadProgress.previewData.validCount} MTOs detected
+                        {uploadProgress.previewData.validCount === 0 && (
+                          <span className="block mt-1">The file was processed but no valid MTO data was found. Please check the file format and column headers.</span>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -710,13 +706,23 @@ const Upload: React.FC = () => {
                   </button>
                   <button
                     onClick={handleUpload}
-                    className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700"
+                    disabled={uploadProgress.previewData?.validCount === 0}
+                    className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Confirm Upload
+                    {uploadProgress.previewData?.validCount === 0 ? 'No Data to Upload' : 'Confirm Upload'}
                   </button>
               </div>
             </div>
           )}
+
+            {/* Parsing State */}
+            {uploadProgress.status === 'parsing' && (
+              <div className="text-center py-12">
+                <Loader2 className="mx-auto h-12 w-12 animate-spin text-indigo-600 mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Parsing File...</h3>
+                <p className="text-sm text-gray-500 mb-4">{uploadProgress.message}</p>
+              </div>
+            )}
 
             {/* Uploading State */}
           {uploadProgress.status === 'uploading' && (
@@ -768,12 +774,12 @@ const Upload: React.FC = () => {
                   </dl>
                 </div>
                 <div className="flex gap-3 justify-center">
-              <button
-                onClick={resetUpload}
+                  <button
+                    onClick={resetUpload}
                     className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-              >
+                  >
                     Upload Another
-              </button>
+                  </button>
                   <a
                     href="/brand/mtos"
                     className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700"
@@ -790,12 +796,12 @@ const Upload: React.FC = () => {
                 <AlertTriangle className="mx-auto h-12 w-12 text-red-500 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Failed</h3>
                 <p className="text-sm text-red-600 mb-6">{uploadProgress.message}</p>
-              <button
-                onClick={resetUpload}
+                <button
+                  onClick={resetUpload}
                   className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700"
-              >
-                Try Again
-              </button>
+                >
+                  Try Again
+                </button>
             </div>
           )}
           </div>
@@ -831,8 +837,8 @@ const Upload: React.FC = () => {
                           <Eye size={16} />
                         </button>
                       </div>
-        </div>
-      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
             ) : (
@@ -840,13 +846,13 @@ const Upload: React.FC = () => {
                 <Clock className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No Upload History</h3>
                 <p className="text-sm text-gray-500">Your upload history will appear here</p>
-        </div>
+              </div>
             )}
         </div>
         )}
       </div>
     </div>
-  )
+  );
 }
 
 export default Upload

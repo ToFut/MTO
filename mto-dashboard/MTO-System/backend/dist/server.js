@@ -31,6 +31,8 @@ const chat_routes_1 = __importDefault(require("./routes/chat.routes"));
 const sync_routes_1 = __importDefault(require("./routes/sync.routes"));
 const analytics_routes_1 = __importDefault(require("./routes/analytics.routes"));
 const assignment_routes_1 = __importDefault(require("./routes/assignment.routes"));
+const user_routes_1 = __importDefault(require("./routes/user.routes"));
+const company_routes_1 = __importDefault(require("./routes/company.routes"));
 // Import controllers and services
 const chat_controller_1 = __importDefault(require("./controllers/chat.controller"));
 // Import middleware
@@ -133,6 +135,8 @@ class Server {
                     sync: '/api/sync',
                     analytics: '/api/analytics',
                     assignments: '/api/assignments',
+                    users: '/api/users',
+                    companies: '/api/companies',
                 },
             });
         });
@@ -149,6 +153,8 @@ class Server {
         this.app.use('/api/sync', sync_routes_1.default);
         this.app.use('/api/analytics', analytics_routes_1.default);
         this.app.use('/api/assignments', assignment_routes_1.default);
+        this.app.use('/api/users', user_routes_1.default);
+        this.app.use('/api/companies', company_routes_1.default);
         // 404 handler
         this.app.use('*', (req, res) => {
             res.status(404).json({

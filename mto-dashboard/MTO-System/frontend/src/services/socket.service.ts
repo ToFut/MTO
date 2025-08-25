@@ -28,8 +28,12 @@ class SocketService {
       auth: { token },
       reconnection: true,
       reconnectionDelay: this.reconnectDelay,
+      reconnectionDelayMax: 5000,
       reconnectionAttempts: this.maxReconnectAttempts,
       transports: ['websocket', 'polling'],
+      forceNew: true,
+      timeout: 20000,
+      upgrade: true,
     });
 
     this.setupEventListeners();
@@ -54,10 +58,15 @@ class SocketService {
     });
 
     this.socket.on('connect_error', (error) => {
-      logger.error('Socket connection error:', error.message);
       this.reconnectAttempts++;
       
+      // Only log every few attempts to avoid console spam
+      if (this.reconnectAttempts % 3 === 0 || this.reconnectAttempts === 1) {
+        logger.error('Socket connection error:', error.message);
+      }
+      
       if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+        logger.warn('Socket max reconnect attempts reached. Real-time features disabled.');
         this.emit('socket:max_reconnect_failed');
       }
     });

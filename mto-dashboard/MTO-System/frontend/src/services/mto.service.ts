@@ -244,6 +244,22 @@ class MTOService {
     return response.data;
   }
 
+  // Update MTO (for factory stage changes)
+  async updateMTO(id: string, updates: any): Promise<any> {
+    const response = await apiClient.patch(`${this.BASE_PATH}/${id}`, updates);
+    return response.data.data;
+  }
+
+  // Upload production photo
+  async uploadProductionPhoto(mtoId: string, formData: FormData): Promise<any> {
+    const response = await apiClient.post(`${this.BASE_PATH}/${mtoId}/photo`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  }
+
   // Export MTOs
   async exportToExcel(filters?: any): Promise<Blob> {
     const response = await apiClient.get(`${this.BASE_PATH}/export`, {

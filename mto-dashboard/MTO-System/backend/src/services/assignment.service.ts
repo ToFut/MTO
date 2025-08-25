@@ -39,6 +39,17 @@ interface AssignmentFilters {
 export class AssignmentService {
   async createAssignment(data: CreateAssignmentData): Promise<BrandFactoryAssignment> {
     try {
+      // First check if the brand_factory_assignments table exists
+      const { error: tableCheckError } = await db
+        .from('brand_factory_assignments')
+        .select('count')
+        .limit(0);
+
+      if (tableCheckError && (tableCheckError.message.includes('does not exist') || tableCheckError.message.includes('relation') && tableCheckError.message.includes('does not exist'))) {
+        logger.error('brand_factory_assignments table does not exist:', tableCheckError);
+        throw new AppError('Assignment functionality is not available. Please contact administrator to set up the database tables.', 503);
+      }
+
       // Validate that brand and factory exist and are correct types
       const { data: brand, error: brandError } = await db
         .from('companies')
@@ -74,25 +85,61 @@ export class AssignmentService {
         throw new AppError('Assignment already exists between this brand and factory', 409);
       }
 
-      // Create the assignment
-      const { data: assignment, error } = await db
+      // Create the assignment with fallback to old schema
+      let insertData: any = {
+        brand_id: data.brand_id,
+        factory_id: data.factory_id,
+        assigned_by: data.assigned_by,
+      };
+
+      // Test if capabilities column exists by trying a select
+      const { error: capabilitiesTestError } = await db
         .from('brand_factory_assignments')
-        .insert({
-          brand_id: data.brand_id,
-          factory_id: data.factory_id,
-          assigned_by: data.assigned_by,
+        .select('capabilities')
+        .limit(0);
+
+      logger.info('Capabilities column test error:', capabilitiesTestError?.message || 'No error');
+
+      // If capabilities column doesn't exist, use old schema
+      if (capabilitiesTestError && capabilitiesTestError.message.includes('capabilities')) {
+        logger.info('Using OLD schema for assignment creation');
+        insertData = {
+          ...insertData,
+          assignment_type: 'preferred',
+          capacity_allocation: data.production_capacity || 100,
+          priority_level: Math.round((data.quality_rating || 5) / 2), // Convert 0-10 to 0-5
+          settings: {
+            capabilities: data.capabilities || [],
+            preferred_categories: data.preferred_for_categories || [],
+            notes: data.notes || ''
+          },
+          active: true
+        };
+      } else {
+        // Use new schema
+        logger.info('Using NEW schema for assignment creation');
+        insertData = {
+          ...insertData,
           capabilities: data.capabilities || [],
           production_capacity: data.production_capacity || 0,
           quality_rating: data.quality_rating || 0,
           preferred_for_categories: data.preferred_for_categories || [],
           notes: data.notes,
           status: 'active'
-        })
+        };
+      }
+
+      const { data: assignment, error } = await db
+        .from('brand_factory_assignments')
+        .insert(insertData)
         .select()
         .single();
 
       if (error) {
         logger.error('Error creating brand-factory assignment:', error);
+        if (error.message.includes('capabilities') || error.message.includes('column') && error.message.includes('does not exist')) {
+          throw new AppError('Database table is missing required columns. Please contact administrator to update the database schema.', 503);
+        }
         throw new AppError('Failed to create assignment', 500);
       }
 
@@ -107,20 +154,66 @@ export class AssignmentService {
 
   async getAssignments(filters: AssignmentFilters = {}) {
     try {
-      let query = db
+      // First check if the brand_factory_assignments table exists
+      const { error: tableCheckError } = await db
         .from('brand_factory_assignments')
-        .select(`
-          *,
-          brand:companies!brand_factory_assignments_brand_id_fkey(
-            id, name, code, email, contact_person
-          ),
-          factory:companies!brand_factory_assignments_factory_id_fkey(
-            id, name, code, email, contact_person
-          ),
-          assigned_by_user:users!brand_factory_assignments_assigned_by_fkey(
-            id, full_name, email
-          )
-        `);
+        .select('count')
+        .limit(0);
+
+      if (tableCheckError && (tableCheckError.message.includes('does not exist') || tableCheckError.message.includes('relation') && tableCheckError.message.includes('does not exist'))) {
+        logger.warn('brand_factory_assignments table does not exist, returning empty assignments');
+        return [];
+      }
+
+      // First check what columns are available
+      const { data: schemaCheck } = await db
+        .from('brand_factory_assignments')
+        .select('*')
+        .limit(1);
+
+      let query;
+      
+      if (schemaCheck && schemaCheck.length > 0) {
+        const columns = Object.keys(schemaCheck[0]);
+        if (columns.includes('capabilities')) {
+          // New schema - select all with joins
+          query = db
+            .from('brand_factory_assignments')
+            .select(`
+              *,
+              brand:companies!brand_factory_assignments_brand_id_fkey(
+                id, name, code, contact_email, contact_phone
+              ),
+              factory:companies!brand_factory_assignments_factory_id_fkey(
+                id, name, code, contact_email, contact_phone
+              ),
+              assigned_by_user:users!brand_factory_assignments_assigned_by_fkey(
+                id, full_name, email
+              )
+            `);
+        } else {
+          // Old schema - select available columns
+          query = db
+            .from('brand_factory_assignments')
+            .select('*');
+        }
+      } else {
+        // Empty table - use new schema format
+        query = db
+          .from('brand_factory_assignments')
+          .select(`
+            *,
+            brand:companies!brand_factory_assignments_brand_id_fkey(
+              id, name, code, contact_email, contact_phone
+            ),
+            factory:companies!brand_factory_assignments_factory_id_fkey(
+              id, name, code, contact_email, contact_phone
+            ),
+            assigned_by_user:users!brand_factory_assignments_assigned_by_fkey(
+              id, full_name, email
+            )
+          `);
+      }
 
       // Apply filters
       if (filters.brand_id) {
@@ -139,12 +232,37 @@ export class AssignmentService {
         query = query.range(offset, offset + filters.limit - 1);
       }
 
-      query = query.order('assigned_at', { ascending: false });
+      // Use different order column based on what exists
+      // Test for assigned_at column
+      const { error: assignedAtTestError } = await db
+        .from('brand_factory_assignments')
+        .select('assigned_at')
+        .limit(0);
+
+      if (assignedAtTestError && assignedAtTestError.message.includes('assigned_at')) {
+        // assigned_at doesn't exist, try created_at
+        const { error: createdAtTestError } = await db
+          .from('brand_factory_assignments')
+          .select('created_at')
+          .limit(0);
+          
+        if (createdAtTestError && createdAtTestError.message.includes('created_at')) {
+          // Use updated_at as fallback
+          query = query.order('updated_at', { ascending: false });
+        } else {
+          query = query.order('created_at', { ascending: false });
+        }
+      } else {
+        query = query.order('assigned_at', { ascending: false });
+      }
 
       const { data, error } = await query;
 
       if (error) {
         logger.error('Error fetching assignments:', error);
+        if (error.message.includes('does not exist') || error.message.includes('relation')) {
+          return [];
+        }
         throw new AppError('Failed to fetch assignments', 500);
       }
 

@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, Building, Factory, Users, Star, AlertCircle, CheckCircle } from 'lucide-react';
 import { apiClient } from '../../utils/api-client';
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client for direct access as fallback
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://xqppbixijmvulwsnvehx.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhxcHBiaXhpam12dWx3c252ZWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjEzMjcxNDAsImV4cCI6MjAzNjkwMzE0MH0.yKMXxMQoQXOMTccTLFWfoBbB0W5AlPPDx7fgUbD5jYY';
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 interface Company {
   id: string;
@@ -78,17 +84,72 @@ const BrandFactoryAssignments: React.FC = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [assignmentsRes, brandsRes, factoriesRes] = await Promise.all([
-        apiClient.get<{success: boolean, data: any[]}>('/assignments'),
-        apiClient.get<{success: boolean, data: any[]}>('/companies?type=brand'),
-        apiClient.get<{success: boolean, data: any[]}>('/companies?type=factory')
-      ]);
-
-      setAssignments(assignmentsRes.data.data || []);
-      setBrands(brandsRes.data.data || []);
-      setFactories(factoriesRes.data.data || []);
+      
+      // Try to fetch assignments from API
+      try {
+        const assignmentsRes = await apiClient.get<{success: boolean, data: any[]}>('/assignments');
+        setAssignments(assignmentsRes.data.data || []);
+      } catch (apiError) {
+        console.warn('API assignments fetch failed, using fallback:', apiError);
+        // Fallback: fetch directly from Supabase
+        const { data: assignmentsData, error: assignmentsError } = await supabase
+          .from('brand_factory_assignments')
+          .select(`
+            *,
+            brand:companies!brand_id(*),
+            factory:companies!factory_id(*)
+          `);
+        
+        if (assignmentsError) {
+          console.error('Supabase assignments fetch error:', assignmentsError);
+        } else {
+          setAssignments(assignmentsData || []);
+        }
+      }
+      
+      // Try to fetch companies from API first
+      let brandCompanies: Company[] = [];
+      let factoryCompanies: Company[] = [];
+      
+      try {
+        const companiesRes = await apiClient.get<{success: boolean, data: any[]}>('/companies');
+        const allCompanies = companiesRes.data.data || [];
+        
+        // Filter companies by type
+        brandCompanies = allCompanies.filter(c => c.type === 'brand');
+        factoryCompanies = allCompanies.filter(c => c.type === 'factory');
+        
+        console.log('API fetched brands:', brandCompanies);
+        console.log('API fetched factories:', factoryCompanies);
+      } catch (apiError) {
+        console.warn('API companies fetch failed, using Supabase fallback:', apiError);
+        
+        // Fallback: fetch directly from Supabase
+        const { data: companiesData, error: companiesError } = await supabase
+          .from('companies')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (companiesError) {
+          console.error('Supabase companies fetch error:', companiesError);
+        } else if (companiesData) {
+          // Filter companies by type
+          brandCompanies = companiesData.filter(c => c.type === 'brand');
+          factoryCompanies = companiesData.filter(c => c.type === 'factory');
+          
+          console.log('Supabase fetched brands:', brandCompanies);
+          console.log('Supabase fetched factories:', factoryCompanies);
+        }
+      }
+      
+      setBrands(brandCompanies);
+      setFactories(factoryCompanies);
+      
+      // Log final state
+      console.log('Final brands count:', brandCompanies.length);
+      console.log('Final factories count:', factoryCompanies.length);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error in fetchData:', error);
     } finally {
       setLoading(false);
     }
@@ -110,7 +171,17 @@ const BrandFactoryAssignments: React.FC = () => {
       fetchData();
     } catch (error: any) {
       console.error('Error saving assignment:', error);
-      alert(error.response?.data?.error || 'Failed to save assignment');
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to save assignment';
+      
+      if (error.response?.status === 503) {
+        alert('Assignment functionality is temporarily unavailable. The database needs to be set up by an administrator. Please contact support.');
+      } else if (errorMessage.includes('Assignment already exists')) {
+        alert('An assignment already exists between this brand and factory. Please choose different companies or edit the existing assignment.');
+      } else if (errorMessage.includes('not found')) {
+        alert('Selected brand or factory not found. Please refresh the page and try again.');
+      } else {
+        alert(errorMessage);
+      }
     }
   };
 
@@ -131,10 +202,10 @@ const BrandFactoryAssignments: React.FC = () => {
     setFormData({
       brand_id: assignment.brand_id,
       factory_id: assignment.factory_id,
-      capabilities: assignment.capabilities,
+      capabilities: ((assignment as any).capabilities || (assignment as any).settings?.capabilities || []),
       production_capacity: assignment.production_capacity,
       quality_rating: assignment.quality_rating,
-      preferred_for_categories: assignment.preferred_for_categories,
+      preferred_for_categories: ((assignment as any).preferred_for_categories || (assignment as any).settings?.preferred_for_categories || []),
       notes: assignment.notes || ''
     });
     setShowForm(true);
@@ -163,10 +234,11 @@ const BrandFactoryAssignments: React.FC = () => {
 
   const filteredAssignments = assignments.filter(assignment => {
     const matchesSearch = !searchTerm || 
-      assignment.brand?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      assignment.factory?.name.toLowerCase().includes(searchTerm.toLowerCase());
+      (assignment as any).brand?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (assignment as any).factory?.name.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || assignment.status === statusFilter;
+    const assignmentStatus = (assignment as any).status || ((assignment as any).active ? 'active' : 'inactive');
+    const matchesStatus = statusFilter === 'all' || assignmentStatus === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
@@ -209,6 +281,48 @@ const BrandFactoryAssignments: React.FC = () => {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Brand-Factory Assignments</h1>
         <p className="text-gray-600">Manage relationships between brands and manufacturing factories</p>
+      </div>
+
+      {/* Statistics */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-white rounded-lg shadow-sm border p-4">
+          <div className="flex items-center">
+            <Users className="h-8 w-8 text-blue-500" />
+            <div className="ml-4">
+              <p className="text-2xl font-semibold text-gray-900">{assignments.length}</p>
+              <p className="text-gray-600">Total Assignments</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border p-4">
+          <div className="flex items-center">
+            <CheckCircle className="h-8 w-8 text-green-500" />
+            <div className="ml-4">
+              <p className="text-2xl font-semibold text-gray-900">
+                {assignments.filter(a => (a as any).status === 'active' || (a as any).active).length}
+              </p>
+              <p className="text-gray-600">Active</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border p-4">
+          <div className="flex items-center">
+            <Building className="h-8 w-8 text-purple-500" />
+            <div className="ml-4">
+              <p className="text-2xl font-semibold text-gray-900">{brands.length}</p>
+              <p className="text-gray-600">Active Brands</p>
+            </div>
+          </div>
+        </div>
+        <div className="bg-white rounded-lg shadow-sm border p-4">
+          <div className="flex items-center">
+            <Factory className="h-8 w-8 text-orange-500" />
+            <div className="ml-4">
+              <p className="text-2xl font-semibold text-gray-900">{factories.length}</p>
+              <p className="text-gray-600">Active Factories</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Controls */}
@@ -261,6 +375,30 @@ const BrandFactoryAssignments: React.FC = () => {
                 {editingAssignment ? 'Edit Assignment' : 'Create New Assignment'}
               </h2>
               
+              {brands.length === 0 && factories.length === 0 && (
+                <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    <strong>No companies found!</strong> Please create brand and factory companies first in the Companies tab before creating assignments.
+                  </p>
+                </div>
+              )}
+              
+              {brands.length === 0 && factories.length > 0 && (
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    <strong>No brand companies found!</strong> Please create at least one brand company in the Companies tab.
+                  </p>
+                </div>
+              )}
+              
+              {factories.length === 0 && brands.length > 0 && (
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <p className="text-sm text-green-800">
+                    <strong>No factory companies found!</strong> Please create at least one factory company in the Companies tab.
+                  </p>
+                </div>
+              )}
+              
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -270,10 +408,15 @@ const BrandFactoryAssignments: React.FC = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       value={formData.brand_id}
                       onChange={(e) => setFormData(prev => ({ ...prev, brand_id: e.target.value }))}
+                      disabled={brands.length === 0}
                     >
-                      <option value="">Select Brand</option>
+                      <option value="">
+                        {brands.length === 0 ? 'No brands available - Create companies first' : 'Select Brand'}
+                      </option>
                       {brands.map(brand => (
-                        <option key={brand.id} value={brand.id}>{brand.name}</option>
+                        <option key={brand.id} value={brand.id}>
+                          {brand.name} ({brand.code})
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -285,10 +428,15 @@ const BrandFactoryAssignments: React.FC = () => {
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                       value={formData.factory_id}
                       onChange={(e) => setFormData(prev => ({ ...prev, factory_id: e.target.value }))}
+                      disabled={factories.length === 0}
                     >
-                      <option value="">Select Factory</option>
+                      <option value="">
+                        {factories.length === 0 ? 'No factories available - Create companies first' : 'Select Factory'}
+                      </option>
                       {factories.map(factory => (
-                        <option key={factory.id} value={factory.id}>{factory.name}</option>
+                        <option key={factory.id} value={factory.id}>
+                          {factory.name} ({factory.code})
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -472,33 +620,33 @@ const BrandFactoryAssignments: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        {getStatusIcon(assignment.status)}
-                        <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(assignment.status)}`}>
-                          {assignment.status}
+                        {getStatusIcon((assignment as any).status || ((assignment as any).active ? 'active' : 'inactive'))}
+                        <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor((assignment as any).status || ((assignment as any).active ? 'active' : 'inactive'))}`}>
+                          {(assignment as any).status || ((assignment as any).active ? 'active' : 'inactive')}
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {assignment.production_capacity.toLocaleString()} units/month
+                        {((assignment as any).production_capacity || (assignment as any).capacity_allocation || 0).toLocaleString()} units/month
                       </div>
                       <div className="flex items-center mt-1">
                         <Star className="h-4 w-4 text-yellow-400 mr-1" />
                         <span className="text-sm text-gray-500">
-                          {assignment.quality_rating}/10
+                          {((assignment as any).quality_rating || ((assignment as any).priority_level || 0) * 2)}/10
                         </span>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-wrap gap-1">
-                        {assignment.capabilities.slice(0, 3).map((capability, index) => (
+                        {((assignment as any).capabilities || (assignment as any).settings?.capabilities || []).slice(0, 3).map((capability, index) => (
                           <span key={index} className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">
                             {capability.replace('_', ' ')}
                           </span>
                         ))}
-                        {assignment.capabilities.length > 3 && (
+                        {((assignment as any).capabilities || (assignment as any).settings?.capabilities || []).length > 3 && (
                           <span className="inline-flex px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded">
-                            +{assignment.capabilities.length - 3} more
+                            +{((assignment as any).capabilities || (assignment as any).settings?.capabilities || []).length - 3} more
                           </span>
                         )}
                       </div>

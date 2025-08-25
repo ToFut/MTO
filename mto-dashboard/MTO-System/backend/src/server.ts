@@ -29,6 +29,8 @@ import chatRoutes from './routes/chat.routes';
 import syncRoutes from './routes/sync.routes';
 import analyticsRoutes from './routes/analytics.routes';
 import assignmentRoutes from './routes/assignment.routes';
+import userRoutes from './routes/user.routes';
+import companyRoutes from './routes/company.routes';
 
 // Import controllers and services
 import chatController from './controllers/chat.controller';
@@ -150,6 +152,8 @@ class Server {
           sync: '/api/sync',
           analytics: '/api/analytics',
           assignments: '/api/assignments',
+          users: '/api/users',
+          companies: '/api/companies',
         },
       });
     });
@@ -167,6 +171,8 @@ class Server {
     this.app.use('/api/sync', syncRoutes);
     this.app.use('/api/analytics', analyticsRoutes);
     this.app.use('/api/assignments', assignmentRoutes);
+    this.app.use('/api/users', userRoutes);
+    this.app.use('/api/companies', companyRoutes);
 
     // 404 handler
     this.app.use('*', (req: Request, res: Response) => {

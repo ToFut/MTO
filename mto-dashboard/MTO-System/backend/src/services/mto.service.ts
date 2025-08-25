@@ -1,7 +1,7 @@
 import { getSupabase } from '../config/supabase';
 import { logger } from '../config/logger';
 import { AppError } from '../middleware/error.middleware';
-import { ExcelService } from './excel.service';
+import { NextGenExcelService } from './next-gen-excel.service';
 import { POParserService } from './po-parser.service';
 import { VocabularyService } from './vocabulary.service';
 import { InventoryService } from './inventory.service';
@@ -27,7 +27,7 @@ interface MTOFilters {
 
 export class MTOService {
   private supabase = getSupabase();
-  private excelService = new ExcelService();
+  private nextGenExcelService = new NextGenExcelService();
   private poParserService = new POParserService();
   private vocabularyService = new VocabularyService();
   private inventoryService = new InventoryService();
@@ -289,6 +289,7 @@ export class MTOService {
   /**
    * Preview MTO Upload - Parse and analyze without saving to database
    * Returns parsed MTOs and analysis for user review
+   * UPDATED: Now uses Next-Gen Excel Parser for complete column detection
    */
   async previewMTOUpload(
     fileBuffer: Buffer,
@@ -297,7 +298,7 @@ export class MTOService {
     factoryId: string
   ) {
     try {
-      logger.info(`Starting MTO preview for PO: ${poNumber}`);
+      logger.info(`Starting MTO preview for PO: ${poNumber} with Next-Gen parser`);
 
       // Step 1: Detect file format (PO or MTO)
       const fileType = await this.detectFileType(fileBuffer);
@@ -335,21 +336,28 @@ export class MTOService {
         };
         
       } else {
-        // Handle traditional MTO Excel format
-        logger.info('Processing as MTO Excel format...');
+        // Handle traditional MTO Excel format with Next-Gen parser
+        logger.info('Processing as MTO Excel format with Next-Gen parser...');
         
-        // Validate Excel file
-        const validation = await this.excelService.validateExcelFile(fileBuffer);
-        if (!validation.isValid) {
-          throw new AppError(`Invalid Excel file: ${validation.errors.join(', ')}`, 400);
-        }
-
-        // Smart Excel Analysis
-        excelAnalysis = await this.excelService.analyzeExcelStructure(fileBuffer);
+        // Use Next-Gen Excel Service for complete parsing
+        const NextGenExcelService = require('./next-gen-excel.service').default;
+        const parseResult = await NextGenExcelService.parseExcel(fileBuffer);
         
-        // Extract MTOs with intelligent parsing
-        parsedMTOs = await this.excelService.extractMTOsFromExcel(excelAnalysis, fileBuffer);
-        excelAnalysis.format = 'MTO';
+        logger.info(`Next-Gen parser found ${parseResult.totalColumns} columns, ${parseResult.totalRows} rows`);
+        
+        // Convert to MTO format
+        parsedMTOs = parseResult.data;
+        
+        // Create analysis from parse results
+        excelAnalysis = {
+          detectedSpots: parseResult.data.reduce((sum, mto) => sum + (mto.spots_data?.length || 0), 0),
+          qualityScore: Math.round((parseResult.data.filter(m => m.display_name).length / parseResult.totalRows) * 100) || 0,
+          totalRows: parseResult.totalRows,
+          totalColumns: parseResult.totalColumns,
+          format: 'MTO',
+          headers: parseResult.headers,
+          columnMapping: parseResult.columnMapping
+        };
       }
 
       // Enrich MTOs with additional data (without saving)
@@ -387,29 +395,54 @@ export class MTOService {
 
       logger.info(`Preview complete: ${enrichedMTOs.length} MTOs ready for upload`);
 
+      // Enhanced preview response with ALL column information
       return {
         mtoCount: enrichedMTOs.length,
         mtos: enrichedMTOs.map(mto => ({
+          // Core fields
           internal_id: mto.internal_id,
           po_line_id: mto.po_line_id,
           display_name: mto.display_name,
           reference_number: mto.reference_number,
           quantity: mto.quantity,
+          
+          // Dates
+          expected_ship_date: mto.expected_ship_date,
+          actual_ship_date: mto.actual_ship_date,
+          order_submit_date: mto.order_submit_date,
+          shopify_order_date: mto.shopify_order_date,
+          cpsd: mto.cpsd,
+          
+          // Tracking
+          po_line_tracking: mto.po_line_tracking,
+          awb: mto.awb,
+          master_carton: mto.master_carton,
+          sales_order_number: mto.sales_order_number,
+          
+          // Product
+          bag_base_pid: mto.bag_base_pid,
+          order_type: mto.order_type,
+          vendor_po_status: mto.vendor_po_status,
+          
+          // Spots
+          spots: mto.spots || mto.spots_data,
+          spot_count: mto.spots?.length || mto.spots_data?.length || 0,
+          
+          // Categories
           production_category: mto.production_category,
           priority: mto.priority,
-          expected_ship_date: mto.expected_ship_date,
-          spots: mto.spots,
-          spot_count: mto.spots?.length || 0,
-          po_customer: mto.po_customer,
-          hts_code: mto.hts_code,
-          fob_cost: mto.fob_cost,
-          ext_fob: mto.ext_fob
+          
+          // Include ALL raw data for preview
+          _allColumns: mto._rawData || {}
         })),
         analysis: {
           fileFormat: excelAnalysis.format,
           qualityScore: excelAnalysis.qualityScore,
           totalRows: excelAnalysis.totalRows,
+          totalColumns: excelAnalysis.totalColumns,
           detectedSpots: totalSpots,
+          headers: excelAnalysis.headers, // ALL headers found
+          columnMapping: excelAnalysis.columnMapping, // How columns were mapped
           poInfo: excelAnalysis.poInfo || null
         },
         summary,
@@ -653,20 +686,29 @@ export class MTOService {
         
       } else {
         // Handle traditional MTO Excel format
-        logger.info('Processing as MTO Excel format...');
+        logger.info('Processing as MTO Excel format with Next-Gen parser...');
         
-        // Step 1: Validate Excel file
-        const validation = await this.excelService.validateExcelFile(fileBuffer);
-        if (!validation.isValid) {
-          throw new AppError(`Invalid Excel file: ${validation.errors.join(', ')}`, 400);
-        }
-
-        // Step 2: Smart Excel Analysis
-        excelAnalysis = await this.excelService.analyzeExcelStructure(fileBuffer);
-        logger.info(`Excel analysis: ${excelAnalysis.detectedSpots} spots detected, quality: ${excelAnalysis.qualityScore}%`);
-
-        // Step 3: Extract MTOs with intelligent parsing
-        parsedMTOs = await this.excelService.extractMTOsFromExcel(excelAnalysis, fileBuffer);
+        // Use Next-Gen Excel Parser for COMPLETE column detection
+        const parseResult = await this.nextGenExcelService.parseExcel(fileBuffer);
+        
+        // Convert to parsedMTOs format
+        parsedMTOs = parseResult.data;
+        
+        // Create analysis from parsed data
+        excelAnalysis = {
+          detectedSpots: parseResult.data.reduce((sum: number, mto: any) => 
+            sum + (mto.spots_data?.length || 0), 0),
+          qualityScore: parseResult.errors.length === 0 ? 100 : 
+            Math.max(50, 100 - (parseResult.errors.length * 5)),
+          totalRows: parseResult.totalRows,
+          totalColumns: parseResult.totalColumns,
+          headers: parseResult.headers,
+          columnMapping: parseResult.columnMapping,
+          sheets: parseResult.sheets,
+          errors: parseResult.errors
+        };
+        
+        logger.info(`Next-Gen parser found ${parseResult.totalColumns} columns, ${parseResult.totalRows} rows`);
       }
 
       // Step 2: Create or get PO record

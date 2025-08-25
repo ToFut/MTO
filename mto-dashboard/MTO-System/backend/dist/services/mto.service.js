@@ -40,7 +40,7 @@ exports.MTOService = void 0;
 const supabase_1 = require("../config/supabase");
 const logger_1 = require("../config/logger");
 const error_middleware_1 = require("../middleware/error.middleware");
-const excel_service_1 = require("./excel.service");
+const next_gen_excel_service_1 = require("./next-gen-excel.service");
 const po_parser_service_1 = require("./po-parser.service");
 const vocabulary_service_1 = require("./vocabulary.service");
 const inventory_service_1 = require("./inventory.service");
@@ -51,7 +51,7 @@ const crypto_1 = __importDefault(require("crypto"));
 class MTOService {
     constructor() {
         this.supabase = (0, supabase_1.getSupabase)();
-        this.excelService = new excel_service_1.ExcelService();
+        this.nextGenExcelService = new next_gen_excel_service_1.NextGenExcelService();
         this.poParserService = new po_parser_service_1.POParserService();
         this.vocabularyService = new vocabulary_service_1.VocabularyService();
         this.inventoryService = new inventory_service_1.InventoryService();
@@ -288,10 +288,11 @@ class MTOService {
     /**
      * Preview MTO Upload - Parse and analyze without saving to database
      * Returns parsed MTOs and analysis for user review
+     * UPDATED: Now uses Next-Gen Excel Parser for complete column detection
      */
     async previewMTOUpload(fileBuffer, poNumber, brandId, factoryId) {
         try {
-            logger_1.logger.info(`Starting MTO preview for PO: ${poNumber}`);
+            logger_1.logger.info(`Starting MTO preview for PO: ${poNumber} with Next-Gen parser`);
             // Step 1: Detect file format (PO or MTO)
             const fileType = await this.detectFileType(fileBuffer);
             logger_1.logger.info(`Detected file type: ${fileType}`);
@@ -323,18 +324,24 @@ class MTOService {
                 };
             }
             else {
-                // Handle traditional MTO Excel format
-                logger_1.logger.info('Processing as MTO Excel format...');
-                // Validate Excel file
-                const validation = await this.excelService.validateExcelFile(fileBuffer);
-                if (!validation.isValid) {
-                    throw new error_middleware_1.AppError(`Invalid Excel file: ${validation.errors.join(', ')}`, 400);
-                }
-                // Smart Excel Analysis
-                excelAnalysis = await this.excelService.analyzeExcelStructure(fileBuffer);
-                // Extract MTOs with intelligent parsing
-                parsedMTOs = await this.excelService.extractMTOsFromExcel(excelAnalysis, fileBuffer);
-                excelAnalysis.format = 'MTO';
+                // Handle traditional MTO Excel format with Next-Gen parser
+                logger_1.logger.info('Processing as MTO Excel format with Next-Gen parser...');
+                // Use Next-Gen Excel Service for complete parsing
+                const NextGenExcelService = require('./next-gen-excel.service').default;
+                const parseResult = await NextGenExcelService.parseExcel(fileBuffer);
+                logger_1.logger.info(`Next-Gen parser found ${parseResult.totalColumns} columns, ${parseResult.totalRows} rows`);
+                // Convert to MTO format
+                parsedMTOs = parseResult.data;
+                // Create analysis from parse results
+                excelAnalysis = {
+                    detectedSpots: parseResult.data.reduce((sum, mto) => sum + (mto.spots_data?.length || 0), 0),
+                    qualityScore: Math.round((parseResult.data.filter(m => m.display_name).length / parseResult.totalRows) * 100) || 0,
+                    totalRows: parseResult.totalRows,
+                    totalColumns: parseResult.totalColumns,
+                    format: 'MTO',
+                    headers: parseResult.headers,
+                    columnMapping: parseResult.columnMapping
+                };
             }
             // Enrich MTOs with additional data (without saving)
             const enrichedMTOs = await this.smartEnrichMTOs(parsedMTOs, brandId, factoryId);
@@ -366,29 +373,48 @@ class MTOService {
                 urgentCount: enrichedMTOs.filter(m => m.priority === 'urgent').length,
             };
             logger_1.logger.info(`Preview complete: ${enrichedMTOs.length} MTOs ready for upload`);
+            // Enhanced preview response with ALL column information
             return {
                 mtoCount: enrichedMTOs.length,
                 mtos: enrichedMTOs.map(mto => ({
+                    // Core fields
                     internal_id: mto.internal_id,
                     po_line_id: mto.po_line_id,
                     display_name: mto.display_name,
                     reference_number: mto.reference_number,
                     quantity: mto.quantity,
+                    // Dates
+                    expected_ship_date: mto.expected_ship_date,
+                    actual_ship_date: mto.actual_ship_date,
+                    order_submit_date: mto.order_submit_date,
+                    shopify_order_date: mto.shopify_order_date,
+                    cpsd: mto.cpsd,
+                    // Tracking
+                    po_line_tracking: mto.po_line_tracking,
+                    awb: mto.awb,
+                    master_carton: mto.master_carton,
+                    sales_order_number: mto.sales_order_number,
+                    // Product
+                    bag_base_pid: mto.bag_base_pid,
+                    order_type: mto.order_type,
+                    vendor_po_status: mto.vendor_po_status,
+                    // Spots
+                    spots: mto.spots || mto.spots_data,
+                    spot_count: mto.spots?.length || mto.spots_data?.length || 0,
+                    // Categories
                     production_category: mto.production_category,
                     priority: mto.priority,
-                    expected_ship_date: mto.expected_ship_date,
-                    spots: mto.spots,
-                    spot_count: mto.spots?.length || 0,
-                    po_customer: mto.po_customer,
-                    hts_code: mto.hts_code,
-                    fob_cost: mto.fob_cost,
-                    ext_fob: mto.ext_fob
+                    // Include ALL raw data for preview
+                    _allColumns: mto._rawData || {}
                 })),
                 analysis: {
                     fileFormat: excelAnalysis.format,
                     qualityScore: excelAnalysis.qualityScore,
                     totalRows: excelAnalysis.totalRows,
+                    totalColumns: excelAnalysis.totalColumns,
                     detectedSpots: totalSpots,
+                    headers: excelAnalysis.headers, // ALL headers found
+                    columnMapping: excelAnalysis.columnMapping, // How columns were mapped
                     poInfo: excelAnalysis.poInfo || null
                 },
                 summary,
@@ -586,17 +612,24 @@ class MTOService {
             }
             else {
                 // Handle traditional MTO Excel format
-                logger_1.logger.info('Processing as MTO Excel format...');
-                // Step 1: Validate Excel file
-                const validation = await this.excelService.validateExcelFile(fileBuffer);
-                if (!validation.isValid) {
-                    throw new error_middleware_1.AppError(`Invalid Excel file: ${validation.errors.join(', ')}`, 400);
-                }
-                // Step 2: Smart Excel Analysis
-                excelAnalysis = await this.excelService.analyzeExcelStructure(fileBuffer);
-                logger_1.logger.info(`Excel analysis: ${excelAnalysis.detectedSpots} spots detected, quality: ${excelAnalysis.qualityScore}%`);
-                // Step 3: Extract MTOs with intelligent parsing
-                parsedMTOs = await this.excelService.extractMTOsFromExcel(excelAnalysis, fileBuffer);
+                logger_1.logger.info('Processing as MTO Excel format with Next-Gen parser...');
+                // Use Next-Gen Excel Parser for COMPLETE column detection
+                const parseResult = await this.nextGenExcelService.parseExcel(fileBuffer);
+                // Convert to parsedMTOs format
+                parsedMTOs = parseResult.data;
+                // Create analysis from parsed data
+                excelAnalysis = {
+                    detectedSpots: parseResult.data.reduce((sum, mto) => sum + (mto.spots_data?.length || 0), 0),
+                    qualityScore: parseResult.errors.length === 0 ? 100 :
+                        Math.max(50, 100 - (parseResult.errors.length * 5)),
+                    totalRows: parseResult.totalRows,
+                    totalColumns: parseResult.totalColumns,
+                    headers: parseResult.headers,
+                    columnMapping: parseResult.columnMapping,
+                    sheets: parseResult.sheets,
+                    errors: parseResult.errors
+                };
+                logger_1.logger.info(`Next-Gen parser found ${parseResult.totalColumns} columns, ${parseResult.totalRows} rows`);
             }
             // Step 2: Create or get PO record
             const po = await this.createOrGetPO(poNumber, brandId, factoryId);
@@ -987,16 +1020,24 @@ class MTOService {
     /**
      * Parse Excel buffer into MTO data with validation and analysis
      * Handles multiple sheets and flexible MTO structures
-     * Used by directMTOUpload method
+     * Enhanced for large files (7000+ rows) and any column format
      */
     async parseExcelData(fileBuffer) {
         try {
-            // Read Excel file from buffer
-            const workbook = XLSX.read(fileBuffer, { type: 'buffer' });
+            logger_1.logger.info(`Starting Excel parse, buffer size: ${fileBuffer.length} bytes`);
+            // Read Excel file from buffer with options for large files
+            const workbook = XLSX.read(fileBuffer, {
+                type: 'buffer',
+                cellDates: true, // Parse dates properly
+                cellNF: false, // Don't parse number formats (faster)
+                cellText: false, // Don't generate formatted text (faster)
+                sheetStubs: false // Don't create stub cells (faster)
+            });
             const allValidMTOs = [];
             const allErrors = [];
             const usedInternalIds = new Set();
             let totalRowsProcessed = 0;
+            const BATCH_SIZE = 500; // Process in batches for memory efficiency
             // Process all sheets in the workbook
             for (const sheetName of workbook.SheetNames) {
                 logger_1.logger.info(`Processing sheet: ${sheetName}`);
@@ -1031,138 +1072,152 @@ class MTOService {
                 logger_1.logger.info(`Headers in sheet ${sheetName}:`, headers);
                 const headerMap = this.createHeaderMap(headers);
                 logger_1.logger.info(`Header mapping for sheet ${sheetName}:`, headerMap);
-                // Process data rows starting after header
-                for (let i = headerRowIndex + 1; i < data.length; i++) {
-                    const row = data[i];
-                    // Skip completely empty rows
-                    if (!row || row.length === 0 || row.every(cell => !cell || cell.toString().trim() === '')) {
-                        continue;
-                    }
-                    totalRowsProcessed++;
-                    try {
-                        // Extract spots from row and enrich with vocabulary
-                        const spots = [];
-                        for (let spotIndex = 1; spotIndex <= 6; spotIndex++) {
-                            const skuCol = headerMap[`spot${spotIndex}`];
-                            const refCol = headerMap[`spot${spotIndex}_ref`];
-                            if (skuCol !== -1 && row[skuCol] && row[skuCol].toString().trim()) {
-                                const sku = row[skuCol].toString().trim();
-                                const patchRef = refCol !== -1 && row[refCol] ? row[refCol].toString().trim() : null;
-                                // Create spot with potential vocabulary lookup
-                                const spot = {
-                                    position: spotIndex,
-                                    sku,
-                                    patch_ref: patchRef,
-                                    description: patchRef || `Patch ${sku}`,
-                                    // Mark for vocabulary translation
-                                    needs_vocabulary: true,
-                                    brand_sku: sku,
-                                    brand_description: patchRef
-                                };
-                                spots.push(spot);
-                            }
-                        }
-                        // Build MTO data using modern structure
-                        let internalId = this.getColumnValue(row, headerMap, 'internal_id');
-                        // Check if internal_id looks like a Yes/No value and ignore it
-                        if (internalId && (internalId.toLowerCase() === 'no' || internalId.toLowerCase() === 'yes')) {
-                            logger_1.logger.warn(`Invalid internal_id value "${internalId}" at row ${i + 1}, will generate new ID`);
-                            internalId = null;
-                        }
-                        // If internal_id from Excel is empty or already used, generate a unique one
-                        if (!internalId || usedInternalIds.has(internalId)) {
-                            if (internalId && usedInternalIds.has(internalId)) {
-                                logger_1.logger.warn(`Duplicate internal_id "${internalId}" found at row ${i + 1}, generating new ID`);
-                            }
-                            // Try SKU field as fallback for internal_id
-                            const skuValue = this.getColumnValue(row, headerMap, 'sku');
-                            if (skuValue && !usedInternalIds.has(skuValue)) {
-                                internalId = skuValue;
-                            }
-                            else {
-                                internalId = this.generateUniqueInternalId(i);
-                            }
-                        }
-                        usedInternalIds.add(internalId);
-                        // Get display name with multiple fallback options
-                        let displayName = this.getColumnValue(row, headerMap, 'display_name');
-                        // If display name is empty or just whitespace, try multiple fallbacks
-                        if (!displayName || displayName.toString().trim() === '') {
-                            // Try these fields in order of preference
-                            const fallbackFields = [
-                                'reference_number',
-                                'sku',
-                                'bag_base_pid',
-                                'sales_order_number',
-                                'po_line_id'
-                            ];
-                            for (const field of fallbackFields) {
-                                const value = this.getColumnValue(row, headerMap, field);
-                                if (value && value.toString().trim() !== '') {
-                                    displayName = value;
-                                    logger_1.logger.info(`Using ${field} as display name: ${displayName}`);
-                                    break;
-                                }
-                            }
-                            // If still no display name, generate one from available data
-                            if (!displayName || displayName.toString().trim() === '') {
-                                const internalIdForDisplay = this.getColumnValue(row, headerMap, 'internal_id');
-                                const bagBase = this.getColumnValue(row, headerMap, 'bag_base_pid');
-                                if (bagBase) {
-                                    displayName = `${bagBase}-${internalIdForDisplay || i}`;
-                                }
-                                else {
-                                    displayName = `MTO-${internalIdForDisplay || i}`;
-                                }
-                                logger_1.logger.info(`Generated display name: ${displayName}`);
-                            }
-                        }
-                        const mtoData = {
-                            internal_id: internalId,
-                            po_line_id: this.getColumnValue(row, headerMap, 'po_line_id') || i.toString(),
-                            display_name: displayName,
-                            reference_number: this.getColumnValue(row, headerMap, 'reference_number') || this.generateUniqueReferenceNumber(i),
-                            quantity: parseInt(this.getColumnValue(row, headerMap, 'quantity')) || 1,
-                            expected_ship_date: this.parseExcelDate(this.getColumnValue(row, headerMap, 'expected_ship_date')),
-                            status: 'pending',
-                            production_stage: 'receive',
-                            production_category: 'monthly',
-                            priority: 'normal',
-                            // Modern JSONB storage
-                            spots_data: spots,
-                            // Store ALL original Excel data for complete preservation
-                            excel_data: this.captureAllExcelData(row, headers, headerMap, {
-                                sheet: sheetName,
-                                row_number: i,
-                                parsed_at: new Date().toISOString(),
-                                source: 'excel_upload'
-                            })
-                        };
-                        // Validation - display_name now has fallback, so just ensure it exists
-                        if (!mtoData.display_name || mtoData.display_name.trim() === '') {
-                            logger_1.logger.warn(`Row ${i + 1} has no identifiable data, skipping`);
-                            errors.push({
-                                row: i + 1,
-                                errors: ['No identifiable data found in row']
-                            });
+                // Process data rows in batches for large files
+                const dataRows = data.slice(headerRowIndex + 1);
+                logger_1.logger.info(`Processing ${dataRows.length} data rows from sheet ${sheetName}`);
+                // Process in batches to avoid memory issues
+                for (let batchStart = 0; batchStart < dataRows.length; batchStart += BATCH_SIZE) {
+                    const batchEnd = Math.min(batchStart + BATCH_SIZE, dataRows.length);
+                    const batch = dataRows.slice(batchStart, batchEnd);
+                    logger_1.logger.info(`Processing batch ${Math.floor(batchStart / BATCH_SIZE) + 1}: rows ${batchStart + 1}-${batchEnd} of ${dataRows.length}`);
+                    for (let batchIndex = 0; batchIndex < batch.length; batchIndex++) {
+                        const i = batchStart + batchIndex + headerRowIndex + 1; // Actual row number in original data
+                        const row = batch[batchIndex];
+                        // Skip completely empty rows
+                        if (!row || row.length === 0 || row.every(cell => !cell || cell.toString().trim() === '')) {
                             continue;
                         }
-                        // Additional validation: check if row has any meaningful data
-                        const hasSpots = spots.length > 0;
-                        const hasQuantity = mtoData.quantity > 0;
-                        if (!hasSpots && !hasQuantity) {
-                            logger_1.logger.warn(`Row ${i + 1} appears to be empty or invalid, skipping`);
-                            continue; // Skip completely empty rows without logging as error
+                        totalRowsProcessed++;
+                        try {
+                            // Extract spots from row and enrich with vocabulary
+                            const spots = [];
+                            for (let spotIndex = 1; spotIndex <= 6; spotIndex++) {
+                                const skuCol = headerMap[`spot${spotIndex}`];
+                                const refCol = headerMap[`spot${spotIndex}_ref`];
+                                if (skuCol !== -1 && row[skuCol] && row[skuCol].toString().trim()) {
+                                    const sku = row[skuCol].toString().trim();
+                                    const patchRef = refCol !== -1 && row[refCol] ? row[refCol].toString().trim() : null;
+                                    // Create spot with potential vocabulary lookup
+                                    const spot = {
+                                        position: spotIndex,
+                                        sku,
+                                        patch_ref: patchRef,
+                                        description: patchRef || `Patch ${sku}`,
+                                        // Mark for vocabulary translation
+                                        needs_vocabulary: true,
+                                        brand_sku: sku,
+                                        brand_description: patchRef
+                                    };
+                                    spots.push(spot);
+                                }
+                            }
+                            // Build MTO data using modern structure
+                            let internalId = this.getColumnValue(row, headerMap, 'internal_id');
+                            // Check if internal_id looks like a Yes/No value and ignore it
+                            if (internalId && (internalId.toLowerCase() === 'no' || internalId.toLowerCase() === 'yes')) {
+                                logger_1.logger.warn(`Invalid internal_id value "${internalId}" at row ${i + 1}, will generate new ID`);
+                                internalId = null;
+                            }
+                            // If internal_id from Excel is empty or already used, generate a unique one
+                            if (!internalId || usedInternalIds.has(internalId)) {
+                                if (internalId && usedInternalIds.has(internalId)) {
+                                    logger_1.logger.warn(`Duplicate internal_id "${internalId}" found at row ${i + 1}, generating new ID`);
+                                }
+                                // Try SKU field as fallback for internal_id
+                                const skuValue = this.getColumnValue(row, headerMap, 'sku');
+                                if (skuValue && !usedInternalIds.has(skuValue)) {
+                                    internalId = skuValue;
+                                }
+                                else {
+                                    internalId = this.generateUniqueInternalId(i);
+                                }
+                            }
+                            usedInternalIds.add(internalId);
+                            // Get display name with multiple fallback options
+                            let displayName = this.getColumnValue(row, headerMap, 'display_name');
+                            // If display name is empty or just whitespace, try multiple fallbacks
+                            if (!displayName || displayName.toString().trim() === '') {
+                                // Try these fields in order of preference
+                                const fallbackFields = [
+                                    'reference_number',
+                                    'sku',
+                                    'bag_base_pid',
+                                    'sales_order_number',
+                                    'po_line_id'
+                                ];
+                                for (const field of fallbackFields) {
+                                    const value = this.getColumnValue(row, headerMap, field);
+                                    if (value && value.toString().trim() !== '') {
+                                        displayName = value;
+                                        logger_1.logger.info(`Using ${field} as display name: ${displayName}`);
+                                        break;
+                                    }
+                                }
+                                // If still no display name, generate one from available data
+                                if (!displayName || displayName.toString().trim() === '') {
+                                    const internalIdForDisplay = this.getColumnValue(row, headerMap, 'internal_id');
+                                    const bagBase = this.getColumnValue(row, headerMap, 'bag_base_pid');
+                                    if (bagBase) {
+                                        displayName = `${bagBase}-${internalIdForDisplay || i}`;
+                                    }
+                                    else {
+                                        displayName = `MTO-${internalIdForDisplay || i}`;
+                                    }
+                                    logger_1.logger.info(`Generated display name: ${displayName}`);
+                                }
+                            }
+                            const mtoData = {
+                                internal_id: internalId,
+                                po_line_id: this.getColumnValue(row, headerMap, 'po_line_id') || i.toString(),
+                                display_name: displayName,
+                                reference_number: this.getColumnValue(row, headerMap, 'reference_number') || this.generateUniqueReferenceNumber(i),
+                                quantity: parseInt(this.getColumnValue(row, headerMap, 'quantity')) || 1,
+                                expected_ship_date: this.parseExcelDate(this.getColumnValue(row, headerMap, 'expected_ship_date')),
+                                status: 'pending',
+                                production_stage: 'receive',
+                                production_category: 'monthly',
+                                priority: 'normal',
+                                // Modern JSONB storage
+                                spots_data: spots,
+                                // Store ALL original Excel data for complete preservation
+                                excel_data: this.captureAllExcelData(row, headers, headerMap, {
+                                    sheet: sheetName,
+                                    row_number: i,
+                                    parsed_at: new Date().toISOString(),
+                                    source: 'excel_upload'
+                                })
+                            };
+                            // Validation - display_name now has fallback, so just ensure it exists
+                            if (!mtoData.display_name || mtoData.display_name.trim() === '') {
+                                logger_1.logger.warn(`Row ${i + 1} has no identifiable data, skipping`);
+                                errors.push({
+                                    row: i + 1,
+                                    errors: ['No identifiable data found in row']
+                                });
+                                continue;
+                            }
+                            // Additional validation: check if row has any meaningful data
+                            const hasSpots = spots.length > 0;
+                            const hasQuantity = mtoData.quantity > 0;
+                            if (!hasSpots && !hasQuantity) {
+                                logger_1.logger.warn(`Row ${i + 1} appears to be empty or invalid, skipping`);
+                                continue; // Skip completely empty rows without logging as error
+                            }
+                            validMTOs.push(mtoData);
                         }
-                        validMTOs.push(mtoData);
+                        catch (error) {
+                            logger_1.logger.error(`Error parsing row ${i + 1}:`, error);
+                            errors.push({
+                                row: i + 1,
+                                errors: [`Parsing error: ${error.message}`]
+                            });
+                        }
+                    } // End of batch iteration
+                    // Log batch progress
+                    if (batchEnd < dataRows.length) {
+                        logger_1.logger.info(`Batch complete: ${validMTOs.length} valid MTOs so far, ${errors.length} errors`);
                     }
-                    catch (error) {
-                        errors.push({
-                            row: i + 1,
-                            errors: [`Parsing error: ${error.message}`]
-                        });
-                    }
-                }
+                } // End of batch processing
                 // Add sheet results to overall results
                 allValidMTOs.push(...validMTOs);
                 allErrors.push(...errors.map(e => ({ ...e, sheet: sheetName })));

@@ -112,7 +112,7 @@ async function createDemoUser(userData: DemoUser): Promise<void> {
     }
 
     // Create company if needed
-    let companyId = null;
+    let companyId: string | null = null;
     if (userData.company_type && userData.company_name) {
       companyId = await createCompanyIfNeeded({
         name: userData.company_name,

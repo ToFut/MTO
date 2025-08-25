@@ -18,7 +18,7 @@ const authenticate = async (req, res, next) => {
             return;
         }
         // Handle demo users (they don't exist in database)
-        if (decoded.userId === 'demo-brand-user-id' || decoded.userId === 'f47ac10b-58cc-4372-a567-0e02b2c3d479') {
+        if (decoded.userId === 'demo-brand-user-id' || decoded.userId === 'f47ac10b-58cc-4372-a567-0e02b2c3d479' || decoded.userId === 'admin-demo-user-id-12345') {
             // Demo users
             let demoUser;
             if (decoded.userId === 'demo-brand-user-id') {
@@ -30,13 +30,22 @@ const authenticate = async (req, res, next) => {
                     companyType: 'brand'
                 };
             }
-            else {
+            else if (decoded.userId === 'f47ac10b-58cc-4372-a567-0e02b2c3d479') {
                 demoUser = {
                     id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
                     email: 'factory@factory.com',
                     role: 'factory_operator',
                     companyId: 'b1234567-89ab-cdef-0123-456789abcdef',
                     companyType: 'factory'
+                };
+            }
+            else {
+                demoUser = {
+                    id: 'admin-demo-user-id-12345',
+                    email: 'admin@admin.com',
+                    role: 'admin',
+                    companyId: '',
+                    companyType: 'admin'
                 };
             }
             req.user = demoUser;
@@ -122,7 +131,7 @@ const optionalAuth = async (req, res, next) => {
         const decoded = auth_service_1.authService.verifyToken(token);
         if (decoded) {
             // Handle demo users
-            if (decoded.userId === 'demo-brand-user-id' || decoded.userId === 'f47ac10b-58cc-4372-a567-0e02b2c3d479') {
+            if (decoded.userId === 'demo-brand-user-id' || decoded.userId === 'f47ac10b-58cc-4372-a567-0e02b2c3d479' || decoded.userId === 'admin-demo-user-id-12345') {
                 let demoUser;
                 if (decoded.userId === 'demo-brand-user-id') {
                     demoUser = {
@@ -133,13 +142,22 @@ const optionalAuth = async (req, res, next) => {
                         companyType: 'brand'
                     };
                 }
-                else {
+                else if (decoded.userId === 'f47ac10b-58cc-4372-a567-0e02b2c3d479') {
                     demoUser = {
                         id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
                         email: 'factory@factory.com',
                         role: 'factory_operator',
                         companyId: 'b1234567-89ab-cdef-0123-456789abcdef',
                         companyType: 'factory'
+                    };
+                }
+                else {
+                    demoUser = {
+                        id: 'admin-demo-user-id-12345',
+                        email: 'admin@admin.com',
+                        role: 'admin',
+                        companyId: '',
+                        companyType: 'admin'
                     };
                 }
                 req.user = demoUser;

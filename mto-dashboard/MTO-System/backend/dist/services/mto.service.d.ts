@@ -13,7 +13,7 @@ interface MTOFilters {
 }
 export declare class MTOService {
     private supabase;
-    private excelService;
+    private nextGenExcelService;
     private poParserService;
     private vocabularyService;
     private inventoryService;
@@ -31,6 +31,7 @@ export declare class MTOService {
     /**
      * Preview MTO Upload - Parse and analyze without saving to database
      * Returns parsed MTOs and analysis for user review
+     * UPDATED: Now uses Next-Gen Excel Parser for complete column detection
      */
     previewMTOUpload(fileBuffer: Buffer, poNumber: string, brandId: string, factoryId: string): Promise<{
         mtoCount: number;
@@ -40,21 +41,32 @@ export declare class MTOService {
             display_name: any;
             reference_number: any;
             quantity: any;
-            production_category: any;
-            priority: any;
             expected_ship_date: any;
+            actual_ship_date: any;
+            order_submit_date: any;
+            shopify_order_date: any;
+            cpsd: any;
+            po_line_tracking: any;
+            awb: any;
+            master_carton: any;
+            sales_order_number: any;
+            bag_base_pid: any;
+            order_type: any;
+            vendor_po_status: any;
             spots: any;
             spot_count: any;
-            po_customer: any;
-            hts_code: any;
-            fob_cost: any;
-            ext_fob: any;
+            production_category: any;
+            priority: any;
+            _allColumns: any;
         }[];
         analysis: {
             fileFormat: any;
             qualityScore: any;
             totalRows: any;
+            totalColumns: any;
             detectedSpots: number;
+            headers: any;
+            columnMapping: any;
             poInfo: any;
         };
         summary: {
@@ -213,7 +225,7 @@ export declare class MTOService {
     /**
      * Parse Excel buffer into MTO data with validation and analysis
      * Handles multiple sheets and flexible MTO structures
-     * Used by directMTOUpload method
+     * Enhanced for large files (7000+ rows) and any column format
      */
     private parseExcelData;
     /**

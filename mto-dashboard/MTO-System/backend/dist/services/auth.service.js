@@ -130,6 +130,30 @@ class AuthService {
                     token,
                 };
             }
+            // TEMPORARY: Demo admin user authentication
+            if (email === 'admin@admin.com' && password === 'admin123') {
+                const demoUser = {
+                    id: 'admin-demo-user-id-12345',
+                    email: 'admin@admin.com',
+                    full_name: 'Admin Demo User',
+                    role: 'admin',
+                    company_id: null,
+                    language: 'en',
+                    avatar_url: null,
+                    phone: null,
+                    preferences: {},
+                    last_login: new Date().toISOString(),
+                    active: true,
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+                const token = this.generateToken(demoUser.id, demoUser.role);
+                logger_1.logger.info(`Demo admin user logged in: ${email}`);
+                return {
+                    user: demoUser,
+                    token,
+                };
+            }
             // Find user with password hash
             const { data: user, error } = await database_1.db
                 .from('users')

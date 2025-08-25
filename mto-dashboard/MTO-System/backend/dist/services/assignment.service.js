@@ -7,6 +7,15 @@ const error_middleware_1 = require("../middleware/error.middleware");
 class AssignmentService {
     async createAssignment(data) {
         try {
+            // First check if the brand_factory_assignments table exists
+            const { error: tableCheckError } = await database_1.db
+                .from('brand_factory_assignments')
+                .select('count')
+                .limit(0);
+            if (tableCheckError && (tableCheckError.message.includes('does not exist') || tableCheckError.message.includes('relation') && tableCheckError.message.includes('does not exist'))) {
+                logger_1.logger.error('brand_factory_assignments table does not exist:', tableCheckError);
+                throw new error_middleware_1.AppError('Assignment functionality is not available. Please contact administrator to set up the database tables.', 503);
+            }
             // Validate that brand and factory exist and are correct types
             const { data: brand, error: brandError } = await database_1.db
                 .from('companies')
@@ -54,6 +63,9 @@ class AssignmentService {
                 .single();
             if (error) {
                 logger_1.logger.error('Error creating brand-factory assignment:', error);
+                if (error.message.includes('capabilities') || error.message.includes('column') && error.message.includes('does not exist')) {
+                    throw new error_middleware_1.AppError('Database table is missing required columns. Please contact administrator to update the database schema.', 503);
+                }
                 throw new error_middleware_1.AppError('Failed to create assignment', 500);
             }
             logger_1.logger.info(`Brand-factory assignment created: ${assignment.id}`);
@@ -68,6 +80,15 @@ class AssignmentService {
     }
     async getAssignments(filters = {}) {
         try {
+            // First check if the brand_factory_assignments table exists
+            const { error: tableCheckError } = await database_1.db
+                .from('brand_factory_assignments')
+                .select('count')
+                .limit(0);
+            if (tableCheckError && (tableCheckError.message.includes('does not exist') || tableCheckError.message.includes('relation') && tableCheckError.message.includes('does not exist'))) {
+                logger_1.logger.warn('brand_factory_assignments table does not exist, returning empty assignments');
+                return [];
+            }
             let query = database_1.db
                 .from('brand_factory_assignments')
                 .select(`
@@ -101,6 +122,9 @@ class AssignmentService {
             const { data, error } = await query;
             if (error) {
                 logger_1.logger.error('Error fetching assignments:', error);
+                if (error.message.includes('does not exist') || error.message.includes('relation')) {
+                    return [];
+                }
                 throw new error_middleware_1.AppError('Failed to fetch assignments', 500);
             }
             return data || [];

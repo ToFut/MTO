@@ -330,7 +330,17 @@ export class MTOController {
 
   // Preview MTOs before upload - parse without saving
   previewMTOs = asyncHandler(async (req: AuthRequest, res: Response) => {
+    logger.info('🔍 PREVIEW ENDPOINT HIT - Starting deep dive debug');
+    logger.info('File received:', req.file ? 'YES' : 'NO');
+    logger.info('File details:', req.file ? {
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    } : 'NO FILE');
+    logger.info('Body params:', req.body);
+    
     if (!req.file) {
+      logger.error('No file in request!');
       res.status(400).json({
         success: false,
         error: 'Excel file is required',
@@ -339,8 +349,10 @@ export class MTOController {
     }
 
     const { poNumber, factoryId } = req.body;
+    logger.info('Parsed params:', { poNumber, factoryId });
     
     if (!poNumber) {
+      logger.error('No PO number provided!');
       res.status(400).json({
         success: false,
         error: 'Purchase Order number is required',
@@ -351,12 +363,15 @@ export class MTOController {
     // Determine brand and factory IDs
     const brandId = req.user?.companyType === 'brand' ? req.user.companyId : req.body.brandId;
     const finalFactoryId = req.user?.companyType === 'factory' ? req.user.companyId : factoryId;
+    logger.info('Final IDs:', { brandId, finalFactoryId });
 
     try {
       // Read file buffer
       const fileBuffer = req.file.buffer || require('fs').readFileSync(req.file.path);
+      logger.info('File buffer size:', fileBuffer.length);
 
       // Parse and analyze without saving
+      logger.info('🚀 Calling previewMTOUpload with NextGen parser...');
       const previewResult = await this.mtoService.previewMTOUpload(
         fileBuffer,
         poNumber,
@@ -369,7 +384,14 @@ export class MTOController {
         require('fs').unlinkSync(req.file.path);
       }
 
-      logger.info(`MTO preview generated: ${previewResult.mtoCount} MTOs parsed for PO: ${poNumber}`);
+      logger.info(`✅ MTO preview generated: ${previewResult.mtoCount} MTOs parsed for PO: ${poNumber}`);
+      logger.info('Preview result structure:', {
+        mtoCount: previewResult.mtoCount,
+        totalColumns: previewResult.analysis?.totalColumns,
+        totalRows: previewResult.analysis?.totalRows,
+        headers: previewResult.analysis?.headers?.slice(0, 5), // First 5 headers
+        sampleMTO: previewResult.mtos?.[0] ? Object.keys(previewResult.mtos[0]) : 'NO MTOs'
+      });
 
       res.json({
         success: true,
